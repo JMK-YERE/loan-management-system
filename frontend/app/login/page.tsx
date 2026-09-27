@@ -61,12 +61,7 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
             Hauna akaunti? <Link href="/register" className="text-blue-600 font-semibold hover:underline">Jisajili</Link>
           </p>
-          <div className="mt-6 p-3 rounded-xl bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-blue-700 dark:text-blue-300 font-semibold mb-1">🔑 Admin Login:</p>
-            <p className="text-xs text-blue-700 dark:text-blue-300">Email: joseph@jmkloanapp.co.tz</p>
-            <p className="text-xs text-blue-700 dark:text-blue-300">Password: Joseph@2026</p>
           </div>
-        </div>
       </div>
     </div>
   );
