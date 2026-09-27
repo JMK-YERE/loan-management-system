@@ -7,7 +7,6 @@ import {
   MapPin, MessageCircle, Facebook, Instagram, Twitter,
   CheckCircle, ChevronLeft, ChevronRight, Megaphone,
 } from 'lucide-react';
-import AnnouncementTicker from '@/components/AnnouncementTicker';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -21,7 +20,8 @@ export default function Home() {
       color: 'from-blue-600 via-indigo-600 to-purple-700',
       cta: 'Anza Sasa',
       link: '/register',
-      icon: '💰',
+      emoji: '💰',
+      bgImage: 'from-blue-600/90 via-indigo-700/90 to-purple-800/90',
     },
     {
       title: 'Riba 5% kwa Wiki Hii',
@@ -31,7 +31,8 @@ export default function Home() {
       color: 'from-orange-500 via-red-500 to-pink-600',
       cta: 'Chukua Ofa',
       link: '/register',
-      icon: '📱',
+      emoji: '🎁',
+      bgImage: 'from-orange-600/90 via-red-600/90 to-pink-700/90',
     },
     {
       title: 'Malipo kwa M-Pesa, Tigo, Airtel',
@@ -41,7 +42,8 @@ export default function Home() {
       color: 'from-green-500 via-emerald-600 to-teal-700',
       cta: 'Jifunze Zaidi',
       link: '#features',
-      icon: '🛡️',
+      emoji: '📱',
+      bgImage: 'from-green-600/90 via-emerald-700/90 to-teal-800/90',
     },
     {
       title: 'Uthibitisho wa NIDA',
@@ -51,32 +53,15 @@ export default function Home() {
       color: 'from-purple-600 via-pink-600 to-rose-600',
       cta: 'Jisajili',
       link: '/register',
-      icon: '🚀',
+      emoji: '🔒',
+      bgImage: 'from-purple-700/90 via-pink-700/90 to-rose-700/90',
     },
   ];
 
   const news = [
-    {
-      title: 'JmkLoanApp yazinduliwa Tanzania',
-      content: 'Mfumo mpya wa mikopo unalenga kurahisisha biashara ya kukopesha.',
-      date: '27 Sep 2026',
-      tag: 'Habari',
-      icon: '📰',
-    },
-    {
-      title: 'Wadhamini sasa kwa simu',
-      content: 'Wadhamini wanaweza kuidhinisha mikopo kupitia simu zao moja kwa moja.',
-      date: '26 Sep 2026',
-      tag: 'Sasisho',
-      icon: '📱',
-    },
-    {
-      title: 'Ripoti za faida kila wiki',
-      content: 'Pata ripoti kamili ya faida na mikopo inayochelewa kila wiki.',
-      date: '25 Sep 2026',
-      tag: 'Kipengele',
-      icon: '📊',
-    },
+    { title: 'JmkLoanApp yazinduliwa Tanzania', content: 'Mfumo mpya wa mikopo unalenga kurahisisha biashara ya kukopesha.', date: '27 Sep 2026', tag: 'Habari', emoji: '📰', color: 'from-blue-500 to-indigo-600' },
+    { title: 'Wadhamini sasa kwa simu', content: 'Wadhamini wanaweza kuidhinisha mikopo kupitia simu zao moja kwa moja.', date: '26 Sep 2026', tag: 'Sasisho', emoji: '📱', color: 'from-green-500 to-emerald-600' },
+    { title: 'Ripoti za faida kila wiki', content: 'Pata ripoti kamili ya faida na mikopo inayochelewa kila wiki.', date: '25 Sep 2026', tag: 'Kipengele', emoji: '📊', color: 'from-purple-500 to-pink-600' },
   ];
 
   useEffect(() => {
@@ -104,9 +89,9 @@ export default function Home() {
   ];
 
   const testimonials = [
-    { name: 'Joseph M.', role: 'Mkopeshaji', text: 'JmkLoanApp imerahisisha biashara yangu. Sasa nafuatilia mikopo yote kwa simu.', avatar: null },
-    { name: 'Neema K.', role: 'Mkopaji', text: 'Nilipata mkopo haraka bila usumbufu. Malipo kwa M-Pesa ni rahisi sana.', avatar: null },
-    { name: 'Amina S.', role: 'Mdhamini', text: 'Kuidhinisha mikopo kwa wateja wangu ni rahisi. Nashukuru sana.', avatar: null },
+    { name: 'Joseph M.', role: 'Mkopeshaji', text: 'JmkLoanApp imerahisisha biashara yangu. Sasa nafuatilia mikopo yote kwa simu.', color: 'from-blue-600 to-indigo-600' },
+    { name: 'Neema K.', role: 'Mkopaji', text: 'Nilipata mkopo haraka bila usumbufu. Malipo kwa M-Pesa ni rahisi sana.', color: 'from-green-600 to-emerald-600' },
+    { name: 'Amina S.', role: 'Mdhamini', text: 'Kuidhinisha mikopo kwa wateja wangu ni rahisi. Nashukuru sana.', color: 'from-purple-600 to-pink-600' },
   ];
 
   const currentSlideData = slides[currentSlide];
@@ -118,12 +103,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg">
-                💰
-              </div>
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                JmkLoanApp
-              </span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg">💰</div>
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">JmkLoanApp</span>
             </Link>
             <div className="hidden lg:flex items-center gap-8">
               <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Vipengele</a>
@@ -139,12 +120,10 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ANNOUNCEMENT TICKER */}
-      <AnnouncementTicker />
-
       {/* HERO SLIDER */}
       <section className="relative overflow-hidden">
-        <div className={`relative bg-gradient-to-br ${currentSlideData.color} transition-all duration-700 min-h-[500px] sm:min-h-[600px] flex items-center`}>
+        <div className={`relative bg-gradient-to-br ${currentSlideData.bgImage} transition-all duration-700 min-h-[500px] sm:min-h-[600px] flex items-center`}>
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
           <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-white/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
@@ -158,20 +137,16 @@ export default function Home() {
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 sm:mb-4 leading-tight">
                   {currentSlideData.title}
                 </h1>
-                <p className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-white/90">
-                  {currentSlideData.subtitle}
-                </p>
-                <p className="text-sm sm:text-base md:text-lg text-white/80 mb-6 sm:mb-8 leading-relaxed">
-                  {currentSlideData.content}
-                </p>
+                <p className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-white/90">{currentSlideData.subtitle}</p>
+                <p className="text-sm sm:text-base md:text-lg text-white/80 mb-6 sm:mb-8 leading-relaxed">{currentSlideData.content}</p>
                 <Link href={currentSlideData.link} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition shadow-xl hover:scale-105 transform text-sm sm:text-base">
                   {currentSlideData.cta}
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </div>
               <div className="order-1 md:order-2 flex justify-center">
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl bg-white/20 backdrop-blur-lg border-4 border-white/30 flex items-center justify-center shadow-2xl animate-float">
-                  <span className="text-8xl sm:text-9xl md:text-[10rem]">{currentSlideData.icon}</span>
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl bg-white/15 backdrop-blur-lg border-4 border-white/30 flex items-center justify-center shadow-2xl animate-float">
+                  <span className="text-8xl sm:text-9xl md:text-[10rem] drop-shadow-2xl">{currentSlideData.emoji}</span>
                 </div>
               </div>
             </div>
@@ -213,15 +188,15 @@ export default function Home() {
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Habari mpya kila siku</p>
             </div>
             <div className="hidden md:flex items-center gap-2 text-blue-600 font-semibold text-sm">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              LIVE
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />LIVE
             </div>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {news.map((n, i) => (
               <article key={i} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="relative h-40 sm:h-48 overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 flex items-center justify-center">
-                  <span className="text-6xl group-hover:scale-110 transition-transform duration-500">{n.icon}</span>
+                <div className={`relative h-40 sm:h-48 overflow-hidden bg-gradient-to-br ${n.color} flex items-center justify-center`}>
+                  <span className="text-6xl group-hover:scale-110 transition-transform duration-500">{n.emoji}</span>
+                  <div className="absolute inset-0 bg-black/10" />
                 </div>
                 <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-3">
@@ -295,9 +270,7 @@ export default function Home() {
                 </div>
                 <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed italic">&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
-                    {t.name[0]}
-                  </div>
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br ${t.color} text-white flex items-center justify-center font-bold text-lg`}>{t.name[0]}</div>
                   <div>
                     <p className="font-bold text-gray-900 dark:text-white text-sm">{t.name}</p>
                     <p className="text-xs text-gray-500">{t.role}</p>
@@ -339,7 +312,6 @@ export default function Home() {
               <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold">Dodoma, Tanzania</p>
             </div>
           </div>
-
           <div className="mt-8 sm:mt-12 text-center">
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 font-semibold">Tufuate kwenye Mitandao</p>
             <div className="flex justify-center gap-3 sm:gap-4">
