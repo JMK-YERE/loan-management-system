@@ -6,6 +6,8 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: PORT
+        value: 8080
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://ep-winter-water-b2aod0wg-pooler.c-6.eu-central-1.aws.neon.tech/loandb?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
@@ -14,8 +16,12 @@ services:
         value: npg_7IuEDepBH5ds
       - key: JWT_SECRET
         value: my-super-secret-key-for-loan-app-change-this-in-production-minimum-256-bits-long
-      - key: PORT
-        value: 8080
+      - key: JWT_EXPIRATION
+        value: 86400000
+      - key: SPRING_MAIL_USERNAME
+        value: joseph@jmkloanapp.co.tz
+      - key: SPRING_MAIL_PASSWORD
+        value: default
       - key: APP_ADMIN_EMAIL
         value: joseph@jmkloanapp.co.tz
       - key: APP_FRONTEND_URL
