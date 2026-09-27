@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight, Shield, Zap, Users, TrendingUp, Star, Phone,
   MapPin, MessageCircle, Facebook, Instagram, Twitter,
@@ -21,6 +22,7 @@ export default function Home() {
       cta: 'Anza Sasa',
       link: '/register',
       emoji: '💰',
+      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
       bgImage: 'from-blue-600/90 via-indigo-700/90 to-purple-800/90',
     },
     {
@@ -32,6 +34,7 @@ export default function Home() {
       cta: 'Chukua Ofa',
       link: '/register',
       emoji: '🎁',
+      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80',
       bgImage: 'from-orange-600/90 via-red-600/90 to-pink-700/90',
     },
     {
@@ -43,6 +46,7 @@ export default function Home() {
       cta: 'Jifunze Zaidi',
       link: '#features',
       emoji: '📱',
+      image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80',
       bgImage: 'from-green-600/90 via-emerald-700/90 to-teal-800/90',
     },
     {
@@ -54,14 +58,15 @@ export default function Home() {
       cta: 'Jisajili',
       link: '/register',
       emoji: '🔒',
+      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80',
       bgImage: 'from-purple-700/90 via-pink-700/90 to-rose-700/90',
     },
   ];
 
   const news = [
-    { title: 'JmkLoanApp yazinduliwa Tanzania', content: 'Mfumo mpya wa mikopo unalenga kurahisisha biashara ya kukopesha.', date: '27 Sep 2026', tag: 'Habari', emoji: '📰', color: 'from-blue-500 to-indigo-600' },
-    { title: 'Wadhamini sasa kwa simu', content: 'Wadhamini wanaweza kuidhinisha mikopo kupitia simu zao moja kwa moja.', date: '26 Sep 2026', tag: 'Sasisho', emoji: '📱', color: 'from-green-500 to-emerald-600' },
-    { title: 'Ripoti za faida kila wiki', content: 'Pata ripoti kamili ya faida na mikopo inayochelewa kila wiki.', date: '25 Sep 2026', tag: 'Kipengele', emoji: '📊', color: 'from-purple-500 to-pink-600' },
+    { title: 'JmkLoanApp yazinduliwa Tanzania', content: 'Mfumo mpya wa mikopo unalenga kurahisisha biashara ya kukopesha.', date: '27 Sep 2026', tag: 'Habari', emoji: '📰', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80', color: 'from-blue-500 to-indigo-600' },
+    { title: 'Wadhamini sasa kwa simu', content: 'Wadhamini wanaweza kuidhinisha mikopo kupitia simu zao moja kwa moja.', date: '26 Sep 2026', tag: 'Sasisho', emoji: '📱', image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80', color: 'from-green-500 to-emerald-600' },
+    { title: 'Ripoti za faida kila wiki', content: 'Pata ripoti kamili ya faida na mikopo inayochelewa kila wiki.', date: '25 Sep 2026', tag: 'Kipengele', emoji: '📊', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80', color: 'from-purple-500 to-pink-600' },
   ];
 
   useEffect(() => {
@@ -145,8 +150,15 @@ export default function Home() {
                 </Link>
               </div>
               <div className="order-1 md:order-2 flex justify-center">
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl bg-white/15 backdrop-blur-lg border-4 border-white/30 flex items-center justify-center shadow-2xl animate-float">
-                  <span className="text-8xl sm:text-9xl md:text-[10rem] drop-shadow-2xl">{currentSlideData.emoji}</span>
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/30 animate-float">
+                  <Image
+                    src={currentSlideData.image}
+                    alt={currentSlideData.title}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 768px) 256px, (max-width: 1024px) 384px, 384px"
+                  />
                 </div>
               </div>
             </div>
@@ -194,9 +206,9 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {news.map((n, i) => (
               <article key={i} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className={`relative h-40 sm:h-48 overflow-hidden bg-gradient-to-br ${n.color} flex items-center justify-center`}>
-                  <span className="text-6xl group-hover:scale-110 transition-transform duration-500">{n.emoji}</span>
-                  <div className="absolute inset-0 bg-black/10" />
+                <div className="relative h-40 sm:h-48 overflow-hidden">
+                  <Image src={n.image} alt={n.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
                 <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-3">
