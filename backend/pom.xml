@@ -13,10 +13,10 @@
     </parent>
 
     <groupId>com.loanapp</groupId>
-    <artifactId>loan-management-system</artifactId>
+    <artifactId>jmkloanapp</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>loan-management-system</name>
-    <description>Mfumo wa Mikopo - P2P Lending Tanzania</description>
+    <name>JmkLoanApp</name>
+    <description>JmkLoanApp - Mfumo wa Mikopo Tanzania</description>
 
     <properties>
         <java.version>17</java.version>
