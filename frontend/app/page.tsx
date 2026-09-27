@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   ArrowRight, Shield, Zap, Users, TrendingUp, Star, Phone,
   MapPin, MessageCircle, Facebook, Instagram, Twitter,
@@ -171,15 +170,8 @@ export default function Home() {
                 </Link>
               </div>
               <div className="order-1 md:order-2 flex justify-center">
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/30">
-                  <Image
-                    src={currentSlideData.image}
-                    alt={currentSlideData.title}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 256px, (max-width: 1024px) 384px, 384px"
-                  />
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl bg-white/20 backdrop-blur-lg border-4 border-white/30 flex items-center justify-center shadow-2xl animate-float">
+                  <span className="text-8xl sm:text-9xl md:text-[10rem]">{currentSlideData.icon}</span>
                 </div>
               </div>
             </div>
@@ -228,9 +220,8 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {news.map((n, i) => (
               <article key={i} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="relative h-40 sm:h-48 overflow-hidden">
-                  <Image src={n.image} alt={n.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="relative h-40 sm:h-48 overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 flex items-center justify-center">
+                  <span className="text-6xl group-hover:scale-110 transition-transform duration-500">{n.icon}</span>
                 </div>
                 <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-3">
@@ -304,8 +295,8 @@ export default function Home() {
                 </div>
                 <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed italic">&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden">
-                    <Image src={t.avatar} alt={t.name} fill className="object-cover" sizes="48px" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold">
+                    {t.name[0]}
                   </div>
                   <div>
                     <p className="font-bold text-gray-900 dark:text-white text-sm">{t.name}</p>
