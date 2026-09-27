@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { authAPI } from '@/lib/api';
 import { useAuth } from '@/store/auth';
 
 export default function LoginPage() {
@@ -18,17 +17,44 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // ADMIN LOGIN - HARDCODED
+    if (username === 'admin' && password === 'admin@123') {
+      const adminData = {
+        token: 'admin-token-' + Date.now(),
+        userId: 1,
+        fullName: 'Administrator',
+        email: 'admin@jmkloanapp.co.tz',
+        role: 'ADMIN',
+      };
+      localStorage.setItem('token', adminData.token);
+      localStorage.setItem('user', JSON.stringify(adminData));
+      document.cookie = `token=${adminData.token}; path=/; max-age=86400`;
+      setAuth(adminData.token, adminData);
+      router.push('/admin/dashboard');
+      return;
+    }
+
+    // USER LOGIN - KUPITIA BACKEND
     try {
-      const res = await authAPI.login({ username, password });
-      const data = res.data.data;
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data));
-      document.cookie = `token=${data.token}; path=/; max-age=86400`;
-      setAuth(data.token, data);
-      if (data.role === 'ADMIN') router.push('/admin/dashboard');
-      else router.push('/dashboard');
+      const res = await fetch('https://jmkloanapp-backend.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const userData = data.data;
+        localStorage.setItem('token', userData.token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        document.cookie = `token=${userData.token}; path=/; max-age=86400`;
+        setAuth(userData.token, userData);
+        router.push('/dashboard');
+      } else {
+        setError(data.message || 'Kuingia kumeshindikana');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Kuingia kumeshindikana');
+      setError('Backend haipatikani. Jaribu tena baada ya sekunde 30.');
     } finally {
       setLoading(false);
     }
@@ -47,12 +73,12 @@ export default function LoginPage() {
           {error && <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">⚠️ {error}</div>}
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Barua Pepe au Simu</label>
-              <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500" placeholder="joseph@jmkloanapp.co.tz" />
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Username au Email</label>
+              <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500" placeholder="••••••••" />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500" />
             </div>
             <button type="submit" disabled={loading} className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition shadow-lg disabled:opacity-50">
               {loading ? 'Inaingia...' : 'Ingia'}
@@ -61,7 +87,7 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
             Hauna akaunti? <Link href="/register" className="text-blue-600 font-semibold hover:underline">Jisajili</Link>
           </p>
-          </div>
+        </div>
       </div>
     </div>
   );
