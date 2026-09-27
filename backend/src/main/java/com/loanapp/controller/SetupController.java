@@ -20,19 +20,18 @@ public class SetupController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // Unda admin mpya
     @PostMapping("/create-admin")
     public ResponseEntity<ApiResponse<String>> createAdmin(@RequestBody Map<String, String> body) {
         String email = body.getOrDefault("email", "joseph@jmkloanapp.co.tz");
         String password = body.getOrDefault("password", "Joseph@2026");
-        String fullName = body.getOrDefault("fullName", "Joseph");
-        String phone = body.getOrDefault("phone", "+255700000000");
 
         userRepository.findByEmail(email).ifPresent(userRepository::delete);
 
         User admin = User.builder()
-                .fullName(fullName)
+                .fullName("Joseph")
                 .email(email)
-                .phone(phone)
+                .phone("+255700000000")
                 .nidaNumber("00000000000000000000")
                 .password(passwordEncoder.encode(password))
                 .role(User.Role.ADMIN)
@@ -44,5 +43,23 @@ public class SetupController {
 
         return ResponseEntity.ok(ApiResponse.success(
             "Admin ameundwa: " + email + " / " + password, "OK"));
+    }
+
+    // Badilisha password
+    @PostMapping("/set-password")
+    public ResponseEntity<ApiResponse<String>> setPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String newPassword = body.get("password");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setActive(true);
+        user.setStatus(User.UserStatus.APPROVED);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(ApiResponse.success(
+            "Password imewekwa kwa " + email, "OK"));
     }
 }
