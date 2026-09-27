@@ -8,6 +8,7 @@ import {
   MapPin, MessageCircle, Facebook, Instagram, Twitter,
   CheckCircle, ChevronLeft, ChevronRight, Megaphone,
 } from 'lucide-react';
+import AnnouncementTicker from '@/components/AnnouncementTicker';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -138,6 +139,9 @@ export default function Home() {
           </div>
         </div>
       </nav>
+
+      {/* ANNOUNCEMENT TICKER */}
+      <AnnouncementTicker />
 
       {/* HERO SLIDER */}
       <section className="relative overflow-hidden">
