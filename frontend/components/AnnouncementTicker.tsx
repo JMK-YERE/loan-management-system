@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Megaphone, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface Announcement {
@@ -12,6 +13,7 @@ interface Announcement {
   color: string;
   link: string;
   cta: string;
+  image: string;
 }
 
 export default function AnnouncementTicker() {
@@ -27,6 +29,7 @@ export default function AnnouncementTicker() {
       color: 'from-orange-500 via-red-500 to-pink-600',
       link: '/register',
       cta: 'Chukua Ofa',
+      image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&q=80',
     },
     {
       id: 2,
@@ -36,6 +39,7 @@ export default function AnnouncementTicker() {
       color: 'from-green-500 via-emerald-600 to-teal-700',
       link: '#features',
       cta: 'Jifunze Zaidi',
+      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80',
     },
     {
       id: 3,
@@ -45,6 +49,7 @@ export default function AnnouncementTicker() {
       color: 'from-blue-500 via-indigo-600 to-purple-700',
       link: '/register',
       cta: 'Jisajili',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
     },
     {
       id: 4,
@@ -54,6 +59,7 @@ export default function AnnouncementTicker() {
       color: 'from-purple-500 via-pink-600 to-rose-600',
       link: 'https://wa.me/255627827053',
       cta: 'Wasiliana',
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
     },
     {
       id: 5,
@@ -63,6 +69,7 @@ export default function AnnouncementTicker() {
       color: 'from-cyan-500 via-blue-600 to-indigo-700',
       link: '/register',
       cta: 'Anza Sasa',
+      image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400&q=80',
     },
   ];
 
@@ -83,24 +90,36 @@ export default function AnnouncementTicker() {
 
   return (
     <div className={`relative bg-gradient-to-r ${a.color} transition-all duration-500 overflow-hidden`}>
-      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-black/20" />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-        <div className={`flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-          <div className="flex items-center gap-3 text-white text-center sm:text-left">
-            <span className="hidden sm:flex w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm items-center justify-center">
-              <Megaphone className="w-4 h-4" />
-            </span>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-              <span className="px-2 py-0.5 rounded-full bg-white/25 text-white text-xs font-bold whitespace-nowrap">
-                {a.tag}
-              </span>
-              <div>
-                <p className="font-bold text-sm sm:text-base text-white">{a.title}</p>
-                <p className="text-xs sm:text-sm text-white/90">{a.content}</p>
+        <div className={`flex items-center justify-between gap-2 sm:gap-4 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          {/* Left: Image + Tag + Text */}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Picha ya Mwafrika */}
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/50 shadow-lg">
+              <Image
+                src={a.image}
+                alt={a.title}
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
+            </div>
+
+            {/* Maandishi */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                <span className="px-2 py-0.5 rounded-full bg-white/25 text-white text-[10px] sm:text-xs font-bold whitespace-nowrap">
+                  {a.tag}
+                </span>
               </div>
+              <p className="font-bold text-xs sm:text-sm md:text-base text-white truncate">{a.title}</p>
+              <p className="text-[10px] sm:text-xs text-white/90 truncate">{a.content}</p>
             </div>
           </div>
-          <Link href={a.link} className="flex-shrink-0 inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-gray-900 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg text-xs sm:text-sm whitespace-nowrap">
+
+          {/* Right: CTA */}
+          <Link href={a.link} className="flex-shrink-0 inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-gray-900 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg text-[10px] sm:text-xs md:text-sm whitespace-nowrap">
             {a.cta}
             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
           </Link>
