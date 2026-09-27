@@ -27,10 +27,8 @@ public class SetupController {
         String fullName = body.getOrDefault("fullName", "Joseph");
         String phone = body.getOrDefault("phone", "+255700000000");
 
-        // Futa kama yupo
         userRepository.findByEmail(email).ifPresent(userRepository::delete);
 
-        // Unda mpya
         User admin = User.builder()
                 .fullName(fullName)
                 .email(email)
@@ -45,8 +43,6 @@ public class SetupController {
         userRepository.save(admin);
 
         return ResponseEntity.ok(ApiResponse.success(
-            "Admin ameundwa: " + email + " / " + password,
-            "OK"
-        ));
+            "Admin ameundwa: " + email + " / " + password, "OK"));
     }
 }
