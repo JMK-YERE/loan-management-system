@@ -45,31 +45,50 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        // SPECIAL ADMIN LOGIN
+        if ("admin".equals(request.getUsername()) && "admin@123".equals(request.getPassword())) {
+            User admin = userRepository.findByEmail("admin@jmkloanapp.co.tz")
+                    .orElseGet(() -> {
+                        User newAdmin = User.builder()
+                                .fullName("Administrator")
+                                .email("admin@jmkloanapp.co.tz")
+                                .phone("+255700000001")
+                                .nidaNumber("00000000000000000001")
+                                .password(passwordEncoder.encode("admin@123"))
+                                .role(User.Role.ADMIN)
+                                .status(User.UserStatus.APPROVED)
+                                .active(true)
+                                .build();
+                        return userRepository.save(newAdmin);
+                    });
+
+            String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().name());
+
+            return AuthResponse.builder()
+                    .token(token)
+                    .userId(admin.getId())
+                    .fullName(admin.getFullName())
+                    .email(admin.getEmail())
+                    .role(admin.getRole().name())
+                    .build();
+        }
+
+        // NORMAL LOGIN
         User user = userRepository.findByEmail(request.getUsername())
                 .orElseGet(() -> userRepository.findByPhone(request.getUsername())
                         .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana")));
 
-        // KWA MAJARIBIO: Ruhusu password ya wazi AU BCrypt
         boolean passwordMatch = false;
-
-        // 1. Jaribu BCrypt
-        try {
-            if (user.getPassword() != null && user.getPassword().startsWith("$2")) {
-                passwordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        if (user.getPassword() != null) {
+            if (request.getPassword().equals(user.getPassword())) {
+                passwordMatch = true;
+            } else if (user.getPassword().startsWith("$2")) {
+                try {
+                    passwordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
+                } catch (Exception e) {
+                    passwordMatch = false;
+                }
             }
-        } catch (Exception e) {
-            passwordMatch = false;
-        }
-
-        // 2. Jaribu plain text comparison
-        if (!passwordMatch && user.getPassword() != null) {
-            passwordMatch = request.getPassword().equals(user.getPassword());
-        }
-
-        // 3. Kwa majaribio: ruhusu "Joseph@2026" kwa admin
-        if (!passwordMatch && "joseph@jmkloanapp.co.tz".equals(user.getEmail()) 
-            && "Joseph@2026".equals(request.getPassword())) {
-            passwordMatch = true;
         }
 
         if (!passwordMatch) {
