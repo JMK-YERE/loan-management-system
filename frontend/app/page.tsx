@@ -22,7 +22,7 @@ export default function Home() {
       color: 'from-blue-600 via-indigo-600 to-purple-700',
       cta: 'Anza Sasa',
       link: '/register',
-      image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80',
+      icon: '💰',
     },
     {
       title: 'Riba 5% kwa Wiki Hii',
@@ -32,7 +32,7 @@ export default function Home() {
       color: 'from-orange-500 via-red-500 to-pink-600',
       cta: 'Chukua Ofa',
       link: '/register',
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80',
+      icon: '📱',
     },
     {
       title: 'Malipo kwa M-Pesa, Tigo, Airtel',
@@ -42,7 +42,7 @@ export default function Home() {
       color: 'from-green-500 via-emerald-600 to-teal-700',
       cta: 'Jifunze Zaidi',
       link: '#features',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+      icon: '🛡️',
     },
     {
       title: 'Uthibitisho wa NIDA',
@@ -52,7 +52,7 @@ export default function Home() {
       color: 'from-purple-600 via-pink-600 to-rose-600',
       cta: 'Jisajili',
       link: '/register',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80',
+      icon: '🚀',
     },
   ];
 
@@ -62,21 +62,21 @@ export default function Home() {
       content: 'Mfumo mpya wa mikopo unalenga kurahisisha biashara ya kukopesha.',
       date: '27 Sep 2026',
       tag: 'Habari',
-      image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600&q=80',
+      icon: '📰',
     },
     {
       title: 'Wadhamini sasa kwa simu',
       content: 'Wadhamini wanaweza kuidhinisha mikopo kupitia simu zao moja kwa moja.',
       date: '26 Sep 2026',
       tag: 'Sasisho',
-      image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=600&q=80',
+      icon: '📱',
     },
     {
       title: 'Ripoti za faida kila wiki',
       content: 'Pata ripoti kamili ya faida na mikopo inayochelewa kila wiki.',
       date: '25 Sep 2026',
       tag: 'Kipengele',
-      image: 'https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=600&q=80',
+      icon: '📊',
     },
   ];
 
@@ -105,9 +105,9 @@ export default function Home() {
   ];
 
   const testimonials = [
-    { name: 'Joseph M.', role: 'Mkopeshaji', text: 'JmkLoanApp imerahisisha biashara yangu. Sasa nafuatilia mikopo yote kwa simu.', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&q=80' },
-    { name: 'Neema K.', role: 'Mkopaji', text: 'Nilipata mkopo haraka bila usumbufu. Malipo kwa M-Pesa ni rahisi sana.', avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&q=80' },
-    { name: 'Amina S.', role: 'Mdhamini', text: 'Kuidhinisha mikopo kwa wateja wangu ni rahisi. Nashukuru sana.', avatar: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=150&q=80' },
+    { name: 'Joseph M.', role: 'Mkopeshaji', text: 'JmkLoanApp imerahisisha biashara yangu. Sasa nafuatilia mikopo yote kwa simu.', avatar: null },
+    { name: 'Neema K.', role: 'Mkopaji', text: 'Nilipata mkopo haraka bila usumbufu. Malipo kwa M-Pesa ni rahisi sana.', avatar: null },
+    { name: 'Amina S.', role: 'Mdhamini', text: 'Kuidhinisha mikopo kwa wateja wangu ni rahisi. Nashukuru sana.', avatar: null },
   ];
 
   const currentSlideData = slides[currentSlide];
