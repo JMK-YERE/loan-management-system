@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://jmkloanapp-backend.onrender.com/api';
+const API_URL = 'https://jmkloanapp-backend.onrender.com/api';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -23,9 +23,6 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       document.cookie = 'token=; path=/; max-age=0';
-      if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/dashboard')) {
-        window.location.href = '/login';
-      }
     }
     return Promise.reject(error);
   }
