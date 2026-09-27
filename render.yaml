@@ -1,5 +1,27 @@
 services:
   - type: web
+    name: jmkloanapp-backend
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://ep-winter-water-b2aod0wg-pooler.c-6.eu-central-1.aws.neon.tech/loandb?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: loandb_owner
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: npg_7IuEDepBH5ds
+      - key: JWT_SECRET
+        value: my-super-secret-key-for-loan-app-change-this-in-production-minimum-256-bits-long
+      - key: PORT
+        value: 8080
+      - key: APP_ADMIN_EMAIL
+        value: joseph@jmkloanapp.co.tz
+      - key: APP_FRONTEND_URL
+        value: https://loan-management-system-3awf.onrender.com
+
+  - type: web
     name: jmkloanapp-frontend
     runtime: node
     plan: free
