@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: jmkloanapp-frontend
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.4
+      - key: NEXT_PUBLIC_API_URL
+        value: https://jmkloanapp-backend.onrender.com/api
