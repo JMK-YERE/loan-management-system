@@ -31,6 +31,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Kuingia kumefanikiwa", response));
     }
 
+    @GetMapping("/")
+    public ResponseEntity<ApiResponse<String>> root() {
+        return ResponseEntity.ok(ApiResponse.success("JmkLoanApp API ipo hai", "Karibu JmkLoanApp Backend"));
+    }
+
     @GetMapping("/health")
     public ResponseEntity<ApiResponse<String>> health() {
         return ResponseEntity.ok(ApiResponse.success("API ipo hai", "OK"));
