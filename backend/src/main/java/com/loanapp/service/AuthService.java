@@ -22,7 +22,7 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public AuthResponse register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Barua pepe imetumika tayari");
         }
@@ -34,13 +34,51 @@ public class AuthService {
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .nidaNumber(request.getNidaNumber())
                 .role(request.getRole())
-                .nationalId(request.getNationalId())
-                .active(true)
+                .status(User.UserStatus.PENDING)
+                .active(false)
                 .build();
 
-        user = userRepository.save(user);
+        userRepository.save(user);
+        return "Usajili wako umepokelewa. Utapata email baada ya kukaguliwa.";
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getUsername())
+                .orElseGet(() -> userRepository.findByPhone(request.getUsername())
+                        .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana")));
+
+        // KWA MAJARIBIO: Ruhusu password ya wazi AU BCrypt
+        boolean passwordMatch = false;
+
+        // 1. Jaribu BCrypt
+        try {
+            if (user.getPassword() != null && user.getPassword().startsWith("$2")) {
+                passwordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
+            }
+        } catch (Exception e) {
+            passwordMatch = false;
+        }
+
+        // 2. Jaribu plain text comparison
+        if (!passwordMatch && user.getPassword() != null) {
+            passwordMatch = request.getPassword().equals(user.getPassword());
+        }
+
+        // 3. Kwa majaribio: ruhusu "Joseph@2026" kwa admin
+        if (!passwordMatch && "joseph@jmkloanapp.co.tz".equals(user.getEmail()) 
+            && "Joseph@2026".equals(request.getPassword())) {
+            passwordMatch = true;
+        }
+
+        if (!passwordMatch) {
+            throw new RuntimeException("Password si sahihi");
+        }
+
+        if (!user.getActive()) {
+            throw new RuntimeException("Akaunti yako haijakubaliwa bado");
+        }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
@@ -53,35 +91,7 @@ public class AuthService {
                 .build();
     }
 
-    public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getUsername())
-                .orElseGet(() -> userRepository.findByPhone(request.getUsername())
-                        .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana")));
-
-        // KWA MAJARIBIO: Ruhusu password ya wazi
-        boolean passwordMatch = false;
-        try {
-            passwordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
-        } catch (Exception e) {
-            passwordMatch = false;
-        }
-        // Ruhusu password ya wazi kwa majaribio
-        if (!passwordMatch && !request.getPassword().equals("Joseph@2026")) {
-            throw new RuntimeException("Password si sahihi");
-        }
-
-        if (!user.getActive()) {
-            throw new RuntimeException("Akaunti yako imezimwa");
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-
-        return AuthResponse.builder()
-                .token(token)
-                .userId(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .build();
+    public void setPassword(String token, String newPassword) {
+        throw new RuntimeException("Kipengele hiki hakijatekelezwa bado");
     }
 }
