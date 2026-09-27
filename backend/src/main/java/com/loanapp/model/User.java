@@ -29,21 +29,33 @@ public class User {
     @Column(unique = true, nullable = false, length = 20)
     private String phone;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
+
+    @Column(name = "national_id", unique = true, length = 50)
+    private String nidaNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
 
-    @Column(length = 50)
-    private String nationalId;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserStatus status = UserStatus.PENDING;
+
+    @Column(unique = true, length = 100)
+    private String verificationToken;
+
+    private LocalDateTime tokenExpiry;
 
     @Column(length = 500)
     private String profilePicture;
 
+    @Column(length = 500)
+    private String rejectionReason;
+
     @Column(nullable = false)
-    private Boolean active = true;
+    private Boolean active = false;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -63,5 +75,9 @@ public class User {
 
     public enum Role {
         LENDER, BORROWER, GUARANTOR, ADMIN
+    }
+
+    public enum UserStatus {
+        PENDING, APPROVED, REJECTED
     }
 }
