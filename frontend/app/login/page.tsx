@@ -27,7 +27,7 @@ export default function LoginPage() {
       setAuth(userData.token, userData);
       router.push(userData.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Backend inaamka, jaribu tena baada ya sekunde 30.');
+      setError(err.response?.data?.message || err.message || "Login imeshindikana. Hakikisha username na password ni sahihi.");
     } finally {
       setLoading(false);
     }
