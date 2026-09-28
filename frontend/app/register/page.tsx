@@ -86,6 +86,7 @@ export default function RegisterPage() {
         monthlyIncome: Number(f.monthlyIncome),
         photo,
       };
+      console.log('REGISTER PAYLOAD:', payload);
       const res = await authAPI.register(payload);
       setSuccess(res.data.message || 'Usajili umepokelewa');
       window.scrollTo({ top: 0, behavior: 'smooth' });
