@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://jmkloanapp-backend.onrender.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://jmkloanapp-backend.onrender.com/api';
 
 export const api = axios.create({
   baseURL: API_URL,

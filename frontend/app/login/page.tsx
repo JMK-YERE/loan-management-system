@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { authAPI } from '@/lib/api';
 import { useAuth } from '@/store/auth';
 
 export default function LoginPage() {
@@ -18,43 +19,16 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    // ADMIN LOGIN - HARDCODED
-    if (username === 'admin' && password === 'admin@123') {
-      const adminData = {
-        token: 'admin-token-' + Date.now(),
-        userId: 1,
-        fullName: 'Administrator',
-        email: 'admin@jmkloanapp.co.tz',
-        role: 'ADMIN',
-      };
-      localStorage.setItem('token', adminData.token);
-      localStorage.setItem('user', JSON.stringify(adminData));
-      document.cookie = `token=${adminData.token}; path=/; max-age=86400`;
-      setAuth(adminData.token, adminData);
-      router.push('/admin/dashboard');
-      return;
-    }
-
-    // USER LOGIN - KUPITIA BACKEND
     try {
-      const res = await fetch('https://jmkloanapp-backend.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        const userData = data.data;
-        localStorage.setItem('token', userData.token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        document.cookie = `token=${userData.token}; path=/; max-age=86400`;
-        setAuth(userData.token, userData);
-        router.push('/dashboard');
-      } else {
-        setError(data.message || 'Kuingia kumeshindikana');
-      }
+      const res = await authAPI.login({ username, password });
+      const userData = res.data.data;
+      localStorage.setItem('token', userData.token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      document.cookie = `token=${userData.token}; path=/; max-age=86400`;
+      setAuth(userData.token, userData);
+      router.push(userData.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard');
     } catch (err: any) {
-      setError('Backend haipatikani. Jaribu tena baada ya sekunde 30.');
+      setError(err.response?.data?.message || 'Backend inaamka, jaribu tena baada ya sekunde 30.');
     } finally {
       setLoading(false);
     }
