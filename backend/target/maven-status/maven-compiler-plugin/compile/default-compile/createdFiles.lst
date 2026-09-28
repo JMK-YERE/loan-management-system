@@ -1,0 +1,8 @@
+com/loanapp/model/User$UserStatus.class
+com/loanapp/model/Payment$PaymentStatus.class
+com/loanapp/model/User.class
+com/loanapp/model/User$Role.class
+com/loanapp/model/Payment$PaymentMethod.class
+com/loanapp/model/Payment.class
+com/loanapp/model/Loan$LoanStatus.class
+com/loanapp/model/Loan.class

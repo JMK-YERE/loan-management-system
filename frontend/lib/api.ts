@@ -44,4 +44,15 @@ export const announcementAPI = {
   delete: (id: number) => api.delete(`/announcements/${id}`),
 };
 
+export const adminAPI = {
+  list: (status?: string) => api.get('/admin/applicants', { params: status ? { status } : {} }),
+  get: (id: number) => api.get(`/admin/applicants/${id}`),
+  approve: (id: number) => api.post(`/admin/applicants/${id}/approve`),
+  reject: (id: number, reason: string) => api.post(`/admin/applicants/${id}/reject`, { reason }),
+};
+
+export const userAPI = {
+  me: () => api.get('/me'),
+};
+
 export default api;

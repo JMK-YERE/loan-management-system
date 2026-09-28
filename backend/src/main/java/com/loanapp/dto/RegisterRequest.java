@@ -1,15 +1,14 @@
 package com.loanapp.dto;
 
 import com.loanapp.model.User;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -26,15 +25,61 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message = "Namba ya simu inahitajika")
-    @Pattern(regexp = "^\\+?255[0-9]{9}$", message = "Namba ya simu iwe format ya Tanzania (+255XXXXXXXXX)")
+    @Pattern(regexp = "^\\+[1-9][0-9]{6,14}$", message = "Simu iwe na code ya nchi, mfano +255712345678")
     private String phone;
 
-    @NotBlank(message = "Password inahitajika")
-    @Size(min = 6, message = "Password iwe angalau herufi 6")
-    private String password;
-
-    @NotNull(message = "Role inahitajika")
+    @NotNull(message = "Aina ya akaunti inahitajika")
     private User.Role role;
 
-    private String nationalId;
+    @NotBlank(message = "Aina ya kitambulisho inahitajika")
+    private String idType;
+
+    @NotBlank(message = "Namba ya kitambulisho inahitajika")
+    @Size(min = 5, max = 30, message = "Namba ya kitambulisho iwe herufi 5 hadi 30")
+    private String idNumber;
+
+    @NotNull(message = "Tarehe ya kuzaliwa inahitajika")
+    @Past(message = "Tarehe ya kuzaliwa si sahihi")
+    private LocalDate dateOfBirth;
+
+    @NotBlank(message = "Jinsia inahitajika")
+    private String gender;
+
+    @NotBlank(message = "Hali ya ndoa inahitajika")
+    private String maritalStatus;
+
+    @NotBlank(message = "Utaifa unahitajika")
+    private String nationality;
+
+    @NotBlank(message = "Anwani inahitajika")
+    private String address;
+
+    @NotBlank(message = "Mji unahitajika")
+    private String city;
+
+    @NotBlank(message = "Nchi inahitajika")
+    private String country;
+
+    @NotBlank(message = "Hali ya ajira inahitajika")
+    private String employmentStatus;
+
+    private String occupation;
+    private String employer;
+
+    @NotNull(message = "Kipato cha mwezi kinahitajika")
+    @DecimalMin(value = "0", message = "Kipato hakiwezi kuwa hasi")
+    private BigDecimal monthlyIncome;
+
+    @NotBlank(message = "Jina la ndugu wa karibu linahitajika")
+    private String kinName;
+
+    @NotBlank(message = "Simu ya ndugu wa karibu inahitajika")
+    @Pattern(regexp = "^\\+[1-9][0-9]{6,14}$", message = "Simu ya ndugu iwe na code ya nchi")
+    private String kinPhone;
+
+    @NotBlank(message = "Uhusiano na ndugu unahitajika")
+    private String kinRelationship;
+
+    @NotBlank(message = "Picha inahitajika")
+    private String photo;
 }

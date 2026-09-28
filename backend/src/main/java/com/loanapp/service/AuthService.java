@@ -7,52 +7,73 @@ import com.loanapp.model.User;
 import com.loanapp.repository.UserRepository;
 import com.loanapp.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
 
 @Service
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Value("${app.admin.email}") private String adminEmail;
+    @Value("${app.admin.username:admin}") private String adminUsername;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    public String register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Barua pepe imetumika tayari");
+    public String register(RegisterRequest r) {
+        if (r.getRole() == User.Role.ADMIN) {
+            throw new RuntimeException("Role hii hairuhusiwi");
         }
-        if (userRepository.existsByPhone(request.getPhone())) {
-            throw new RuntimeException("Namba ya simu imetumika tayari");
+        if (Period.between(r.getDateOfBirth(), LocalDate.now()).getYears() < 18) {
+            throw new RuntimeException("Lazima uwe na umri wa miaka 18 au zaidi");
         }
+        String photo = r.getPhoto();
+        if (!photo.startsWith("data:image/jpeg;base64,") || photo.length() > 400_000) {
+            throw new RuntimeException("Picha si sahihi au ni kubwa mno");
+        }
+        String email = r.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(email)) throw new RuntimeException("Barua pepe imetumika tayari");
+        if (userRepository.existsByPhone(r.getPhone())) throw new RuntimeException("Namba ya simu imetumika tayari");
+        if (userRepository.existsByNidaNumber(r.getIdNumber().trim())) throw new RuntimeException("Namba ya kitambulisho imetumika tayari");
 
         User user = User.builder()
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .nidaNumber(request.getNidaNumber())
-                .role(request.getRole())
+                .fullName(r.getFullName().trim())
+                .email(email)
+                .phone(r.getPhone())
+                .nidaNumber(r.getIdNumber().trim())
+                .idType(r.getIdType())
+                .dateOfBirth(r.getDateOfBirth())
+                .gender(r.getGender())
+                .maritalStatus(r.getMaritalStatus())
+                .nationality(r.getNationality())
+                .address(r.getAddress())
+                .city(r.getCity())
+                .country(r.getCountry())
+                .employmentStatus(r.getEmploymentStatus())
+                .occupation(r.getOccupation())
+                .employer(r.getEmployer())
+                .monthlyIncome(r.getMonthlyIncome())
+                .kinName(r.getKinName())
+                .kinPhone(r.getKinPhone())
+                .kinRelationship(r.getKinRelationship())
+                .photoData(photo)
+                .role(r.getRole())
                 .status(User.UserStatus.PENDING)
                 .active(false)
                 .build();
-
         userRepository.save(user);
-        return "Usajili wako umepokelewa. Utapata email baada ya kukaguliwa.";
+        return "Usajili wako umepokelewa. Admin atakagua na kukupa link ya kuweka password.";
     }
-
-    @org.springframework.beans.factory.annotation.Value("${app.admin.email}")
-    private String adminEmail;
-
-    @org.springframework.beans.factory.annotation.Value("${app.admin.username:admin}")
-    private String adminUsername;
 
     public AuthResponse login(LoginRequest request) {
         String id = request.getUsername().trim();
         if (id.equalsIgnoreCase(adminUsername)) id = adminEmail;
+        else if (id.contains("@")) id = id.toLowerCase();
         final String identifier = id;
 
         User user = userRepository.findByEmail(identifier)
@@ -78,6 +99,19 @@ public class AuthService {
     }
 
     public void setPassword(String token, String newPassword) {
-        throw new RuntimeException("Kipengele hiki hakijatekelezwa bado");
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new RuntimeException("Password iwe angalau herufi 8");
+        }
+        User u = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new RuntimeException("Link si sahihi au imeisha muda"));
+        if (u.getTokenExpiry() == null || u.getTokenExpiry().isBefore(LocalDateTime.now())
+                || u.getStatus() != User.UserStatus.APPROVED) {
+            throw new RuntimeException("Link si sahihi au imeisha muda");
+        }
+        u.setPassword(passwordEncoder.encode(newPassword));
+        u.setActive(true);
+        u.setVerificationToken(null);
+        u.setTokenExpiry(null);
+        userRepository.save(u);
     }
 }

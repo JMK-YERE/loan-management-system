@@ -57,6 +57,23 @@ public class User {
     @Column(nullable = false)
     private Boolean active = false;
 
+    @Column(length = 30) private String idType;
+    private java.time.LocalDate dateOfBirth;
+    @Column(length = 10) private String gender;
+    @Column(length = 20) private String maritalStatus;
+    @Column(length = 60) private String nationality;
+    @Column(length = 200) private String address;
+    @Column(length = 80) private String city;
+    @Column(length = 80) private String country;
+    @Column(length = 30) private String employmentStatus;
+    @Column(length = 120) private String occupation;
+    @Column(length = 150) private String employer;
+    private java.math.BigDecimal monthlyIncome;
+    @Column(length = 200) private String kinName;
+    @Column(length = 20) private String kinPhone;
+    @Column(length = 40) private String kinRelationship;
+    @Column(columnDefinition = "TEXT") private String photoData;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
