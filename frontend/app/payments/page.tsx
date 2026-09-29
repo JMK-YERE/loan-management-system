@@ -1,0 +1,20 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { CreditCard, Smartphone } from 'lucide-react';
+import { loanAPI, paymentAPI, mobileMoneyAPI } from '@/lib/api';
+
+export default function PaymentsPage(){
+ const [loans,setLoans]=useState<any[]>([]);const [loanId,setLoanId]=useState('');const [amount,setAmount]=useState('');const [method,setMethod]=useState('MPESA');const [phone,setPhone]=useState('');const [msg,setMsg]=useState('');const [busy,setBusy]=useState(false);
+ useEffect(()=>{(async()=>{try{const r=await loanAPI.byBorrower();setLoans(r.data?.data||r.data||[])}catch(e){setMsg('Imeshindikana kupakia mikopo.')}})()},[]);
+ const pay=async(e:any)=>{e.preventDefault();setBusy(true);setMsg('');try{const p=await paymentAPI.create({loanId:Number(loanId),amount:Number(amount),paymentMethod:method});const payment=p.data?.data||p.data;const r=await mobileMoneyAPI.checkout(payment.id,phone);const data=r.data?.data||r.data;setMsg(data?.message||('Gateway status: '+data?.status));}catch(e:any){setMsg(e?.response?.data?.message||'Malipo yameshindwa kuanzishwa.')}finally{setBusy(false)}};
+ return <main className="min-h-screen bg-slate-50 p-6 dark:bg-slate-950"><div className="mx-auto max-w-3xl space-y-6">
+  <section className="rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-900"><div className="flex items-center gap-3"><div className="rounded-xl bg-emerald-50 p-3 text-emerald-600"><CreditCard/></div><div><h1 className="text-2xl font-black">Mobile Money Payment</h1><p className="text-sm text-slate-500">M-Pesa, Tigo Pesa na Airtel Money kupitia gateway iliyounganishwa.</p></div></div></section>
+  <form onSubmit={pay} className="space-y-4 rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-900"><select required value={loanId} onChange={e=>setLoanId(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"><option value="">Chagua loan</option>{loans.filter(l=>!['PAID','REJECTED'].includes(l.status)).map(l=><option key={l.id} value={l.id}>Loan #{l.id} · TZS {l.amount} · {l.status}</option>)}</select>
+  <input required type="number" min="1" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="Kiasi cha kulipa" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
+  <select value={method} onChange={e=>setMethod(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950">{['MPESA','TIGO_PESA','AIRTEL_MONEY'].map(x=><option key={x}>{x}</option>)}</select>
+  <input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+2557XXXXXXXX" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
+  <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-950"><Smartphone className="mb-2 h-5 w-5"/>Payment provider credentials are kept on Render server-side. Never enter API secrets here.</div>
+  <button disabled={busy} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white">{busy?'Inaanzisha...':'Lipa Sasa'}</button></form>{msg&&<div className="rounded-2xl bg-white p-4 text-sm dark:bg-slate-900">{msg}</div>}
+ </div></main>;
+}
