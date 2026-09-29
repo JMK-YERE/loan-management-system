@@ -21,7 +21,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<Map<String,Object>>>> borrowers() {
         List<Map<String,Object>> data = userRepository.findByRole(User.Role.BORROWER).stream()
                 .filter(u -> Boolean.TRUE.equals(u.getActive()))
-                .map(u -> Map.<String,Object>of("id",u.getId(),"fullName",u.getFullName(),"email",u.getEmail(),"phone",u.getPhone(),"city",u.getCity()))
+                .map(u -> { Map<String,Object> m = new java.util.LinkedHashMap<>(); m.put("id",u.getId()); m.put("fullName",u.getFullName()); m.put("email",u.getEmail()); m.put("phone",u.getPhone()); m.put("city",u.getCity()); return m; })
                 .toList();
         return ResponseEntity.ok(ApiResponse.success("Wakopaji waliopo", data));
     }
