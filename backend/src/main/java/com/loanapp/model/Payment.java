@@ -44,6 +44,10 @@ public class Payment {
 
     private LocalDateTime paidAt;
 
+    @Column(length = 40) private String provider;
+    @Column(length = 120) private String gatewayReference;
+    @Column(length = 500) private String checkoutUrl;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
