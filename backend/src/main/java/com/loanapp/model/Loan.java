@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -59,6 +60,12 @@ public class Loan {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    private LocalDate disbursementDate;
+
+    private LocalDate nextDueDate;
+
+    private LocalDateTime lastOverdueReminderAt;
 
     private LocalDateTime updatedAt;
 
