@@ -15,6 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/announcements', label: 'Matangazo', icon: Megaphone },
     { href: '/admin/users', label: 'Watumiaji', icon: Users },
+    { href: '/admin/reports', label: 'Ripoti', icon: BarChart3 },
     { href: '/admin/settings', label: 'Mipangilio', icon: Settings },
   ];
 
