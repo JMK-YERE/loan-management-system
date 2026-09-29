@@ -15,36 +15,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
+    @Autowired private PaymentService paymentService;
 
-    @Autowired
-    private PaymentService paymentService;
+    @PostMapping @PreAuthorize("hasRole('BORROWER')")
+    public ResponseEntity<ApiResponse<Payment>> createPayment(@Valid @RequestBody PaymentRequest request,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Malipo yameanzishwa",paymentService.createPayment(request,auth.getName())));}
 
-    @PostMapping
-    @PreAuthorize("hasRole('BORROWER')")
-    public ResponseEntity<ApiResponse<Payment>> createPayment(
-            @Valid @RequestBody PaymentRequest request) {
-        Payment payment = paymentService.createPayment(request);
-        return ResponseEntity.ok(ApiResponse.success("Malipo yameanzishwa", payment));
-    }
+    @PutMapping("/{id}/confirm") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Payment>> confirmPayment(@PathVariable Long id,@RequestParam String transactionId,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Malipo yamethibitishwa",paymentService.confirmPayment(id,transactionId,auth.getName())));}
 
-    @PutMapping("/{id}/confirm")
-    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
-    public ResponseEntity<ApiResponse<Payment>> confirmPayment(
-            @PathVariable Long id,
-            @RequestParam String transactionId) {
-        Payment payment = paymentService.confirmPayment(id, transactionId);
-        return ResponseEntity.ok(ApiResponse.success("Malipo yamethibitishwa", payment));
-    }
+    @GetMapping("/loan/{loanId}") @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<Payment>>> getPaymentsByLoan(@PathVariable Long loanId,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Malipo yote",paymentService.getPaymentsByLoan(loanId,auth.getName())));}
 
-    @GetMapping("/loan/{loanId}")
-    public ResponseEntity<ApiResponse<List<Payment>>> getPaymentsByLoan(@PathVariable Long loanId) {
-        List<Payment> payments = paymentService.getPaymentsByLoan(loanId);
-        return ResponseEntity.ok(ApiResponse.success("Malipo yote", payments));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Payment>> getPaymentById(@PathVariable Long id) {
-        Payment payment = paymentService.getPaymentById(id);
-        return ResponseEntity.ok(ApiResponse.success("Malipo yamepatikana", payment));
-    }
+    @GetMapping("/{id}") @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Payment>> getPaymentById(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Malipo yamepatikana",paymentService.getPaymentById(id,auth.getName())));}
 }
