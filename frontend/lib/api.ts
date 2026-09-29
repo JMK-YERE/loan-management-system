@@ -55,6 +55,7 @@ export const adminAPI = {
 
 export const userAPI = {
   me: () => api.get('/me'),
+  borrowers: () => api.get('/users/borrowers'),
 };
 
 export const loanAPI = {
