@@ -23,6 +23,7 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       document.cookie = 'token=; path=/; max-age=0';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -53,6 +54,35 @@ export const adminAPI = {
 
 export const userAPI = {
   me: () => api.get('/me'),
+};
+
+export const loanAPI = {
+  byLender: () => api.get('/loans/lender'),
+  byBorrower: () => api.get('/loans/borrower'),
+  get: (id: number) => api.get(`/loans/${id}`),
+  create: (borrowerId: number, data: any) => api.post('/loans', data, { params: { borrowerId } }),
+  approve: (id: number) => api.put(`/loans/${id}/approve`),
+  reject: (id: number) => api.put(`/loans/${id}/reject`),
+};
+
+export const paymentAPI = {
+  create: (data: any) => api.post('/payments', data),
+  byLoan: (loanId: number) => api.get(`/payments/loan/${loanId}`),
+  get: (id: number) => api.get(`/payments/${id}`),
+  confirm: (id: number, transactionId: string) =>
+    api.put(`/payments/${id}/confirm`, null, { params: { transactionId } }),
+};
+
+export const guarantorAPI = {
+  byLoan: (loanId: number) => api.get(`/guarantors/loan/${loanId}`),
+  add: (loanId: number, data: any) => api.post(`/guarantors/loan/${loanId}`, data),
+  approve: (id: number) => api.put(`/guarantors/${id}/approve`),
+  reject: (id: number) => api.put(`/guarantors/${id}/reject`),
+};
+
+export const signatureAPI = {
+  create: (data: any) => api.post('/signatures', data),
+  byLoan: (loanId: number) => api.get(`/signatures/loan/${loanId}`),
 };
 
 export default api;
