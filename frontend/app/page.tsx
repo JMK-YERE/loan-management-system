@@ -1,404 +1,158 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import {
-  ArrowRight, Shield, Zap, Users, TrendingUp, Star, Phone,
-  MapPin, MessageCircle, Facebook, Instagram, Twitter,
-  CheckCircle, ChevronLeft, ChevronRight, Megaphone,
+  ArrowRight, Calculator, CheckCircle2, CreditCard, FileCheck2,
+  LockKeyhole, Menu, ShieldCheck, Users, X,
 } from 'lucide-react';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { getInitialLanguage, translations, Lang } from '@/lib/i18n';
+
+const images = [
+  'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1400&q=85',
+  'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1400&q=85',
+  'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=1400&q=85',
+  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=85',
+  'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1400&q=85',
+];
+
+const iconMap: Record<string, any> = { Calculator, Workflow: FileCheck2, Payments: CreditCard, Guarantor: Users, Security: ShieldCheck, Reports: CheckCircle2 };
 
 export default function Home() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const slides = [
-    {
-      title: 'Karibu JmkLoanApp',
-      subtitle: 'Mfumo wa kisasa wa mikopo Tanzania',
-      content: 'Kopesha kwa urahisi, fuatilia marejesho, na pata faida. Kila kitu mahali pamoja.',
-      tag: 'Karibu',
-      color: 'from-blue-600 via-indigo-600 to-purple-700',
-      cta: 'Anza Sasa',
-      link: '/register',
-      emoji: '💰',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
-      bgImage: 'from-blue-600/90 via-indigo-700/90 to-purple-800/90',
-    },
-    {
-      title: 'Riba 5% kwa Wiki Hii',
-      subtitle: 'Ofa maalum kwa wateja wapya',
-      content: 'Pata mkopo kwa riba nafuu ya 5% kwa wiki hii. Ofa inaisha hivi karibuni!',
-      tag: 'Ofa',
-      color: 'from-orange-500 via-red-500 to-pink-600',
-      cta: 'Chukua Ofa',
-      link: '/register',
-      emoji: '🎁',
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80',
-      bgImage: 'from-orange-600/90 via-red-600/90 to-pink-700/90',
-    },
-    {
-      title: 'Malipo kwa M-Pesa, Tigo, Airtel',
-      subtitle: 'Njia zote za malipo zinapatikana',
-      content: 'Lipa kwa urahisi kupitia M-Pesa, Tigo Pesa, Airtel Money, au HaloPesa.',
-      tag: 'Malipo',
-      color: 'from-green-500 via-emerald-600 to-teal-700',
-      cta: 'Jifunze Zaidi',
-      link: '#features',
-      emoji: '📱',
-      image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80',
-      bgImage: 'from-green-600/90 via-emerald-700/90 to-teal-800/90',
-    },
-    {
-      title: 'Uthibitisho wa NIDA',
-      subtitle: 'Usalama wa hali ya juu',
-      content: 'Kila mtumiaji anathibitishwa kwa NIDA. Data yako iko salama.',
-      tag: 'Usalama',
-      color: 'from-purple-600 via-pink-600 to-rose-600',
-      cta: 'Jisajili',
-      link: '/register',
-      emoji: '🔒',
-      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80',
-      bgImage: 'from-purple-700/90 via-pink-700/90 to-rose-700/90',
-    },
-  ];
-
-  const news = [
-    { title: 'JmkLoanApp yazinduliwa Tanzania', content: 'Mfumo mpya wa mikopo unalenga kurahisisha biashara ya kukopesha.', date: '27 Sep 2026', tag: 'Habari', emoji: '📰', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80', color: 'from-blue-500 to-indigo-600' },
-    { title: 'Wadhamini sasa kwa simu', content: 'Wadhamini wanaweza kuidhinisha mikopo kupitia simu zao moja kwa moja.', date: '26 Sep 2026', tag: 'Sasisho', emoji: '📱', image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80', color: 'from-green-500 to-emerald-600' },
-    { title: 'Ripoti za faida kila wiki', content: 'Pata ripoti kamili ya faida na mikopo inayochelewa kila wiki.', date: '25 Sep 2026', tag: 'Kipengele', emoji: '📊', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80', color: 'from-purple-500 to-pink-600' },
-  ];
+  const [lang, setLang] = useState<Lang>('sw');
+  const [slide, setSlide] = useState(0);
+  const [menu, setMenu] = useState(false);
+  const t = translations[lang];
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [slides.length]);
+    const initial = getInitialLanguage();
+    setLang(initial);
+    const handler = (event: Event) => setLang((event as CustomEvent<Lang>).detail);
+    window.addEventListener('jmk-language-change', handler);
+    return () => window.removeEventListener('jmk-language-change', handler);
+  }, []);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-
-  const features = [
-    { icon: Shield, title: 'Usalama wa Hali ya Juu', desc: 'Data yako inalindwa kwa encryption ya kisasa na uthibitisho wa NIDA.', color: 'from-blue-500 to-indigo-600' },
-    { icon: Zap, title: 'Haraka na Rahisi', desc: 'Omba mkopo kwa dakika 2 tu. Uthibitisho unakuja haraka.', color: 'from-yellow-500 to-orange-500' },
-    { icon: Users, title: 'Wadhamini', desc: 'Ongeza wadhamini kwa urahisi. Wanaidhinisha kwa simu.', color: 'from-green-500 to-emerald-600' },
-    { icon: TrendingUp, title: 'Ripoti za Kina', desc: 'Ona faida, mikopo inayochelewa, na historia yote.', color: 'from-purple-500 to-pink-600' },
-  ];
-
-  const steps = [
-    { num: '1', title: 'Jisajili', desc: 'Jaza taarifa zako — NIDA, email, simu.' },
-    { num: '2', title: 'Subiri Uthibitisho', desc: 'Admin anakagua na kukutumia email.' },
-    { num: '3', title: 'Weka Password', desc: 'Bonyeza link kwenye email, weka password.' },
-    { num: '4', title: 'Anza Kukopesha', desc: 'Ingia, ongeza wakopaji, toa mikopo.' },
-  ];
-
-  const testimonials = [
-    { name: 'Joseph M.', role: 'Mkopeshaji', text: 'JmkLoanApp imerahisisha biashara yangu. Sasa nafuatilia mikopo yote kwa simu.', color: 'from-blue-600 to-indigo-600' },
-    { name: 'Neema K.', role: 'Mkopaji', text: 'Nilipata mkopo haraka bila usumbufu. Malipo kwa M-Pesa ni rahisi sana.', color: 'from-green-600 to-emerald-600' },
-    { name: 'Amina S.', role: 'Mdhamini', text: 'Kuidhinisha mikopo kwa wateja wangu ni rahisi. Nashukuru sana.', color: 'from-purple-600 to-pink-600' },
-  ];
-
-  const currentSlideData = slides[currentSlide];
+  useEffect(() => {
+    const timer = window.setInterval(() => setSlide((s) => (s + 1) % images.length), 5500);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-950 overflow-x-hidden">
-      {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg">💰</div>
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">JmkLoanApp</span>
-            </Link>
-            <div className="hidden lg:flex items-center gap-8">
-              <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Vipengele</a>
-              <a href="#how" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Jinsi Inavyofanya Kazi</a>
-              <a href="#news" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Habari</a>
-              <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Wasiliana</a>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/login" className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">Ingia</Link>
-              <Link href="/register" className="px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl transition shadow-lg hover:shadow-xl">Jisajili</Link>
-            </div>
+    <main className="min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-white">
+      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-xl text-white shadow-lg">💰</div>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-lg font-black text-transparent">JmkLoanApp</span>
+          </Link>
+          <div className="hidden items-center gap-7 md:flex">
+            <a href="#features" className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300">{t.nav.features}</a>
+            <a href="#how" className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300">{t.nav.how}</a>
+            <a href="#security" className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300">{t.nav.security}</a>
+            <a href="#contact" className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300">{t.nav.contact}</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Link href="/login" className="hidden rounded-xl px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 sm:block dark:text-slate-200 dark:hover:bg-slate-800">{t.nav.login}</Link>
+            <Link href="/register" className="hidden rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg hover:bg-blue-700 sm:block">{t.nav.register}</Link>
+            <button onClick={() => setMenu(!menu)} className="rounded-xl p-2 md:hidden" aria-label="Menu">{menu ? <X /> : <Menu />}</button>
           </div>
         </div>
+        {menu && <div className="border-t border-slate-200 bg-white p-4 md:hidden dark:border-slate-800 dark:bg-slate-950">
+          <div className="grid gap-2">
+            <a href="#features" onClick={() => setMenu(false)} className="rounded-xl p-3 font-semibold">{t.nav.features}</a>
+            <a href="#how" onClick={() => setMenu(false)} className="rounded-xl p-3 font-semibold">{t.nav.how}</a>
+            <a href="#security" onClick={() => setMenu(false)} className="rounded-xl p-3 font-semibold">{t.nav.security}</a>
+            <Link href="/login" className="rounded-xl p-3 font-semibold">{t.nav.login}</Link>
+            <Link href="/register" className="rounded-xl bg-blue-600 p-3 text-center font-bold text-white">{t.nav.register}</Link>
+          </div>
+        </div>}
       </nav>
 
-      {/* HERO SLIDER */}
-      <section className="relative overflow-hidden">
-        <div className={`relative bg-gradient-to-br ${currentSlideData.bgImage} transition-all duration-700 min-h-[500px] sm:min-h-[600px] flex items-center`}>
-          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-          <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-white/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 w-full">
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-              <div className="text-white order-2 md:order-1">
-                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-semibold mb-4 sm:mb-6 shadow-sm">
-                  <Megaphone className="w-3 h-3 sm:w-4 sm:h-4" />
-                  {currentSlideData.tag}
-                </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 sm:mb-4 leading-tight">
-                  {currentSlideData.title}
-                </h1>
-                <p className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-white/90">{currentSlideData.subtitle}</p>
-                <p className="text-sm sm:text-base md:text-lg text-white/80 mb-6 sm:mb-8 leading-relaxed">{currentSlideData.content}</p>
-                <Link href={currentSlideData.link} className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition shadow-xl hover:scale-105 transform text-sm sm:text-base">
-                  {currentSlideData.cta}
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Link>
-              </div>
-              <div className="order-1 md:order-2 flex justify-center">
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/30 animate-float">
-                  <Image
-                    src={currentSlideData.image}
-                    alt={currentSlideData.title}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 256px, (max-width: 1024px) 384px, 384px"
-                  />
-                </div>
+      <section className="relative min-h-[680px] overflow-hidden bg-slate-950">
+        <Image src={images[slide]} alt="Loan management" fill priority className="object-cover opacity-35 transition-all duration-700" sizes="100vw" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-blue-950/50" />
+        <div className="relative mx-auto grid min-h-[680px] max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_.95fr]">
+          <div className="max-w-3xl text-white">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold tracking-wider backdrop-blur">
+              <ShieldCheck className="h-4 w-4 text-cyan-300" /> {t.hero.badge}
+            </div>
+            <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">{t.hero.title}</h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-xl">{t.hero.text}</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/register" className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white shadow-xl hover:bg-blue-500">{t.hero.primary}<ArrowRight className="h-5 w-5" /></Link>
+              <Link href="/login" className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3.5 font-bold text-white backdrop-blur hover:bg-white/20">{t.hero.secondary}</Link>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-300">
+              {t.trust.map((x) => <span key={x} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400" />{x}</span>)}
+            </div>
+          </div>
+          <div className="relative hidden lg:block">
+            <div className="relative mx-auto h-[430px] w-[370px] overflow-hidden rounded-[2rem] border border-white/20 shadow-2xl">
+              <Image src={images[(slide + 1) % images.length]} alt="Digital finance" fill className="object-cover" sizes="370px" />
+              <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/20 bg-slate-950/70 p-5 text-white backdrop-blur-xl">
+                <div className="text-xs font-bold uppercase tracking-widest text-cyan-300">{lang === 'sw' ? 'Mfumo mmoja' : 'One platform'}</div>
+                <div className="mt-1 text-2xl font-black">{lang === 'sw' ? 'Mikopo • Malipo • Wadhamini' : 'Loans • Payments • Guarantors'}</div>
               </div>
             </div>
           </div>
-
-          <button onClick={prevSlide} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center text-white transition z-10" aria-label="Previous">
-            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          <button onClick={nextSlide} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center text-white transition z-10" aria-label="Next">
-            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-            {slides.map((_, i) => (
-              <button key={i} onClick={() => setCurrentSlide(i)} className={`h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-6 sm:w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`} aria-label={`Slide ${i + 1}`} />
-            ))}
-          </div>
+        </div>
+        <div className="absolute bottom-7 left-1/2 flex -translate-x-1/2 gap-2">
+          {images.map((_, i) => <button key={i} onClick={() => setSlide(i)} aria-label={`Slide ${i + 1}`} className={`h-2 rounded-full transition-all ${i === slide ? 'w-9 bg-white' : 'w-2 bg-white/40'}`} />)}
         </div>
       </section>
 
-      {/* TRUST BADGES */}
-      <section className="py-6 sm:py-8 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" /> Bure kujisajili</div>
-            <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" /> Usalama wa NIDA</div>
-            <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" /> Malipo ya M-Pesa</div>
-            <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" /> Msaada 24/7</div>
+      <section id="features" className="bg-slate-50 py-20 dark:bg-slate-900/50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-bold text-blue-600">JmkLoanApp</p>
+            <h2 className="mt-2 text-3xl font-black sm:text-4xl">{t.featuresTitle}</h2>
+            <p className="mt-3 text-slate-600 dark:text-slate-400">{t.featuresSub}</p>
           </div>
-        </div>
-      </section>
-
-      {/* NEWS */}
-      <section id="news" className="py-12 sm:py-20 bg-white dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8 sm:mb-12">
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">Habari Zinazojiri</h2>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Habari mpya kila siku</p>
-            </div>
-            <div className="hidden md:flex items-center gap-2 text-blue-600 font-semibold text-sm">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />LIVE
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {news.map((n, i) => (
-              <article key={i} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="relative h-40 sm:h-48 overflow-hidden">
-                  <Image src={n.image} alt={n.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {t.features.map(([key, title, desc], i) => {
+              const Icon = iconMap[key] || CheckCircle2;
+              return <article key={key} className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-950">
+                <div className="relative h-40 overflow-hidden">
+                  <Image src={images[i % images.length]} alt={title} fill className="object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 1024px) 50vw, 33vw" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
+                  <div className="absolute bottom-4 left-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white text-blue-600 shadow-xl"><Icon className="h-5 w-5" /></div>
                 </div>
-                <div className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="px-2 sm:px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-bold">{n.tag}</span>
-                    <span className="text-xs text-gray-500">{n.date}</span>
-                  </div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 transition">{n.title}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">{n.content}</p>
-                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Soma Zaidi <ArrowRight className="w-4 h-4" /></span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section id="features" className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Vipengele Muhimu</h2>
-            <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-400">Kila kitu unachohitaji kukopesha kwa ufanisi</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {features.map((f, i) => {
-              const Icon = f.icon;
-              return (
-                <div key={i} className="group bg-white dark:bg-gray-950 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition`}>
-                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2">{f.title}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{f.desc}</p>
-                </div>
-              );
+                <div className="p-6"><h3 className="text-lg font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{desc}</p></div>
+              </article>;
             })}
           </div>
         </div>
       </section>
 
-      {/* HOW */}
-      <section id="how" className="py-12 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Jinsi Inavyofanya Kazi</h2>
-            <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-400">Hatua 4 rahisi kuanza</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {steps.map((s, i) => (
-              <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center text-lg sm:text-xl font-bold mb-4 shadow-lg">{s.num}</div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2">{s.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
+      <section id="how" className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="text-center"><h2 className="text-3xl font-black sm:text-4xl">{t.howTitle}</h2><p className="mt-3 text-slate-600 dark:text-slate-400">{t.howSub}</p></div>
+          <div className="mt-12 grid gap-5 md:grid-cols-4">
+            {t.steps.map(([num,title,desc]) => <div key={num} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="text-4xl font-black text-blue-600">{num}</div><h3 className="mt-5 font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{desc}</p>
+            </div>)}
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Wateja Wanasema Nini</h2>
+      <section id="security" className="bg-slate-950 py-20 text-white">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
+          <div><div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600"><LockKeyhole /></div><h2 className="text-3xl font-black sm:text-4xl">{t.securityTitle}</h2><p className="mt-4 leading-7 text-slate-300">{t.securitySub}</p>
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">{['JWT authentication','Role-based authorization','Protected API routes','Server-side validation'].map(x => <div key={x} className="rounded-2xl border border-white/10 bg-white/5 p-4 font-semibold"><CheckCircle2 className="mr-2 inline h-4 w-4 text-emerald-400" />{x}</div>)}</div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {testimonials.map((t, i) => (
-              <div key={i} className="bg-white dark:bg-gray-950 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (<Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />))}
-                </div>
-                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed italic">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br ${t.color} text-white flex items-center justify-center font-bold text-lg`}>{t.name[0]}</div>
-                  <div>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className="relative h-[360px] overflow-hidden rounded-[2rem] border border-white/10"><Image src={images[4]} alt="Secure digital finance" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" /><div className="absolute inset-0 bg-blue-950/40" /></div>
         </div>
       </section>
 
-      {/* CONTACT */}
-      <section id="contact" className="py-12 sm:py-20 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">📞 Wasiliana Nasi</h2>
-            <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-400">Tupo tayari kukusaidia wakati wowote</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
-            <a href="tel:0694258683" className="group bg-white dark:bg-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all hover:-translate-y-1 text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition">
-                <Phone className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-              </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm sm:text-base">Simu</h3>
-              <p className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">0694 258 683</p>
-            </a>
-            <a href="https://wa.me/255627827053" target="_blank" rel="noopener noreferrer" className="group bg-white dark:bg-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all hover:-translate-y-1 text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition">
-                <MessageCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-              </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm sm:text-base">WhatsApp</h3>
-              <p className="text-base sm:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">0627 827 053</p>
-            </a>
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-800 text-center sm:col-span-2 lg:col-span-1">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <MapPin className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-              </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm sm:text-base">Location</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold">Dodoma, Tanzania</p>
-            </div>
-          </div>
-          <div className="mt-8 sm:mt-12 text-center">
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 font-semibold">Tufuate kwenye Mitandao</p>
-            <div className="flex justify-center gap-3 sm:gap-4">
-              <a href="https://wa.me/255627827053" target="_blank" rel="noopener noreferrer" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center text-white transition shadow-lg hover:scale-110">
-                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-              <a href="#" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition shadow-lg hover:scale-110">
-                <Facebook className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-              <a href="#" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 flex items-center justify-center text-white transition shadow-lg hover:scale-110">
-                <Instagram className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-              <a href="#" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-sky-500 hover:bg-sky-600 flex items-center justify-center text-white transition shadow-lg hover:scale-110">
-                <Twitter className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-            </div>
-          </div>
-        </div>
+      <section id="contact" className="bg-gradient-to-br from-blue-700 to-indigo-900 py-20 text-white">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6"><h2 className="text-3xl font-black sm:text-4xl">{t.ctaTitle}</h2><p className="mx-auto mt-4 max-w-2xl text-blue-100">{t.ctaText}</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3.5 font-black text-blue-700 shadow-xl hover:bg-blue-50">{t.cta}<ArrowRight className="h-5 w-5" /></Link></div>
       </section>
 
-      {/* CTA */}
-      <section className="py-12 sm:py-20 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">Tayari Kuanza?</h2>
-          <p className="text-sm sm:text-lg text-blue-100 mb-6 sm:mb-8">Jiunge na maelfu ya wakopeshaji Tanzania wanaotumia JmkLoanApp kila siku.</p>
-          <Link href="/register" className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-blue-700 font-bold rounded-xl hover:bg-gray-100 transition shadow-xl hover:scale-105 transform text-sm sm:text-base">
-            Jisajili Bure Sasa
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Link>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-400 py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg">💰</div>
-                <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">JmkLoanApp</span>
-              </div>
-              <p className="text-xs sm:text-sm mb-4">Mfumo wa kisasa wa mikopo Tanzania.</p>
-              <div className="flex gap-3">
-                <a href="tel:0694258683" className="text-gray-400 hover:text-white transition"><Phone className="w-5 h-5" /></a>
-                <a href="https://wa.me/255627827053" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition"><MessageCircle className="w-5 h-5" /></a>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-3 sm:mb-4 text-sm sm:text-base">Bidhaa</h4>
-              <ul className="space-y-2 text-xs sm:text-sm">
-                <li><a href="#features" className="hover:text-white transition">Vipengele</a></li>
-                <li><a href="#how" className="hover:text-white transition">Jinsi</a></li>
-                <li><a href="#news" className="hover:text-white transition">Habari</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-3 sm:mb-4 text-sm sm:text-base">Kampuni</h4>
-              <ul className="space-y-2 text-xs sm:text-sm">
-                <li><a href="#contact" className="hover:text-white transition">Wasiliana</a></li>
-                <li><a href="#" className="hover:text-white transition">Kuhusu</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-3 sm:mb-4 text-sm sm:text-base">Wasiliana</h4>
-              <ul className="space-y-2 text-xs sm:text-sm">
-                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /><a href="tel:0694258683" className="hover:text-white transition">0694 258 683</a></li>
-                <li className="flex items-center gap-2"><MessageCircle className="w-4 h-4" /><a href="https://wa.me/255627827053" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">0627 827 053</a></li>
-                <li className="flex items-center gap-2"><MapPin className="w-4 h-4" /><span>Dodoma, Tanzania</span></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-6 sm:pt-8 text-center text-xs sm:text-sm">
-            <p>&copy; 2026 JmkLoanApp. Haki zote zimehifadhiwa. 🇹🇿</p>
-          </div>
-        </div>
+      <footer className="border-t border-slate-200 bg-white py-8 dark:border-slate-800 dark:bg-slate-950">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-sm text-slate-500 sm:flex-row sm:px-6"><span>{t.footer}</span><div className="flex gap-5"><Link href="/login" className="hover:text-blue-600">{t.nav.login}</Link><Link href="/register" className="hover:text-blue-600">{t.nav.register}</Link></div></div>
       </footer>
     </main>
   );
