@@ -7,6 +7,7 @@ import com.loanapp.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class PaymentController {
     private PaymentService paymentService;
 
     @PostMapping
+    @PreAuthorize("hasRole('BORROWER')")
     public ResponseEntity<ApiResponse<Payment>> createPayment(
             @Valid @RequestBody PaymentRequest request) {
         Payment payment = paymentService.createPayment(request);
@@ -26,6 +28,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}/confirm")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Payment>> confirmPayment(
             @PathVariable Long id,
             @RequestParam String transactionId) {
