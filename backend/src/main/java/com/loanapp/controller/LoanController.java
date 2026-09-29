@@ -7,6 +7,7 @@ import com.loanapp.service.LoanService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class LoanController {
     private LoanService loanService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Loan>> createLoan(
             @Valid @RequestBody LoanRequest request,
             @RequestParam Long borrowerId,
@@ -30,12 +32,14 @@ public class LoanController {
     }
 
     @GetMapping("/lender")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<List<Loan>>> getLoansByLender(Authentication authentication) {
         List<Loan> loans = loanService.getLoansByLender(authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Mikopo yote", loans));
     }
 
     @GetMapping("/borrower")
+    @PreAuthorize("hasRole('BORROWER')")
     public ResponseEntity<ApiResponse<List<Loan>>> getLoansByBorrower(Authentication authentication) {
         List<Loan> loans = loanService.getLoansByBorrower(authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Mikopo yako", loans));
@@ -48,12 +52,14 @@ public class LoanController {
     }
 
     @PutMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Loan>> approveLoan(@PathVariable Long id) {
         Loan loan = loanService.approveLoan(id);
         return ResponseEntity.ok(ApiResponse.success("Mkopo umeidhinishwa", loan));
     }
 
     @PutMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Loan>> rejectLoan(@PathVariable Long id) {
         Loan loan = loanService.rejectLoan(id);
         return ResponseEntity.ok(ApiResponse.success("Mkopo umekataliwa", loan));
