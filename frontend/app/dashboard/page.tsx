@@ -410,7 +410,26 @@ export default function DashboardPage() {
               <button onClick={() => setSelectedLoan(null)} className="self-start rounded-xl border px-3 py-2 text-sm dark:border-slate-700">Funga</button>
             </div>
 
-            <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            <div className="mt-5 grid gap-5 lg:grid-cols-3">
+              <div>
+                <h3 className="font-bold">Muhtasari</h3>
+                <div className="mt-3 space-y-2 text-sm">
+                  <div className="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950"><span className="text-slate-500">Kiasi</span><b>{money(selectedLoan.amount)}</b></div>
+                  <div className="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950"><span className="text-slate-500">Riba</span><b>{selectedLoan.interestRate}%</b></div>
+                  <div className="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950"><span className="text-slate-500">Muda</span><b>{selectedLoan.durationMonths} miezi</b></div>
+                  <div className="flex justify-between rounded-xl bg-blue-50 p-3 text-blue-700 dark:bg-blue-950"><span>Makadirio kwa mwezi</span><b>{money(Number(selectedLoan.totalRepayment||0)/Math.max(1,Number(selectedLoan.durationMonths||1)))}</b></div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-bold">Ratiba ya Marejesho</h3>
+                <div className="mt-3 max-h-64 overflow-auto rounded-xl border dark:border-slate-800">
+                  {Array.from({length:Math.max(1,Number(selectedLoan.durationMonths||1))}).map((_,i)=>{
+                    const installment=Number(selectedLoan.totalRepayment||0)/Math.max(1,Number(selectedLoan.durationMonths||1));
+                    return <div key={i} className="flex justify-between border-b p-3 text-sm last:border-0 dark:border-slate-800"><span>Mwezi {i+1}</span><b>{money(installment)}</b></div>;
+                  })}
+                </div>
+              </div>
+
               <div>
                 <h3 className="font-bold">Historia ya Malipo</h3>
                 <div className="mt-3 space-y-2">
