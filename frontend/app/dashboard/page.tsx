@@ -436,9 +436,9 @@ export default function DashboardPage() {
                 <h3 className="font-bold">Historia ya Malipo</h3>
                 <div className="mt-3 space-y-2">
                   {payments.length === 0 ? <p className="text-sm text-slate-500">Hakuna malipo bado.</p> : payments.map((p) => (
-                    <div key={p.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
+                    <div key={p.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
                       <div><b>{money(p.amount)}</b><div className="text-xs text-slate-500">{p.paymentMethod} · {p.status}</div></div>
-                      <span className="text-xs font-semibold">{p.transactionId || '—'}</span>
+                      <div className="flex items-center gap-2"><span className="text-xs font-semibold">{p.transactionId || '—'}</span>{user.role==='LENDER' && p.status==='PENDING' && <button disabled={busy} onClick={()=>action(()=>paymentAPI.confirm(p.id,p.transactionId || ''),'Malipo yamethibitishwa.')} className="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white">Thibitisha</button>}</div>
                     </div>
                   ))}
                 </div>
