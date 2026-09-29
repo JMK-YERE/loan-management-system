@@ -1,5 +1,9 @@
 name: JmkLoanApp CI
 
+concurrency:
+  group: jmkloan-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
