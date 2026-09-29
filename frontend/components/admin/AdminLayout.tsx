@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Megaphone, Users, Settings, LogOut, ArrowLeft, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Users, Settings, LogOut, ArrowLeft, Menu, X, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -61,7 +61,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
-      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between">
         <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
           <Menu className="w-6 h-6 text-gray-900 dark:text-white" />
@@ -73,17 +72,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="w-10" />
       </div>
 
-      {/* Overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <SidebarContent />
       </aside>
 
-      {/* Main */}
       <main className="flex-1 overflow-auto lg:pt-0 pt-16">
         {children}
       </main>
