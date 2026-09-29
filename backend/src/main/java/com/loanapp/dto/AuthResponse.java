@@ -1,20 +1,8 @@
 package com.loanapp.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AuthResponse {
-
-    private String token;
-    private String tokenType = "Bearer";
-    private Long userId;
-    private String fullName;
-    private String email;
-    private String role;
+ private String token; private String tokenType = "Bearer"; private Long userId; private String fullName; private String email; private String role;
+ public AuthResponse(){} public AuthResponse(String token,String tokenType,Long userId,String fullName,String email,String role){this.token=token;this.tokenType=tokenType;this.userId=userId;this.fullName=fullName;this.email=email;this.role=role;}
+ public static Builder builder(){return new Builder();} public static class Builder{private final AuthResponse x=new AuthResponse(); public Builder token(String v){x.token=v;return this;} public Builder tokenType(String v){x.tokenType=v;return this;} public Builder userId(Long v){x.userId=v;return this;} public Builder fullName(String v){x.fullName=v;return this;} public Builder email(String v){x.email=v;return this;} public Builder role(String v){x.role=v;return this;} public AuthResponse build(){return x;}}
+ public String getToken(){return token;} public void setToken(String v){token=v;} public String getTokenType(){return tokenType;} public void setTokenType(String v){tokenType=v;} public Long getUserId(){return userId;} public void setUserId(Long v){userId=v;} public String getFullName(){return fullName;} public void setFullName(String v){fullName=v;} public String getEmail(){return email;} public void setEmail(String v){email=v;} public String getRole(){return role;} public void setRole(String v){role=v;}
 }
