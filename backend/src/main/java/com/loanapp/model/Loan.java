@@ -1,10 +1,6 @@
 package com.loanapp.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,10 +8,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "loans")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Loan {
 
     @Id
@@ -62,16 +54,120 @@ public class Loan {
     private LocalDateTime createdAt;
 
     private LocalDate disbursementDate;
-
     private LocalDate nextDueDate;
-
     private LocalDateTime lastOverdueReminderAt;
-
     private LocalDateTime updatedAt;
+
+    public Loan() {}
+
+    public Loan(Long id, User borrower, User lender, BigDecimal amount, BigDecimal interestRate,
+                Integer durationMonths, BigDecimal totalRepayment, BigDecimal processingFee,
+                BigDecimal lawyerFee, Boolean lawyerRequired, LoanStatus status, String purpose,
+                LocalDateTime createdAt, LocalDate disbursementDate, LocalDate nextDueDate,
+                LocalDateTime lastOverdueReminderAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.borrower = borrower;
+        this.lender = lender;
+        this.amount = amount;
+        this.interestRate = interestRate;
+        this.durationMonths = durationMonths;
+        this.totalRepayment = totalRepayment;
+        this.processingFee = processingFee;
+        this.lawyerFee = lawyerFee;
+        this.lawyerRequired = lawyerRequired;
+        this.status = status;
+        this.purpose = purpose;
+        this.createdAt = createdAt;
+        this.disbursementDate = disbursementDate;
+        this.nextDueDate = nextDueDate;
+        this.lastOverdueReminderAt = lastOverdueReminderAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public static Builder builder() { return new Builder(); }
+
+    public static class Builder {
+        private Long id;
+        private User borrower;
+        private User lender;
+        private BigDecimal amount;
+        private BigDecimal interestRate;
+        private Integer durationMonths;
+        private BigDecimal totalRepayment;
+        private BigDecimal processingFee = BigDecimal.ZERO;
+        private BigDecimal lawyerFee = BigDecimal.ZERO;
+        private Boolean lawyerRequired = false;
+        private LoanStatus status = LoanStatus.PENDING;
+        private String purpose;
+        private LocalDateTime createdAt;
+        private LocalDate disbursementDate;
+        private LocalDate nextDueDate;
+        private LocalDateTime lastOverdueReminderAt;
+        private LocalDateTime updatedAt;
+
+        public Builder id(Long v) { id=v; return this; }
+        public Builder borrower(User v) { borrower=v; return this; }
+        public Builder lender(User v) { lender=v; return this; }
+        public Builder amount(BigDecimal v) { amount=v; return this; }
+        public Builder interestRate(BigDecimal v) { interestRate=v; return this; }
+        public Builder durationMonths(Integer v) { durationMonths=v; return this; }
+        public Builder totalRepayment(BigDecimal v) { totalRepayment=v; return this; }
+        public Builder processingFee(BigDecimal v) { processingFee=v; return this; }
+        public Builder lawyerFee(BigDecimal v) { lawyerFee=v; return this; }
+        public Builder lawyerRequired(Boolean v) { lawyerRequired=v; return this; }
+        public Builder status(LoanStatus v) { status=v; return this; }
+        public Builder purpose(String v) { purpose=v; return this; }
+        public Builder createdAt(LocalDateTime v) { createdAt=v; return this; }
+        public Builder disbursementDate(LocalDate v) { disbursementDate=v; return this; }
+        public Builder nextDueDate(LocalDate v) { nextDueDate=v; return this; }
+        public Builder lastOverdueReminderAt(LocalDateTime v) { lastOverdueReminderAt=v; return this; }
+        public Builder updatedAt(LocalDateTime v) { updatedAt=v; return this; }
+
+        public Loan build() {
+            return new Loan(id, borrower, lender, amount, interestRate, durationMonths,
+                    totalRepayment, processingFee, lawyerFee, lawyerRequired, status, purpose,
+                    createdAt, disbursementDate, nextDueDate, lastOverdueReminderAt, updatedAt);
+        }
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long v) { id=v; }
+    public User getBorrower() { return borrower; }
+    public void setBorrower(User v) { borrower=v; }
+    public User getLender() { return lender; }
+    public void setLender(User v) { lender=v; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal v) { amount=v; }
+    public BigDecimal getInterestRate() { return interestRate; }
+    public void setInterestRate(BigDecimal v) { interestRate=v; }
+    public Integer getDurationMonths() { return durationMonths; }
+    public void setDurationMonths(Integer v) { durationMonths=v; }
+    public BigDecimal getTotalRepayment() { return totalRepayment; }
+    public void setTotalRepayment(BigDecimal v) { totalRepayment=v; }
+    public BigDecimal getProcessingFee() { return processingFee; }
+    public void setProcessingFee(BigDecimal v) { processingFee=v; }
+    public BigDecimal getLawyerFee() { return lawyerFee; }
+    public void setLawyerFee(BigDecimal v) { lawyerFee=v; }
+    public Boolean getLawyerRequired() { return lawyerRequired; }
+    public void setLawyerRequired(Boolean v) { lawyerRequired=v; }
+    public LoanStatus getStatus() { return status; }
+    public void setStatus(LoanStatus v) { status=v; }
+    public String getPurpose() { return purpose; }
+    public void setPurpose(String v) { purpose=v; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime v) { createdAt=v; }
+    public LocalDate getDisbursementDate() { return disbursementDate; }
+    public void setDisbursementDate(LocalDate v) { disbursementDate=v; }
+    public LocalDate getNextDueDate() { return nextDueDate; }
+    public void setNextDueDate(LocalDate v) { nextDueDate=v; }
+    public LocalDateTime getLastOverdueReminderAt() { return lastOverdueReminderAt; }
+    public void setLastOverdueReminderAt(LocalDateTime v) { lastOverdueReminderAt=v; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime v) { updatedAt=v; }
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        if (createdAt == null) createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
