@@ -1,20 +1,130 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  ArrowRight,
+  Calculator,
+  CheckCircle2,
+  Clock3,
+  CreditCard,
+  FileText,
+  LogOut,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  TrendingUp,
+  UserRound,
+  XCircle,
+} from 'lucide-react';
+import { loanAPI, paymentAPI } from '../../lib/api';
+
+const money = (value: any) =>
+  new Intl.NumberFormat('sw-TZ', {
+    style: 'currency',
+    currency: 'TZS',
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
+
+const unwrap = (response: any) => response?.data?.data ?? response?.data ?? [];
+
+const statusLabel: Record<string, string> = {
+  PENDING: 'Inasubiri',
+  APPROVED: 'Imeidhinishwa',
+  REJECTED: 'Imekataliwa',
+  DISBURSED: 'Imetolewa',
+  PAID: 'Imelipwa',
+  DEFAULTED: 'Imechelewa',
+};
+
+const statusClass: Record<string, string> = {
+  PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
+  APPROVED: 'bg-blue-50 text-blue-700 border-blue-200',
+  REJECTED: 'bg-red-50 text-red-700 border-red-200',
+  DISBURSED: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  PAID: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  DEFAULTED: 'bg-orange-50 text-orange-700 border-orange-200',
+};
 
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [loans, setLoans] = useState<any[]>([]);
+  const [selectedLoan, setSelectedLoan] = useState<any>(null);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [search, setSearch] = useState('');
+
+  const [amount, setAmount] = useState(2000000);
+  const [rate, setRate] = useState(10);
+  const [months, setMonths] = useState(3);
+  const [processingFee, setProcessingFee] = useState(0);
+  const [lawyerRequired, setLawyerRequired] = useState(false);
+  const [lawyerFee, setLawyerFee] = useState(0);
+
+  const [borrowerId, setBorrowerId] = useState('');
+  const [purpose, setPurpose] = useState('');
+
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('MPESA');
+
+  const totalInterest = useMemo(
+    () => (Number(amount) * Number(rate) / 100) * (Number(months) / 12),
+    [amount, rate, months]
+  );
+  const totalRepayment = Number(amount) + totalInterest + Number(processingFee || 0) +
+    (lawyerRequired ? Number(lawyerFee || 0) : 0);
+  const monthlyInstallment = totalRepayment / Math.max(1, Number(months));
+
+  const loadLoans = async (currentUser: any) => {
+    setLoading(true);
+    try {
+      const response = currentUser.role === 'LENDER'
+        ? await loanAPI.byLender()
+        : await loanAPI.byBorrower();
+      const data = unwrap(response);
+      setLoans(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      setMessage(error?.response?.data?.message || 'Imeshindikana kupakia mikopo.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const raw = localStorage.getItem('user');
-    if (!localStorage.getItem('token') || !raw) { router.push('/login'); return; }
-    const u = JSON.parse(raw);
-    if (u.role === 'ADMIN') { router.push('/admin/dashboard'); return; }
-    setUser(u);
+    const token = localStorage.getItem('token');
+    if (!token || !raw) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const currentUser = JSON.parse(raw);
+      if (currentUser.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+        return;
+      }
+      setUser(currentUser);
+      loadLoans(currentUser);
+    } catch {
+      router.push('/login');
+    }
   }, [router]);
+
+  const selectLoan = async (loan: any) => {
+    setSelectedLoan(loan);
+    setPayments([]);
+    try {
+      const response = await paymentAPI.byLoan(loan.id);
+      const data = unwrap(response);
+      setPayments(Array.isArray(data) ? data : []);
+    } catch {
+      setPayments([]);
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -23,60 +133,292 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  const action = async (fn: () => Promise<any>, success: string) => {
+    setBusy(true);
+    setMessage('');
+    try {
+      await fn();
+      setMessage(success);
+      if (user) await loadLoans(user);
+      if (selectedLoan) {
+        const refreshed = await loanAPI.get(selectedLoan.id);
+        setSelectedLoan(unwrap(refreshed));
+      }
+    } catch (error: any) {
+      setMessage(error?.response?.data?.message || 'Ombi halikukamilika.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createLoan = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!borrowerId || Number(amount) <= 0) return;
+    await action(
+      () => loanAPI.create(Number(borrowerId), {
+        amount: Number(amount),
+        interestRate: Number(rate),
+        durationMonths: Number(months),
+        purpose,
+        processingFee: Number(processingFee || 0),
+        lawyerRequired,
+        lawyerFee: lawyerRequired ? Number(lawyerFee || 0) : 0,
+      }),
+      'Mkopo umeundwa na umewekwa kusubiri idhini.'
+    );
+    setPurpose('');
+  };
+
+  const submitPayment = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!selectedLoan || Number(paymentAmount) <= 0) return;
+    await action(
+      () => paymentAPI.create({
+        loanId: selectedLoan.id,
+        amount: Number(paymentAmount),
+        paymentMethod,
+      }),
+      'Malipo yamepokelewa na kusubiri uthibitisho.'
+    );
+    setPaymentAmount('');
+    await selectLoan(selectedLoan);
+  };
+
+  const filteredLoans = loans.filter((loan) => {
+    const text = `${loan.id} ${loan.purpose || ''} ${loan.status || ''}`.toLowerCase();
+    return text.includes(search.toLowerCase());
+  });
+
+  const stats = {
+    total: loans.length,
+    pending: loans.filter((l) => l.status === 'PENDING').length,
+    approved: loans.filter((l) => ['APPROVED', 'DISBURSED'].includes(l.status)).length,
+    paid: loans.filter((l) => l.status === 'PAID').length,
+    value: loans.reduce((sum, l) => sum + Number(l.amount || 0), 0),
+  };
+
   if (!user) return null;
 
-  const stats = [
-    { label: 'Mikopo Yote', value: '0', icon: '💰', color: 'from-blue-500 to-indigo-600' },
-    { label: 'Imelipwa', value: '0', icon: '✅', color: 'from-green-500 to-emerald-600' },
-    { label: 'Inasubiri', value: '0', icon: '⏳', color: 'from-yellow-500 to-orange-500' },
-    { label: 'Imechelewa', value: '0', icon: '⚠️', color: 'from-red-500 to-pink-600' },
-  ];
-
-  const card = 'bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 text-center';
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl">💰</div>
-            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">JmkLoanApp</span>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-xl text-white">💰</div>
+            <div>
+              <div className="font-extrabold text-slate-900 dark:text-white">JmkLoanApp</div>
+              <div className="text-[10px] text-slate-500">Loan Management Platform</div>
+            </div>
           </Link>
-          <button onClick={logout} className="px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-xl transition">Toka</button>
+          <div className="flex items-center gap-3">
+            <Link href="/profile" className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 sm:flex dark:text-slate-300 dark:hover:bg-slate-800">
+              <UserRound className="h-4 w-4" /> Wasifu
+            </Link>
+            <button onClick={logout} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950">
+              <LogOut className="h-4 w-4" /> Toka
+            </button>
+          </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 text-white mb-8">
-          <p className="text-sm opacity-80">Karibu,</p>
-          <h1 className="text-3xl font-bold mb-2">{user.fullName}</h1>
-          <p className="text-sm opacity-80">{user.role}</p>
-        </div>
+      <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+        <section className="rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 p-6 text-white shadow-xl sm:p-8">
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+            <div>
+              <p className="text-sm text-blue-100">Karibu kwenye dashboard</p>
+              <h1 className="mt-1 text-3xl font-black">{user.fullName || 'Mtumiaji'}</h1>
+              <p className="mt-2 text-sm text-blue-100">Role: {user.role} · Simamia mikopo kwa uwazi na usalama.</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
+              <div className="text-xs text-blue-100">Thamani ya mikopo</div>
+              <div className="mt-1 text-2xl font-black">{money(stats.value)}</div>
+            </div>
+          </div>
+        </section>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((s, i) => (
-            <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center text-2xl mb-4`}>{s.icon}</div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{s.value}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{s.label}</p>
+        {message && (
+          <div className="flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            <span>{message}</span>
+            <button onClick={() => setMessage('')}><XCircle className="h-4 w-4" /></button>
+          </div>
+        )}
+
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['Mikopo Yote', stats.total, FileText],
+            ['Inasubiri', stats.pending, Clock3],
+            ['Imeidhinishwa', stats.approved, TrendingUp],
+            ['Imelipwa', stats.paid, CheckCircle2],
+          ].map(([label, value, Icon]: any) => (
+            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <Icon className="h-5 w-5 text-blue-600" />
+              <div className="mt-4 text-3xl font-black text-slate-900 dark:text-white">{value}</div>
+              <div className="text-sm text-slate-500">{label}</div>
             </div>
           ))}
-        </div>
+        </section>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[['➕', 'Mkopo Mpya'], ['📋', 'Orodha ya Mikopo'], ['💳', 'Malipo']].map(([icon, label]) => (
-            <div key={label} className={`${card} opacity-60`}>
-              <div className="text-4xl mb-3">{icon}</div>
-              <p className="font-semibold text-gray-900 dark:text-white">{label}</p>
-              <p className="text-xs text-gray-500 mt-1">Inakuja</p>
+        <section className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="rounded-xl bg-blue-50 p-2 text-blue-600"><Calculator className="h-5 w-5" /></div>
+              <div>
+                <h2 className="font-bold text-slate-900 dark:text-white">Kikokotoo cha Mkopo</h2>
+                <p className="text-xs text-slate-500">Hesabu riba, ada na marejesho kabla ya kuunda mkopo.</p>
+              </div>
             </div>
-          ))}
-          <Link href="/profile" className={`${card} hover:shadow-lg transition`}>
-            <div className="text-4xl mb-3">👤</div>
-            <p className="font-semibold text-gray-900 dark:text-white">Wasifu Wangu</p>
-          </Link>
-        </div>
-      </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Kiasi
+                <input type="number" min="1000" value={amount} onChange={(e) => setAmount(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3 font-normal dark:border-slate-700 dark:bg-slate-950" />
+              </label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Riba (% kwa mwaka)
+                <input type="number" min="0" step="0.1" value={rate} onChange={(e) => setRate(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3 font-normal dark:border-slate-700 dark:bg-slate-950" />
+              </label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Miezi
+                <input type="number" min="1" value={months} onChange={(e) => setMonths(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3 font-normal dark:border-slate-700 dark:bg-slate-950" />
+              </label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ada ya usindikaji
+                <input type="number" min="0" value={processingFee} onChange={(e) => setProcessingFee(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3 font-normal dark:border-slate-700 dark:bg-slate-950" />
+              </label>
+            </div>
+            <label className="mt-4 flex items-center gap-3 rounded-xl border p-3 text-sm dark:border-slate-700">
+              <input type="checkbox" checked={lawyerRequired} onChange={(e) => setLawyerRequired(e.target.checked)} />
+              <span className="font-semibold">Ongeza ada ya wakili</span>
+              {lawyerRequired && <input type="number" min="0" value={lawyerFee} onChange={(e) => setLawyerFee(Number(e.target.value))} className="ml-auto w-32 rounded-lg border p-2 dark:border-slate-700 dark:bg-slate-950" />}
+            </label>
+            <div className="mt-5 grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950">
+              <div><div className="text-[11px] text-slate-500">Riba</div><div className="font-bold">{money(totalInterest)}</div></div>
+              <div><div className="text-[11px] text-slate-500">Jumla</div><div className="font-bold text-blue-600">{money(totalRepayment)}</div></div>
+              <div><div className="text-[11px] text-slate-500">Kwa mwezi</div><div className="font-bold">{money(monthlyInstallment)}</div></div>
+            </div>
+          </div>
+
+          {user.role === 'LENDER' ? (
+            <form onSubmit={createLoan} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600"><CreditCard className="h-5 w-5" /></div>
+                <div>
+                  <h2 className="font-bold text-slate-900 dark:text-white">Unda Mkopo</h2>
+                  <p className="text-xs text-slate-500">Weka ID ya mkopaji na masharti yaliyokokotolewa.</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <input required value={borrowerId} onChange={(e) => setBorrowerId(e.target.value)} placeholder="Borrower ID" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" />
+                <input value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="Madhumuni ya mkopo" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" />
+                <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:opacity-50">
+                  <ShieldCheck className="h-4 w-4" /> {busy ? 'Inatuma...' : 'Unda Mkopo'}
+                </button>
+                <p className="text-xs text-slate-500">Mkopo mpya utaanza kwenye hali ya <b>PENDING</b>.</p>
+              </div>
+            </form>
+          ) : (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="font-bold text-slate-900 dark:text-white">Muhtasari wa Mteja</h2>
+              <div className="mt-5 space-y-3 text-sm">
+                <div className="flex justify-between border-b pb-3"><span className="text-slate-500">Jina</span><b>{user.fullName}</b></div>
+                <div className="flex justify-between border-b pb-3"><span className="text-slate-500">Simu</span><b>{user.phone || '—'}</b></div>
+                <div className="flex justify-between border-b pb-3"><span className="text-slate-500">Barua pepe</span><b>{user.email || '—'}</b></div>
+                <Link href="/profile" className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold text-blue-600 dark:bg-slate-950">
+                  Kamilisha wasifu <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col gap-3 border-b p-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+            <div>
+              <h2 className="font-bold text-slate-900 dark:text-white">Mikopo Yangu</h2>
+              <p className="text-xs text-slate-500">Tafuta, kagua status na fungua historia ya malipo.</p>
+            </div>
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tafuta..." className="rounded-xl border py-2.5 pl-9 pr-3 text-sm dark:border-slate-700 dark:bg-slate-950" />
+              </div>
+              <button onClick={() => user && loadLoans(user)} className="rounded-xl border p-2.5 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"><RefreshCw className="h-4 w-4" /></button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="p-10 text-center text-sm text-slate-500">Inapakia mikopo...</div>
+          ) : filteredLoans.length === 0 ? (
+            <div className="p-10 text-center text-sm text-slate-500">Hakuna mkopo unaolingana na utafutaji wako.</div>
+          ) : (
+            <div className="divide-y dark:divide-slate-800">
+              {filteredLoans.map((loan) => (
+                <div key={loan.id} className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-2xl bg-slate-100 p-3 dark:bg-slate-800"><FileText className="h-5 w-5 text-blue-600" /></div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <b className="text-slate-900 dark:text-white">Loan #{loan.id}</b>
+                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusClass[loan.status] || 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                          {statusLabel[loan.status] || loan.status}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-500">{loan.purpose || 'Hakuna maelezo ya madhumuni'}</p>
+                      <p className="mt-1 text-xs text-slate-400">{loan.durationMonths} miezi · {loan.interestRate}% · {money(loan.amount)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {user.role === 'LENDER' && loan.status === 'PENDING' && (
+                      <>
+                        <button disabled={busy} onClick={() => action(() => loanAPI.approve(loan.id), 'Mkopo umeidhinishwa.')} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white"><CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />Idhinisha</button>
+                        <button disabled={busy} onClick={() => action(() => loanAPI.reject(loan.id), 'Mkopo umekataliwa.')} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-600"><XCircle className="mr-1 inline h-3.5 w-3.5" />Kataa</button>
+                      </>
+                    )}
+                    <button onClick={() => selectLoan(loan)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+                      Fungua
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {selectedLoan && (
+          <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-lg dark:border-blue-900 dark:bg-slate-900">
+            <div className="flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Loan #{selectedLoan.id}</p>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">{money(selectedLoan.amount)}</h2>
+                <p className="text-sm text-slate-500">Jumla ya kurejesha: {money(selectedLoan.totalRepayment)}</p>
+              </div>
+              <button onClick={() => setSelectedLoan(null)} className="self-start rounded-xl border px-3 py-2 text-sm dark:border-slate-700">Funga</button>
+            </div>
+
+            <div className="mt-5 grid gap-5 lg:grid-cols-2">
+              <div>
+                <h3 className="font-bold">Historia ya Malipo</h3>
+                <div className="mt-3 space-y-2">
+                  {payments.length === 0 ? <p className="text-sm text-slate-500">Hakuna malipo bado.</p> : payments.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
+                      <div><b>{money(p.amount)}</b><div className="text-xs text-slate-500">{p.paymentMethod} · {p.status}</div></div>
+                      <span className="text-xs font-semibold">{p.transactionId || '—'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {user.role === 'BORROWER' && !['PAID', 'REJECTED'].includes(selectedLoan.status) && (
+                <form onSubmit={submitPayment}>
+                  <h3 className="font-bold">Fanya Malipo</h3>
+                  <div className="mt-3 space-y-3">
+                    <input required type="number" min="1" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Kiasi cha malipo" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" />
+                    <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950">
+                      {['MPESA','TIGO_PESA','AIRTEL_MONEY','HALOPESA','CASH','BANK_TRANSFER'].map((m) => <option key={m}>{m}</option>)}
+                    </select>
+                    <button disabled={busy} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white disabled:opacity-50">Tuma Malipo</button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </section>
+        )}
+      </main>
     </div>
   );
 }
