@@ -18,7 +18,7 @@ import {
   UserRound,
   XCircle,
 } from 'lucide-react';
-import { loanAPI, paymentAPI } from '../../lib/api';
+import { loanAPI, paymentAPI, guarantorAPI } from '../../lib/api';
 
 const money = (value: any) =>
   new Intl.NumberFormat('sw-TZ', {
@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const [loans, setLoans] = useState<any[]>([]);
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [payments, setPayments] = useState<any[]>([]);
+  const [guarantors, setGuarantors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -82,11 +83,16 @@ export default function DashboardPage() {
   const loadLoans = async (currentUser: any) => {
     setLoading(true);
     try {
-      const response = currentUser.role === 'LENDER'
-        ? await loanAPI.byLender()
-        : await loanAPI.byBorrower();
-      const data = unwrap(response);
-      setLoans(Array.isArray(data) ? data : []);
+      if (currentUser.role === 'GUARANTOR') {
+        const response = await guarantorAPI.mine();
+        const data = unwrap(response);
+        setGuarantors(Array.isArray(data) ? data : []);
+        setLoans([]);
+      } else {
+        const response = currentUser.role === 'LENDER' ? await loanAPI.byLender() : await loanAPI.byBorrower();
+        const data = unwrap(response);
+        setLoans(Array.isArray(data) ? data : []);
+      }
     } catch (error: any) {
       setMessage(error?.response?.data?.message || 'Imeshindikana kupakia mikopo.');
     } finally {
@@ -241,6 +247,18 @@ export default function DashboardPage() {
             <span>{message}</span>
             <button onClick={() => setMessage('')}><XCircle className="h-4 w-4" /></button>
           </div>
+        )}
+
+        {user.role === 'GUARANTOR' && (
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between"><div><h2 className="text-xl font-black text-slate-900 dark:text-white">Maombi ya Udhamini</h2><p className="text-sm text-slate-500">Kagua na ukubali au ukatae maombi yaliyotumwa kwako.</p></div><ShieldCheck className="h-7 w-7 text-blue-600"/></div>
+            <div className="mt-5 space-y-3">
+              {guarantors.length===0 ? <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500 dark:bg-slate-950">Hakuna maombi ya udhamini.</p> : guarantors.map((g:any)=><div key={g.id} className="flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+                <div><b>Loan #{g.loan?.id}</b><p className="text-sm text-slate-500">{money(g.guaranteedAmount)} · {g.relationship || '—'}</p><span className="text-xs font-bold text-blue-600">{g.status}</span></div>
+                {g.status==='PENDING' && <div className="flex gap-2"><button disabled={busy} onClick={()=>action(async()=>{await guarantorAPI.approve(g.id);},'Udhamini umeidhinishwa.')} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">Kubali</button><button disabled={busy} onClick={()=>action(async()=>{await guarantorAPI.reject(g.id);},'Ombi la udhamini limekataliwa.')} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-600">Kataa</button></div>}
+              </div>)}
+            </div>
+          </section>
         )}
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
