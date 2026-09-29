@@ -75,6 +75,7 @@ export const paymentAPI = {
 
 export const guarantorAPI = {
   byLoan: (loanId: number) => api.get(`/guarantors/loan/${loanId}`),
+  mine: () => api.get('/guarantors/mine'),
   add: (loanId: number, data: any) => api.post(`/guarantors/loan/${loanId}`, data),
   approve: (id: number) => api.put(`/guarantors/${id}/approve`),
   reject: (id: number) => api.put(`/guarantors/${id}/reject`),
