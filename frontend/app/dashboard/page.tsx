@@ -19,6 +19,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { loanAPI, paymentAPI, guarantorAPI, userAPI } from '../../lib/api';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const money = (value: any) =>
   new Intl.NumberFormat('sw-TZ', {
@@ -219,6 +220,7 @@ export default function DashboardPage() {
             </div>
           </Link>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Link href="/profile" className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 sm:flex dark:text-slate-300 dark:hover:bg-slate-800">
               <UserRound className="h-4 w-4" /> Wasifu
             </Link>
