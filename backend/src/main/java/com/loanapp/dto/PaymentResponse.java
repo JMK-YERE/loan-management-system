@@ -1,25 +1,11 @@
 package com.loanapp.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class PaymentResponse {
-
-    private Long id;
-    private Long loanId;
-    private BigDecimal amount;
-    private String paymentMethod;
-    private String transactionId;
-    private String status;
-    private LocalDateTime paidAt;
-    private LocalDateTime createdAt;
+ private Long id; private Long loanId; private BigDecimal amount; private String paymentMethod; private String transactionId; private String status; private LocalDateTime paidAt; private LocalDateTime createdAt;
+ public PaymentResponse(){} public PaymentResponse(Long id,Long loanId,BigDecimal amount,String paymentMethod,String transactionId,String status,LocalDateTime paidAt,LocalDateTime createdAt){this.id=id;this.loanId=loanId;this.amount=amount;this.paymentMethod=paymentMethod;this.transactionId=transactionId;this.status=status;this.paidAt=paidAt;this.createdAt=createdAt;}
+ public static Builder builder(){return new Builder();} public static class Builder{private final PaymentResponse x=new PaymentResponse(); public Builder id(Long v){x.id=v;return this;} public Builder loanId(Long v){x.loanId=v;return this;} public Builder amount(BigDecimal v){x.amount=v;return this;} public Builder paymentMethod(String v){x.paymentMethod=v;return this;} public Builder transactionId(String v){x.transactionId=v;return this;} public Builder status(String v){x.status=v;return this;} public Builder paidAt(LocalDateTime v){x.paidAt=v;return this;} public Builder createdAt(LocalDateTime v){x.createdAt=v;return this;} public PaymentResponse build(){return x;}}
+ public Long getId(){return id;} public void setId(Long v){id=v;} public Long getLoanId(){return loanId;} public void setLoanId(Long v){loanId=v;} public BigDecimal getAmount(){return amount;} public void setAmount(BigDecimal v){amount=v;} public String getPaymentMethod(){return paymentMethod;} public void setPaymentMethod(String v){paymentMethod=v;} public String getTransactionId(){return transactionId;} public void setTransactionId(String v){transactionId=v;} public String getStatus(){return status;} public void setStatus(String v){status=v;} public LocalDateTime getPaidAt(){return paidAt;} public void setPaidAt(LocalDateTime v){paidAt=v;} public LocalDateTime getCreatedAt(){return createdAt;} public void setCreatedAt(LocalDateTime v){createdAt=v;}
 }
