@@ -7,6 +7,8 @@ import com.loanapp.service.GuarantorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +21,7 @@ public class GuarantorController {
     private GuarantorService guarantorService;
 
     @PostMapping("/loan/{loanId}")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Guarantor>> addGuarantor(
             @PathVariable Long loanId,
             @Valid @RequestBody GuarantorRequest request) {
@@ -27,14 +30,20 @@ public class GuarantorController {
     }
 
     @PutMapping("/{id}/approve")
-    public ResponseEntity<ApiResponse<Guarantor>> approveGuarantor(@PathVariable Long id) {
-        Guarantor g = guarantorService.approveGuarantor(id);
+    @PreAuthorize("hasAnyRole('GUARANTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Guarantor>> approveGuarantor(
+            @PathVariable Long id,
+            Authentication authentication) {
+        Guarantor g = guarantorService.approveGuarantor(id, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Mdhamini ameidhinisha", g));
     }
 
     @PutMapping("/{id}/reject")
-    public ResponseEntity<ApiResponse<Guarantor>> rejectGuarantor(@PathVariable Long id) {
-        Guarantor g = guarantorService.rejectGuarantor(id);
+    @PreAuthorize("hasAnyRole('GUARANTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Guarantor>> rejectGuarantor(
+            @PathVariable Long id,
+            Authentication authentication) {
+        Guarantor g = guarantorService.rejectGuarantor(id, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Mdhamini amekataa", g));
     }
 
@@ -42,5 +51,12 @@ public class GuarantorController {
     public ResponseEntity<ApiResponse<List<Guarantor>>> getGuarantorsByLoan(@PathVariable Long loanId) {
         List<Guarantor> list = guarantorService.getGuarantorsByLoan(loanId);
         return ResponseEntity.ok(ApiResponse.success("Wadhamini wote", list));
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasRole('GUARANTOR')")
+    public ResponseEntity<ApiResponse<List<Guarantor>>> getMine(Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success("Maombi yako ya udhamini",
+                guarantorService.getGuarantorsByUser(authentication.getName())));
     }
 }
