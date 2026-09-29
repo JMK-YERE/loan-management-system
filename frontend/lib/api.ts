@@ -93,3 +93,7 @@ export default api;
 export const agreementAPI = {
   download: (loanId: number) => api.get('/agreements/' + loanId + '.pdf', { responseType: 'blob' }),
 };
+
+export const mobileMoneyAPI = {
+  checkout: (paymentId: number, phone: string) => api.post('/mobile-money/checkout/' + paymentId, { phone }),
+};
