@@ -24,8 +24,8 @@ public class GuarantorController {
     @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Guarantor>> addGuarantor(
             @PathVariable Long loanId,
-            @Valid @RequestBody GuarantorRequest request) {
-        Guarantor g = guarantorService.addGuarantor(loanId, request);
+            @Valid @RequestBody GuarantorRequest request, Authentication authentication) {
+        Guarantor g = guarantorService.addGuarantor(loanId, request, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Mdhamini ameongezwa", g));
     }
 
