@@ -21,6 +21,7 @@ public class PaymentService {
     @Autowired private PaymentRepository paymentRepository;
     @Autowired private LoanRepository loanRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private AuditService auditService;
 
     @Transactional
     public Payment createPayment(PaymentRequest request,String email){
@@ -35,7 +36,7 @@ public class PaymentService {
         BigDecimal pending=paymentRepository.findByLoanAndStatus(loan,Payment.PaymentStatus.PENDING).stream().map(Payment::getAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
         BigDecimal remaining=loan.getTotalRepayment().subtract(paid).subtract(pending);
         if(request.getAmount().compareTo(remaining)>0) throw new RuntimeException("Malipo yanazidi salio la mkopo: "+remaining);
-        return paymentRepository.save(Payment.builder().loan(loan).amount(request.getAmount()).paymentMethod(method).transactionId("TXN-"+UUID.randomUUID().toString().substring(0,8).toUpperCase()).status(Payment.PaymentStatus.PENDING).build());
+        Payment saved=paymentRepository.save(Payment.builder().loan(loan).amount(request.getAmount()).paymentMethod(method).transactionId("TXN-"+UUID.randomUUID().toString().substring(0,8).toUpperCase()).status(Payment.PaymentStatus.PENDING).build()); auditService.log(email,"PAYMENT_CREATED","PAYMENT",saved.getId(),"Payment initiated"); return saved;
     }
 
     @Transactional
@@ -51,7 +52,7 @@ public class PaymentService {
         BigDecimal paid=paymentRepository.findByLoanAndStatus(loan,Payment.PaymentStatus.SUCCESS).stream().map(Payment::getAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
         if(paid.compareTo(loan.getTotalRepayment())>=0) loan.setStatus(Loan.LoanStatus.PAID);
         else if(loan.getStatus()==Loan.LoanStatus.APPROVED) loan.setStatus(Loan.LoanStatus.DISBURSED);
-        loanRepository.save(loan); return saved;
+        loanRepository.save(loan); auditService.log(actorEmail,"PAYMENT_CONFIRMED","PAYMENT",saved.getId(),"Payment confirmed"); return saved;
     }
 
     public List<Payment> getPaymentsByLoan(Long loanId,String email){
