@@ -89,3 +89,7 @@ export const signatureAPI = {
 };
 
 export default api;
+
+export const agreementAPI = {
+  download: (loanId: number) => api.get('/agreements/' + loanId + '.pdf', { responseType: 'blob' }),
+};
