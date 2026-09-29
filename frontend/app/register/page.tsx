@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
 import CameraCapture from '@/components/CameraCapture';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useLanguage } from '@/lib/useLanguage';
 
 const CODES: [string, string][] = [
   ['+255', 'Tanzania'], ['+254', 'Kenya'], ['+256', 'Uganda'], ['+250', 'Rwanda'], ['+257', 'Burundi'],
@@ -55,6 +57,8 @@ function PhoneField({ value, onChange }: { value: Phone; onChange: (p: Phone) =>
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const en = lang === 'en';
   const [f, setF] = useState({
     fullName: '', email: '', role: 'BORROWER', dateOfBirth: '', gender: '', maritalStatus: '', nationality: '',
     idType: 'NIDA', idNumber: '', address: '', city: '', country: '', employmentStatus: '', occupation: '',
@@ -111,10 +115,11 @@ export default function RegisterPage() {
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg">💰</div>
           <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">JmkLoanApp</span>
         </Link>
+        <div className="mb-4 flex justify-end"><LanguageSwitcher /></div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-200 dark:border-gray-800">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Jisajili</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Jaza taarifa zako kikamilifu. Admin atazikagua kabla ya kukubali.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{en ? 'Create your account' : 'Jisajili'}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{en ? 'Complete your information. An administrator will review it before approval.' : 'Jaza taarifa zako kikamilifu. Admin atazikagua kabla ya kukubali.'}</p>
 
           {error && <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm whitespace-pre-line">⚠️ {error}</div>}
           {success && <div className="mb-4 p-3 rounded-xl bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 text-sm">✅ {success}</div>}
@@ -196,12 +201,12 @@ export default function RegisterPage() {
             </label>
 
             <button type="submit" disabled={loading} className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition shadow-lg disabled:opacity-50">
-              {loading ? 'Inatuma...' : 'Jisajili'}
+              {loading ? (en ? 'Submitting...' : 'Inatuma...') : (en ? 'Create account' : 'Jisajili')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            Una akaunti? <Link href="/login" className="text-blue-600 font-semibold hover:underline">Ingia</Link>
+            {en ? 'Already have an account?' : 'Una akaunti?'} <Link href="/login" className="text-blue-600 font-semibold hover:underline">Ingia</Link>
           </p>
         </div>
       </div>
