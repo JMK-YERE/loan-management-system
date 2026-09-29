@@ -17,6 +17,7 @@ import java.util.List;
 public class LoanService {
     @Autowired private LoanRepository loanRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private AuditService auditService;
 
     @Transactional
     public Loan createLoan(LoanRequest request, String lenderEmail, Long borrowerId) {
@@ -27,7 +28,7 @@ public class LoanService {
         BigDecimal lawyer=request.getLawyerRequired()!=null&&request.getLawyerRequired()&&request.getLawyerFee()!=null?request.getLawyerFee():BigDecimal.ZERO;
         BigDecimal total=calculateTotalRepayment(request.getAmount(),request.getInterestRate(),request.getDurationMonths()).add(processing).add(lawyer).setScale(2,RoundingMode.HALF_UP);
         Loan loan=Loan.builder().lender(lender).borrower(borrower).amount(request.getAmount()).interestRate(request.getInterestRate()).durationMonths(request.getDurationMonths()).totalRepayment(total).purpose(request.getPurpose()).processingFee(processing).lawyerRequired(Boolean.TRUE.equals(request.getLawyerRequired())).lawyerFee(lawyer).status(Loan.LoanStatus.PENDING).build();
-        return loanRepository.save(loan);
+        Loan saved = loanRepository.save(loan); auditService.log(lenderEmail,"LOAN_CREATED","LOAN",saved.getId(),"Loan created for borrower "+borrower.getId()); return saved;
     }
 
     private BigDecimal calculateTotalRepayment(BigDecimal amount,BigDecimal rate,Integer months){
@@ -41,12 +42,12 @@ public class LoanService {
     public Loan approveLoan(Long id,String actorEmail){
         Loan loan=getLoanById(id); authorizeLenderOrAdmin(loan,actorEmail);
         if(loan.getStatus()!=Loan.LoanStatus.PENDING) throw new RuntimeException("Mkopo huu hauko kwenye hatua ya kusubiri idhini");
-        loan.setStatus(Loan.LoanStatus.APPROVED); return loanRepository.save(loan);
+        loan.setStatus(Loan.LoanStatus.APPROVED); Loan saved=loanRepository.save(loan); auditService.log(actorEmail,"LOAN_APPROVED","LOAN",id,"Loan approved"); return saved;
     }
     public Loan rejectLoan(Long id,String actorEmail){
         Loan loan=getLoanById(id); authorizeLenderOrAdmin(loan,actorEmail);
         if(loan.getStatus()!=Loan.LoanStatus.PENDING) throw new RuntimeException("Mkopo huu hauko kwenye hatua ya kusubiri idhini");
-        loan.setStatus(Loan.LoanStatus.REJECTED); return loanRepository.save(loan);
+        loan.setStatus(Loan.LoanStatus.REJECTED); Loan saved=loanRepository.save(loan); auditService.log(actorEmail,"LOAN_REJECTED","LOAN",id,"Loan rejected"); return saved;
     }
     private void authorizeLenderOrAdmin(Loan loan,String email){
         User actor=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Mtumiaji hajapatikana"));
