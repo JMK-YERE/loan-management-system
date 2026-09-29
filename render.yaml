@@ -3,6 +3,7 @@ services:
     name: jmkloanapp-backend
     runtime: docker
     plan: free
+    autoDeployTrigger: checksPass
     rootDir: backend
     dockerfilePath: ./Dockerfile
     envVars:
@@ -33,6 +34,7 @@ services:
     name: jmkloanapp-frontend
     runtime: node
     plan: free
+    autoDeployTrigger: checksPass
     rootDir: frontend
     buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: npm start
