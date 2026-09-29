@@ -16,52 +16,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/loans")
 public class LoanController {
+    @Autowired private LoanService loanService;
 
-    @Autowired
-    private LoanService loanService;
+    @PostMapping @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Loan>> createLoan(@Valid @RequestBody LoanRequest request,@RequestParam Long borrowerId,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umetengenezwa",loanService.createLoan(request,auth.getName(),borrowerId)));}
 
-    @PostMapping
-    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
-    public ResponseEntity<ApiResponse<Loan>> createLoan(
-            @Valid @RequestBody LoanRequest request,
-            @RequestParam Long borrowerId,
-            Authentication authentication) {
-        String lenderEmail = authentication.getName();
-        Loan loan = loanService.createLoan(request, lenderEmail, borrowerId);
-        return ResponseEntity.ok(ApiResponse.success("Mkopo umetengenezwa", loan));
-    }
+    @GetMapping("/lender") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<List<Loan>>> getLoansByLender(Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mikopo yote",loanService.getLoansByLender(auth.getName())));}
 
-    @GetMapping("/lender")
-    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
-    public ResponseEntity<ApiResponse<List<Loan>>> getLoansByLender(Authentication authentication) {
-        List<Loan> loans = loanService.getLoansByLender(authentication.getName());
-        return ResponseEntity.ok(ApiResponse.success("Mikopo yote", loans));
-    }
+    @GetMapping("/borrower") @PreAuthorize("hasRole('BORROWER')")
+    public ResponseEntity<ApiResponse<List<Loan>>> getLoansByBorrower(Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mikopo yako",loanService.getLoansByBorrower(auth.getName())));}
 
-    @GetMapping("/borrower")
-    @PreAuthorize("hasRole('BORROWER')")
-    public ResponseEntity<ApiResponse<List<Loan>>> getLoansByBorrower(Authentication authentication) {
-        List<Loan> loans = loanService.getLoansByBorrower(authentication.getName());
-        return ResponseEntity.ok(ApiResponse.success("Mikopo yako", loans));
-    }
+    @GetMapping("/{id}") @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Loan>> getLoanById(@PathVariable Long id){return ResponseEntity.ok(ApiResponse.success("Mkopo umepatikana",loanService.getLoanById(id)));}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Loan>> getLoanById(@PathVariable Long id) {
-        Loan loan = loanService.getLoanById(id);
-        return ResponseEntity.ok(ApiResponse.success("Mkopo umepatikana", loan));
-    }
+    @PutMapping("/{id}/approve") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Loan>> approveLoan(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umeidhinishwa",loanService.approveLoan(id,auth.getName())));}
 
-    @PutMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
-    public ResponseEntity<ApiResponse<Loan>> approveLoan(@PathVariable Long id) {
-        Loan loan = loanService.approveLoan(id);
-        return ResponseEntity.ok(ApiResponse.success("Mkopo umeidhinishwa", loan));
-    }
-
-    @PutMapping("/{id}/reject")
-    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
-    public ResponseEntity<ApiResponse<Loan>> rejectLoan(@PathVariable Long id) {
-        Loan loan = loanService.rejectLoan(id);
-        return ResponseEntity.ok(ApiResponse.success("Mkopo umekataliwa", loan));
-    }
+    @PutMapping("/{id}/reject") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Loan>> rejectLoan(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umekataliwa",loanService.rejectLoan(id,auth.getName())));}
 }
