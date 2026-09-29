@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -14,5 +15,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByLoanAndStatus(Loan loan, Payment.PaymentStatus status);
 
-    java.util.Optional<Payment> findFirstByTransactionId(String transactionId);
+    Optional<Payment> findByTransactionId(String transactionId);
+
+    Optional<Payment> findFirstByTransactionId(String transactionId);
 }
