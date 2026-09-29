@@ -18,7 +18,7 @@ import {
   UserRound,
   XCircle,
 } from 'lucide-react';
-import { loanAPI, paymentAPI, guarantorAPI } from '../../lib/api';
+import { loanAPI, paymentAPI, guarantorAPI, userAPI } from '../../lib/api';
 
 const money = (value: any) =>
   new Intl.NumberFormat('sw-TZ', {
@@ -67,6 +67,7 @@ export default function DashboardPage() {
   const [lawyerFee, setLawyerFee] = useState(0);
 
   const [borrowerId, setBorrowerId] = useState('');
+  const [borrowers, setBorrowers] = useState<any[]>([]);
   const [purpose, setPurpose] = useState('');
 
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -114,6 +115,7 @@ export default function DashboardPage() {
         return;
       }
       setUser(currentUser);
+      if (currentUser.role === 'LENDER') userAPI.borrowers().then((r) => setBorrowers(unwrap(r))).catch(() => setBorrowers([]));
       loadLoans(currentUser);
     } catch {
       router.push('/login');
@@ -321,7 +323,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <input required value={borrowerId} onChange={(e) => setBorrowerId(e.target.value)} placeholder="Borrower ID" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" />
+                <select required value={borrowerId} onChange={(e) => setBorrowerId(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"><option value="">Chagua mkopaji</option>{borrowers.map((b:any)=><option key={b.id} value={b.id}>{b.fullName} · {b.phone}</option>)}</select>
                 <input value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="Madhumuni ya mkopo" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" />
                 <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:opacity-50">
                   <ShieldCheck className="h-4 w-4" /> {busy ? 'Inatuma...' : 'Unda Mkopo'}
