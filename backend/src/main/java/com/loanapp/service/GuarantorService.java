@@ -25,9 +25,11 @@ public class GuarantorService {
     @Autowired
     private UserRepository userRepository;
 
-    public Guarantor addGuarantor(Long loanId, GuarantorRequest request) {
+    public Guarantor addGuarantor(Long loanId, GuarantorRequest request, String lenderEmail) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Mkopo haujapatikana"));
+        User lender = userRepository.findByEmail(lenderEmail).orElseThrow(() -> new RuntimeException("Mkopeshaji hajapatikana"));
+        if (!loan.getLender().getId().equals(lender.getId()) && lender.getRole() != User.Role.ADMIN) throw new RuntimeException("Huna ruhusa ya kuongeza mdhamini kwenye mkopo huu");
         User guarantor = userRepository.findById(request.getGuarantorId())
                 .orElseThrow(() -> new RuntimeException("Mdhamini hajapatikana"));
 
