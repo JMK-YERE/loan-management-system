@@ -46,6 +46,7 @@ export const announcementAPI = {
 };
 
 export const adminAPI = {
+  stats: () => api.get('/admin/stats'),
   list: (status?: string) => api.get('/admin/applicants', { params: status ? { status } : {} }),
   get: (id: number) => api.get(`/admin/applicants/${id}`),
   approve: (id: number) => api.post(`/admin/applicants/${id}/approve`),
