@@ -46,6 +46,7 @@ public class AnnouncementService {
                 .emoji(request.getEmoji() != null ? request.getEmoji() : "📢")
                 .ctaText(request.getCtaText())
                 .ctaLink(request.getCtaLink())
+                .imageUrl(request.getImageUrl())
                 .active(request.getActive() != null ? request.getActive() : true)
                 .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0)
                 .createdBy(user)
@@ -64,6 +65,7 @@ public class AnnouncementService {
         if (request.getEmoji() != null) a.setEmoji(request.getEmoji());
         if (request.getCtaText() != null) a.setCtaText(request.getCtaText());
         if (request.getCtaLink() != null) a.setCtaLink(request.getCtaLink());
+        if (request.getImageUrl() != null) a.setImageUrl(request.getImageUrl());
         if (request.getActive() != null) a.setActive(request.getActive());
         if (request.getDisplayOrder() != null) a.setDisplayOrder(request.getDisplayOrder());
 
