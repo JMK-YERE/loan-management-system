@@ -5,11 +5,14 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import com.loanapp.model.LoanProduct;
 
 public class LoanRequest {
 
     @NotNull(message = "Kiasi kinahitajika")
     @DecimalMin(value = "1000.00", message = "Kiasi kiwe angalau TZS 1,000")
+    private Long loanProductId;
+
     private BigDecimal amount;
 
     @NotNull(message = "Riba inahitajika")
@@ -38,6 +41,9 @@ public class LoanRequest {
         this.lawyerRequired = lawyerRequired;
         this.lawyerFee = lawyerFee;
     }
+
+    public Long getLoanProductId() { return loanProductId; }
+    public void setLoanProductId(Long v) { loanProductId=v; }
 
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }

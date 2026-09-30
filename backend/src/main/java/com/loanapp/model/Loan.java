@@ -22,6 +22,14 @@ public class Loan {
     @JoinColumn(name = "lender_id", nullable = false)
     private User lender;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loan_product_id")
+    private LoanProduct loanProduct;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private LoanProduct.DurationUnit durationUnit = LoanProduct.DurationUnit.MONTHS;
+
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
@@ -136,6 +144,10 @@ public class Loan {
     public void setBorrower(User v) { borrower=v; }
     public User getLender() { return lender; }
     public void setLender(User v) { lender=v; }
+    public LoanProduct getLoanProduct() { return loanProduct; }
+    public void setLoanProduct(LoanProduct v) { loanProduct=v; }
+    public LoanProduct.DurationUnit getDurationUnit() { return durationUnit; }
+    public void setDurationUnit(LoanProduct.DurationUnit v) { durationUnit=v; }
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal v) { amount=v; }
     public BigDecimal getInterestRate() { return interestRate; }

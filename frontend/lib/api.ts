@@ -99,3 +99,11 @@ export const agreementAPI = {
 export const mobileMoneyAPI = {
   checkout: (paymentId: number, phone: string) => api.post('/mobile-money/checkout/' + paymentId, { phone }),
 };
+
+
+export const loanProductAPI = {
+  active: () => api.get('/loan-products'),
+  all: () => api.get('/loan-products/all'),
+  create: (data: any) => api.post('/loan-products', data),
+  setActive: (id: number, value: boolean) => api.patch('/loan-products/' + id + '/active', null, { params: { value } }),
+};
