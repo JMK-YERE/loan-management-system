@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Megaphone, Users, Settings, LogOut, ArrowLeft, Menu, X, BarChart3, WalletCards } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Users, Settings, LogOut, ArrowLeft, Menu, X, BarChart3, WalletCards, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/lib/useLanguage';
@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/users', label: en ? 'Users' : 'Watumiaji', icon: Users },
     { href: '/admin/reports', label: en ? 'Reports' : 'Ripoti', icon: BarChart3 },
     { href: '/admin/loan-products', label: en ? 'Loan Products' : 'Bidhaa za Mikopo', icon: WalletCards },
+    { href: '/admin/features', label: en ? 'All Features' : 'Vipengele Vyote', icon: ShieldCheck },
     { href: '/admin/settings', label: en ? 'Settings' : 'Mipangilio', icon: Settings },
   ];
 

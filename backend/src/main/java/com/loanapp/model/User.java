@@ -134,5 +134,5 @@ public class User {
     @PreUpdate protected void onUpdate(){updatedAt=LocalDateTime.now();}
 
     public enum Role { LENDER, BORROWER, GUARANTOR, ADMIN }
-    public enum UserStatus { PENDING, APPROVED, REJECTED }
+    public enum UserStatus { PENDING, APPROVED, REJECTED, SUSPENDED }
 }
