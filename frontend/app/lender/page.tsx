@@ -1,30 +1,111 @@
 'use client';
-import { useEffect,useState } from 'react'; import { useRouter } from 'next/navigation'; import Link from 'next/link';
-import { CheckCircle2,Clock3,FileText,LogOut,RefreshCw,ShieldCheck,XCircle } from 'lucide-react';
-import { loanApplicationAPI,loanAPI,guarantorAPI,userAPI } from '@/lib/api'; import LanguageSwitcher from '@/components/LanguageSwitcher'; import { useLanguage } from '@/lib/useLanguage';
-const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0)); const unwrap=(r:any)=>r?.data?.data??r?.data??[];
-export default function LenderPage(){ const router=useRouter(); const {lang}=useLanguage(); const en=lang==='en';
- const [user,setUser]=useState<any>(null),[apps,setApps]=useState<any[]>([]),[loans,setLoans]=useState<any[]>([]),[guarantors,setGuarantors]=useState<any[]>([]),[selected,setSelected]=useState<any>(null),[selectedGuarantor,setSelectedGuarantor]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
- const load=async()=>{try{const [a,l,g]=await Promise.all([loanApplicationAPI.pending(),loanAPI.byLender(),userAPI.guarantors()]);setApps(unwrap(a));setLoans(unwrap(l));setGuarantors(unwrap(g));}catch(e:any){setMessage(e?.response?.data?.message||(en?'Failed to load lender workspace.':'Imeshindikana kupakia workspace ya mkopeshaji.'));}};
- useEffect(()=>{const t=localStorage.getItem('token'),r=localStorage.getItem('user');if(!t||!r){router.push('/login');return}const u=JSON.parse(r);if(u.role!=='LENDER'){router.push('/dashboard');return}setUser(u);load();},[router]);
- const act=async(fn:()=>Promise<any>,ok:string)=>{setBusy(true);setMessage('');try{await fn();setMessage(ok);setSelected(null);await load();}catch(e:any){setMessage(e?.response?.data?.message||(en?'Action failed.':'Kitendo kimeshindikana.'));}finally{setBusy(false);}};
+
+import {useEffect,useState} from 'react';
+import {useRouter} from 'next/navigation';
+import Link from 'next/link';
+import {CheckCircle2,Clock3,FileSignature,FileText,LogOut,RefreshCw,ShieldCheck} from 'lucide-react';
+import {generalLoanApplicationAPI,loanAPI,guarantorAPI,userAPI} from '@/lib/api';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import {useLanguage} from '@/lib/useLanguage';
+
+const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
+const unwrap=(r:any)=>r?.data?.data??r?.data??[];
+
+export default function LenderPage(){
+ const router=useRouter();const {lang}=useLanguage();const en=lang==='en';
+ const [user,setUser]=useState<any>(null),[apps,setApps]=useState<any[]>([]),[loans,setLoans]=useState<any[]>([]),[guarantors,setGuarantors]=useState<any[]>([]);
+ const [selected,setSelected]=useState<Record<number,string>>({}),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+
+ const load=async()=>{
+  try{
+   const [a,l,g]=await Promise.all([generalLoanApplicationAPI.pending(),loanAPI.byLender(),userAPI.guarantors()]);
+   setApps(unwrap(a));setLoans(unwrap(l));setGuarantors(unwrap(g));
+  }catch(e:any){setMessage(e?.response?.data?.message||(en?'Failed to load lender workspace.':'Imeshindikana kupakia workspace ya mkopeshaji.'))}
+ };
+
+ useEffect(()=>{
+  const token=localStorage.getItem('token'),raw=localStorage.getItem('user');
+  if(!token||!raw){router.push('/login');return}
+  const u=JSON.parse(raw);
+  if(u.role!=='LENDER'&&u.role!=='ADMIN'){router.push('/dashboard');return}
+  setUser(u);load();
+ },[router]);
+
+ const action=async(fn:()=>Promise<any>,ok:string)=>{
+  setBusy(true);setMessage('');
+  try{await fn();setMessage(ok);await load();}
+  catch(e:any){setMessage(e?.response?.data?.message||(en?'Action failed.':'Kitendo kimeshindikana.'))}
+  finally{setBusy(false)}
+ };
+
+ const pendingApps=apps.filter(a=>a.status==='SUBMITTED').length;
+ const offers=apps.filter(a=>a.status==='UNDER_REVIEW'&&a.product).length;
+ const pendingLoans=loans.filter(l=>l.status==='PENDING').length;
+ const approvedLoans=loans.filter(l=>l.status==='APPROVED').length;
+
  const logout=()=>{localStorage.clear();document.cookie='token=; path=/; max-age=0';router.push('/login')};
  if(!user)return null;
- return <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"><nav className="sticky top-0 z-40 border-b bg-white/95 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"><div className="mx-auto flex max-w-7xl items-center justify-between"><Link href="/" className="font-black">💰 JmkLoanApp · Lender</Link><div className="flex items-center gap-2"><LanguageSwitcher/><Link href="/profile" className="rounded-xl px-3 py-2 text-sm font-semibold">Profile</Link><button onClick={logout} className="rounded-xl px-3 py-2 text-sm font-semibold text-red-600"><LogOut className="mr-1 inline h-4 w-4"/>{en?'Logout':'Toka'}</button></div></div></nav>
- <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6"><section className="rounded-3xl bg-gradient-to-br from-indigo-700 via-blue-700 to-slate-950 p-7 text-white shadow-xl"><p className="text-sm text-blue-100">{en?'Lender workspace':'Workspace ya Mkopeshaji'}</p><h1 className="mt-1 text-3xl font-black">{en?'Review → approve → guarantee → disburse':'Kagua → idhinisha → mdhamini → toa mkopo'}</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-blue-100">{en?'Every borrower application follows a clear workflow before a loan is approved.':'Kila ombi la mkopaji linapitia hatua zilizo wazi kabla mkopo haujaidhinishwa.'}</p></section>
- {message&&<div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">{message}</div>}
- <div className="flex flex-wrap gap-2 mb-4">
-<Link href="/lender/general-applications" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white">General Loan Requests</Link>
-<Link href="/agreements" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">Agreements</Link>
-<Link href="/signatures" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">E-Signatures</Link>
-<Link href="/repayments" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">Repayment Schedule</Link>
-<Link href="/profile" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">Profile</Link>
-</div>
-   <section className="grid gap-4 sm:grid-cols-3">{[[en?'New applications':'Maombi mapya',apps.length,Clock3],[en?'My loans':'Mikopo yangu',loans.length,FileText],[en?'Guarantors':'Wadhamini',guarantors.length,ShieldCheck]].map(([t,v,I]:any)=><div key={t} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><I className="h-5 w-5 text-blue-600"/><div className="mt-2 text-3xl font-black">{v}</div><div className="text-sm text-slate-500">{t}</div></div>)}</section>
- <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="flex items-center justify-between border-b p-5 dark:border-slate-800"><div><h2 className="text-xl font-black">{en?'Borrower applications':'Maombi ya Mikopo'}</h2><p className="text-sm text-slate-500">{en?'Start review, then approve or reject.':'Anza review, kisha idhinisha au kataa.'}</p></div><button onClick={load} className="rounded-xl border p-2"><RefreshCw className="h-4 w-4"/></button></div>
- {apps.length===0?<div className="p-10 text-center text-sm text-slate-500">{en?'No new applications.':'Hakuna maombi mapya.'}</div>:<div className="divide-y dark:divide-slate-800">{apps.map(a=><div key={a.id} className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between"><div><div className="flex flex-wrap items-center gap-2"><b>Application #{a.id}</b><span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">{a.status}</span></div><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{a.borrower?.fullName} · {a.borrower?.phone}</p><p className="text-sm text-slate-500">{a.product?.name} · {money(a.amount)} · {a.durationMonths} months</p><p className="mt-1 text-xs text-slate-400">{a.purpose}</p></div><div className="flex flex-wrap gap-2">{a.status==='SUBMITTED'&&<button disabled={busy} onClick={()=>act(()=>loanApplicationAPI.review(a.id),en?'Application is now under review.':'Ombi limewekwa kwenye review.')} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">Start review</button>}{a.status==='UNDER_REVIEW'&&<><button disabled={busy} onClick={()=>act(()=>loanApplicationAPI.approve(a.id),en?'Application approved and converted to a loan.':'Ombi limeidhinishwa na kuwa mkopo.')} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white"><CheckCircle2 className="mr-1 inline h-3.5 w-3.5"/>Approve</button><button disabled={busy} onClick={()=>act(()=>loanApplicationAPI.reject(a.id,en?'Application does not meet lending criteria.':'Ombi halijakidhi vigezo.'),en?'Application rejected.':'Ombi limekataliwa.')} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-600"><XCircle className="mr-1 inline h-3.5 w-3.5"/>Reject</button></>}</div></div>)}</div>}</section>
- <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="border-b p-5 dark:border-slate-800"><h2 className="text-xl font-black">{en?'Post-approval workflow':'Hatua baada ya approval'}</h2><p className="text-sm text-slate-500">{en?'Select a pending loan, send a guarantor request, wait for acceptance, then final approve.':'Chagua mkopo pending, mtumie mdhamini ombi, subiri akubali, kisha fanya approval ya mwisho.'}</p></div>
- <div className="grid gap-3 p-5 md:grid-cols-4">{['Application approved','Loan created','Guarantor accepts','Final approval / disbursement'].map((x,i)=><div key={x} className="rounded-2xl border p-4 dark:border-slate-800"><div className="text-xs font-black text-blue-600">STEP {i+1}</div><div className="mt-2 font-bold">{en?x:['Ombi limeidhinishwa','Mkopo umetengenezwa','Mdhamini anakubali','Approval ya mwisho / disbursement'][i]}</div></div>)}</div>
- <div className="grid gap-4 p-5 md:grid-cols-2">{loans.filter(l=>['PENDING','APPROVED'].includes(l.status)).map(l=><div key={l.id} className="rounded-2xl border p-5 dark:border-slate-800"><div className="flex justify-between"><b>Loan #{l.id}</b><span className="text-xs font-bold">{l.status}</span></div><p className="mt-1 text-sm text-slate-500">{l.borrower?.fullName} · {money(l.amount)}</p>{l.status==='PENDING'&&<><div className="mt-4 flex gap-2"><select value={selected?.id===l.id?selectedGuarantor:''} onChange={e=>{setSelected(l);setSelectedGuarantor(e.target.value)}} className="min-w-0 flex-1 rounded-xl border p-2 text-sm dark:border-slate-700 dark:bg-slate-950"><option value="">{en?'Select guarantor':'Chagua mdhamini'}</option>{guarantors.map(g=><option key={g.id} value={g.id}>{g.fullName} · {g.phone}</option>)}</select><button disabled={busy||selected?.id!==l.id||!selectedGuarantor} onClick={()=>act(()=>guarantorAPI.add(l.id,{guarantorId:Number(selectedGuarantor),guaranteedAmount:l.amount,relationship:'Loan guarantor'}),en?'Guarantor request sent.':'Ombi la udhamini limetumwa.')} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">{en?'Send':'Tuma'}</button></div><button disabled={busy} onClick={()=>act(()=>loanAPI.approve(l.id),en?'Final loan approval complete.':'Approval ya mwisho imekamilika.')} className="mt-3 w-full rounded-xl border border-emerald-300 px-3 py-2 text-xs font-bold text-emerald-700">{en?'Final approve':'Idhinisha mwisho'}</button></>}{l.status==='APPROVED'&&<><div className="mt-4 flex flex-wrap gap-2"><Link href={'/agreements?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Agreement</Link><Link href={'/signatures?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Signatures</Link></div><button disabled={busy} onClick={()=>act(()=>loanAPI.disburse(l.id),en?'Loan disbursed.':'Mkopo umetolewa.')} className="mt-2 w-full rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white">{en?'Disburse loan':'Toa mkopo'}</button></>}</div>)}</div></section>
- </main></div>
+
+ return <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
+  <nav className="sticky top-0 z-40 border-b bg-white/95 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+   <div className="mx-auto flex max-w-7xl items-center justify-between">
+    <Link href="/" className="font-black">💰 JmkLoanApp · Lender</Link>
+    <div className="flex items-center gap-2"><LanguageSwitcher/><Link href="/profile" className="rounded-xl px-3 py-2 text-sm font-semibold">Profile</Link><button onClick={logout} className="rounded-xl px-3 py-2 text-sm font-semibold text-red-600"><LogOut className="mr-1 inline h-4 w-4"/>{en?'Logout':'Toka'}</button></div>
+   </div>
+  </nav>
+
+  <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+   <section className="rounded-3xl bg-gradient-to-br from-indigo-700 via-blue-700 to-slate-950 p-7 text-white shadow-xl">
+    <p className="text-sm text-blue-100">{en?'Lender workspace':'Workspace ya Mkopeshaji'}</p>
+    <h1 className="mt-1 text-3xl font-black">{en?'Loan workflow control center':'Kituo cha kusimamia mchakato wa mikopo'}</h1>
+    <p className="mt-3 max-w-3xl text-sm leading-6 text-blue-100">{en?'Review applications, prepare borrower offers, approve converted loans, manage guarantors, signatures and disbursement.':'Kagua maombi, andaa offer kwa mkopaji, idhinisha loan iliyokubaliwa, simamia wadhamini, sahihi na utoaji wa mkopo.'}</p>
+   </section>
+
+   {message&&<div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">{message}</div>}
+
+   <div className="flex flex-wrap gap-2">
+    <Link href="/lender/general-applications" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white">📥 General Loan Requests</Link>
+    <Link href="/agreements" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:border-slate-800 dark:bg-slate-900">📄 Agreements</Link>
+    <Link href="/signatures" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:border-slate-800 dark:bg-slate-900">✍ E-Signatures</Link>
+    <Link href="/repayments" className="rounded-xl border bg-white px-4 py-2 text-sm font-black dark:border-slate-800 dark:bg-slate-900">📅 Repayments</Link>
+   </div>
+
+   <section className="grid gap-4 sm:grid-cols-4">
+    {[
+     ['New requests',pendingApps,Clock3,'SUBMITTED'],
+     ['Offers awaiting acceptance',offers,FileText,'OFFER'],
+     ['Loans awaiting final approval',pendingLoans,CheckCircle2,'PENDING'],
+     ['Approved loans',approvedLoans,ShieldCheck,'APPROVED']
+    ].map(([title,value,Icon,key]:any)=><div key={key} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><Icon className="h-5 w-5 text-blue-600"/><div className="mt-2 text-3xl font-black">{value}</div><div className="text-sm text-slate-500">{en?title:title==='New requests'?'Maombi mapya':title==='Offers awaiting acceptance'?'Offers zinazosubiri acceptance':title==='Loans awaiting final approval'?'Loans zinazosubiri approval':'Loans zilizoidhinishwa'}</div></div>)}
+   </section>
+
+   <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5 dark:border-slate-800">
+     <div><h2 className="text-xl font-black">{en?'Application workflow':'Mtiririko wa maombi'}</h2><p className="text-sm text-slate-500">Application → Review → Offer → Borrower accepts → Create loan → Final approval → Signatures → Disbursement</p></div>
+     <button onClick={load} className="rounded-xl border p-2"><RefreshCw className="h-4 w-4"/></button>
+    </div>
+    <div className="grid gap-3 p-5 md:grid-cols-5">
+     {['1. Review request','2. Prepare offer','3. Borrower accepts','4. Create & approve loan','5. Sign & disburse'].map((x,i)=><div key={x} className="rounded-2xl border p-4 dark:border-slate-800"><div className="text-xs font-black text-blue-600">STEP {i+1}</div><div className="mt-2 text-sm font-bold">{en?x:['1. Kagua ombi','2. Andaa offer','3. Mkopaji akubali','4. Tengeneza na idhinisha loan','5. Saini na toa mkopo'][i]}</div></div>)}
+    </div>
+    <div className="p-5 pt-0"><Link href="/lender/general-applications" className="inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white">Fungua General Loan Requests →</Link></div>
+   </section>
+
+   <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="border-b p-5 dark:border-slate-800"><h2 className="text-xl font-black">Post-approval workflow</h2><p className="text-sm text-slate-500">Hapa lender anaendelea na guarantor, final approval, signatures na disbursement baada ya loan kutengenezwa.</p></div>
+    {loans.filter(l=>['PENDING','APPROVED'].includes(l.status)).length===0?<div className="p-8 text-center text-sm text-slate-500">Hakuna loan inayosubiri hatua hizi.</div>:
+    <div className="grid gap-4 p-5 md:grid-cols-2">{loans.filter(l=>['PENDING','APPROVED'].includes(l.status)).map(l=><div key={l.id} className="rounded-2xl border p-5 dark:border-slate-800">
+     <div className="flex justify-between gap-3"><div><b>Loan #{l.id}</b><p className="text-sm text-slate-500">{l.borrower?.fullName} · {money(l.amount)}</p></div><span className="text-xs font-black">{l.status}</span></div>
+     {l.status==='PENDING'&&<div className="mt-4 space-y-3">
+      <div className="flex gap-2"><select value={selected[l.id]||''} onChange={e=>setSelected({...selected,[l.id]:e.target.value})} className="min-w-0 flex-1 rounded-xl border p-2 text-sm dark:border-slate-700 dark:bg-slate-950"><option value="">Chagua mdhamini</option>{guarantors.map(g=><option key={g.id} value={g.id}>{g.fullName} · {g.phone}</option>)}</select><button disabled={busy||!selected[l.id]} onClick={()=>action(()=>guarantorAPI.add(l.id,{guarantorId:Number(selected[l.id]),guaranteedAmount:l.amount,relationship:'Loan guarantor'}),'Ombi la udhamini limetumwa.')} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">Tuma</button></div>
+      <button disabled={busy} onClick={()=>action(()=>loanAPI.approve(l.id),'Approval ya mwisho imekamilika.')} className="w-full rounded-xl border border-emerald-300 px-3 py-2 text-xs font-bold text-emerald-700">Final Approve Loan</button>
+     </div>}
+     {l.status==='APPROVED'&&<div className="mt-4 flex flex-wrap gap-2">
+      <Link href={'/agreements?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Agreement</Link>
+      <Link href={'/signatures?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Signatures</Link>
+      <button disabled={busy} onClick={()=>action(()=>loanAPI.disburse(l.id),'Mkopo umetolewa.')} className="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white">Disburse Loan</button>
+     </div>}
+    </div>)}</div>}
+   </section>
+  </main>
+ </div>
 }
