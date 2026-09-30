@@ -20,7 +20,7 @@ public class CreditAssessmentService{
   BigDecimal debt=request.getExistingMonthlyDebt()==null?BigDecimal.ZERO:request.getExistingMonthlyDebt();
   if(income.signum()<0||expenses.signum()<0||debt.signum()<0)throw new RuntimeException("Taarifa za kifedha si sahihi");
   BigDecimal surplus=income.subtract(expenses).subtract(debt).max(BigDecimal.ZERO);
-  BigDecimal installment=app.getAmount().divide(BigDecimal.valueOf(Math.max(1,app.getDurationMonths())),2,RoundingMode.HALF_UP);
+  BigDecimal installment=app.getInstallmentAmountSnapshot()!=null&&app.getInstallmentAmountSnapshot().signum()>0?app.getInstallmentAmountSnapshot():app.getAmount().divide(BigDecimal.valueOf(Math.max(1,app.getDurationMonths())),2,RoundingMode.HALF_UP);
   int score=0;if(app.getBorrower().getNidaNumber()!=null&&!app.getBorrower().getNidaNumber().isBlank())score+=15;if(income.signum()>0)score+=20;if(surplus.signum()>0)score+=20;
   boolean affordable=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.50")))<=0;
   boolean borderline=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.75")))<=0;
@@ -28,7 +28,7 @@ public class CreditAssessmentService{
   List<Loan> history=loans.findByBorrower(app.getBorrower());long defaults=history.stream().filter(l->l.getStatus()==Loan.LoanStatus.DEFAULTED).count();if(defaults==0)score+=20;else if(defaults==1)score+=8;
   CreditAssessment.Affordability affordability=affordable?CreditAssessment.Affordability.PASS:(borderline?CreditAssessment.Affordability.BORDERLINE:CreditAssessment.Affordability.FAIL);
   CreditAssessment.RiskLevel risk;if(affordability==CreditAssessment.Affordability.FAIL||defaults>=2)risk=CreditAssessment.RiskLevel.HIGH;else if(score>=75)risk=CreditAssessment.RiskLevel.LOW;else if(score>=55)risk=CreditAssessment.RiskLevel.MEDIUM;else risk=CreditAssessment.RiskLevel.REVIEW_REQUIRED;
-  BigDecimal recommended=surplus.multiply(new BigDecimal("0.50")).multiply(BigDecimal.valueOf(Math.max(1,app.getDurationMonths()))).setScale(2,RoundingMode.HALF_UP);if(recommended.compareTo(app.getAmount())>0)recommended=app.getAmount();
+  BigDecimal periods=app.getDurationUnit()==LoanProduct.DurationUnit.DAYS?BigDecimal.valueOf(app.getDuration()).divide(BigDecimal.valueOf(30),2,RoundingMode.HALF_UP):BigDecimal.valueOf(app.getDuration()); BigDecimal recommended=surplus.multiply(new BigDecimal("0.50")).multiply(periods.max(BigDecimal.ONE)).setScale(2,RoundingMode.HALF_UP);if(recommended.compareTo(app.getAmount())>0)recommended=app.getAmount();
   CreditAssessment a=assessments.findByApplication(app).orElseGet(CreditAssessment::new);a.setApplication(app);a.setMonthlyIncome(income);a.setMonthlyExpenses(expenses);a.setExistingMonthlyDebt(debt);a.setMonthlySurplus(surplus);a.setEstimatedInstallment(installment);a.setRecommendedAmount(recommended);a.setScore(score);a.setRiskLevel(risk);a.setAffordability(affordability);a.setAssessmentSummary("Internal assessment: income="+income+", expenses="+expenses+", existing debt="+debt+", prior defaults="+defaults+". Decision support only; not automatic approval.");
   CreditAssessment saved=assessments.save(a);audit.log(actorEmail,"CREDIT_ASSESSMENT_CREATED","LOAN_APPLICATION",applicationId,"score="+score+", risk="+risk+", affordability="+affordability);return saved;
  }
