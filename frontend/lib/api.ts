@@ -86,6 +86,7 @@ export const loanAPI = {
   get: (id: number) => api.get(`/loans/${id}`),
   create: (borrowerId: number, data: any) => api.post('/loans', data, { params: { borrowerId } }),
   approve: (id: number) => api.put(`/loans/${id}/approve`),
+  disburse: (id: number) => api.put(`/loans/${id}/disburse`),
   reject: (id: number) => api.put(`/loans/${id}/reject`),
 };
 
