@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,12 +29,14 @@ public class AnnouncementController {
 
     // ADMIN - kuona yote
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Announcement>>> getAll() {
         List<Announcement> list = announcementService.getAllAnnouncements();
         return ResponseEntity.ok(ApiResponse.success("Matangazo yote", list));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Announcement>> getById(@PathVariable Long id) {
         Announcement a = announcementService.getById(id);
         return ResponseEntity.ok(ApiResponse.success("Tangazo", a));
@@ -41,6 +44,7 @@ public class AnnouncementController {
 
     // ADMIN - kuunda
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Announcement>> create(
             @Valid @RequestBody AnnouncementRequest request,
             Authentication authentication) {
@@ -50,6 +54,7 @@ public class AnnouncementController {
 
     // ADMIN - kubadilisha
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Announcement>> update(
             @PathVariable Long id,
             @Valid @RequestBody AnnouncementRequest request) {
@@ -59,6 +64,7 @@ public class AnnouncementController {
 
     // ADMIN - kufuta
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long id) {
         announcementService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Tangazo limefutwa", "OK"));
