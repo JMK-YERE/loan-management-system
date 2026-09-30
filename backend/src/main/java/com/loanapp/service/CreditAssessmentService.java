@@ -22,7 +22,7 @@ public class CreditAssessmentService{
   BigDecimal surplus=income.subtract(expenses).subtract(debt).max(BigDecimal.ZERO);
   BigDecimal installment=app.getAmount().divide(BigDecimal.valueOf(Math.max(1,app.getDurationMonths())),2,RoundingMode.HALF_UP);
   int score=0;if(app.getBorrower().getNidaNumber()!=null&&!app.getBorrower().getNidaNumber().isBlank())score+=15;if(income.signum()>0)score+=20;if(surplus.signum()>0)score+=20;
-  boolean affordable=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.50"))<=0)==true;
+  boolean affordable=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.50")))<=0;
   boolean borderline=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.75")))<=0;
   if(affordable)score+=25;else if(borderline)score+=15;
   List<Loan> history=loans.findByBorrower(app.getBorrower());long defaults=history.stream().filter(l->l.getStatus()==Loan.LoanStatus.DEFAULTED).count();if(defaults==0)score+=20;else if(defaults==1)score+=8;
