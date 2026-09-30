@@ -18,6 +18,10 @@ public class LoanApplication {
  @Column(nullable=false) private Integer duration;
  @Enumerated(EnumType.STRING) @Column(nullable=true,length=20) private LoanProduct.DurationUnit durationUnit;
  @Column(length=500) private String purpose;
+ @Column(nullable=true,precision=15,scale=2) private BigDecimal monthlyExpenses=BigDecimal.ZERO;
+ @Column(nullable=true,precision=15,scale=2) private BigDecimal existingMonthlyDebt=BigDecimal.ZERO;
+ @Column(length=500) private String collateralDescription;
+ @Column(nullable=true,precision=15,scale=2) private BigDecimal collateralValue=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal interestSnapshot=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal processingFeeSnapshot=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal lateFeeSnapshot=BigDecimal.ZERO;
@@ -45,6 +49,10 @@ public class LoanApplication {
  public Integer getDurationMonths(){return duration;} public void setDurationMonths(Integer v){duration=v;}
  public LoanProduct.DurationUnit getDurationUnit(){return durationUnit;} public void setDurationUnit(LoanProduct.DurationUnit v){durationUnit=v;}
  public String getPurpose(){return purpose;} public void setPurpose(String v){purpose=v;}
+ public BigDecimal getMonthlyExpenses(){return monthlyExpenses;} public void setMonthlyExpenses(BigDecimal v){monthlyExpenses=v;}
+ public BigDecimal getExistingMonthlyDebt(){return existingMonthlyDebt;} public void setExistingMonthlyDebt(BigDecimal v){existingMonthlyDebt=v;}
+ public String getCollateralDescription(){return collateralDescription;} public void setCollateralDescription(String v){collateralDescription=v;}
+ public BigDecimal getCollateralValue(){return collateralValue;} public void setCollateralValue(BigDecimal v){collateralValue=v;}
  public BigDecimal getInterestSnapshot(){return interestSnapshot;} public void setInterestSnapshot(BigDecimal v){interestSnapshot=v;}
  public BigDecimal getProcessingFeeSnapshot(){return processingFeeSnapshot;} public void setProcessingFeeSnapshot(BigDecimal v){processingFeeSnapshot=v;}
  public BigDecimal getLateFeeSnapshot(){return lateFeeSnapshot;} public void setLateFeeSnapshot(BigDecimal v){lateFeeSnapshot=v;}
