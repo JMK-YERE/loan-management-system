@@ -133,7 +133,14 @@ export const agreementAPI = {
   applicationDownload: (applicationId: number) => api.get('/agreements/application/' + applicationId + '/pdf', { responseType: 'blob' }),
 };
 
-export const bursarAPI = { summary: () => api.get('/bursar/summary'), loans: () => api.get('/bursar/loans'), payments: () => api.get('/bursar/payments'), report: () => api.get('/bursar/report.csv', { responseType: 'blob' }) };\n\nexport const mobileMoneyAPI = {
+export const bursarAPI = {
+  summary: () => api.get('/bursar/summary'),
+  loans: () => api.get('/bursar/loans'),
+  payments: () => api.get('/bursar/payments'),
+  report: () => api.get('/bursar/report.csv', { responseType: 'blob' }),
+};
+
+export const mobileMoneyAPI = {
   checkout: (paymentId: number, phone: string) => api.post('/mobile-money/checkout/' + paymentId, { phone }),
 };
 
