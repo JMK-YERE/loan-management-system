@@ -117,6 +117,8 @@ export default function DashboardPage() {
         router.push('/admin/dashboard');
         return;
       }
+      if (currentUser.role === 'BORROWER') { router.push('/borrower'); return; }
+      if (currentUser.role === 'GUARANTOR') { router.push('/guarantor'); return; }
       setUser(currentUser);
       if (currentUser.role === 'LENDER') {
         userAPI.borrowers().then((r) => setBorrowers(unwrap(r))).catch(() => setBorrowers([]));

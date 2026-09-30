@@ -1,0 +1,29 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { CheckCircle2, Clock3, FileSignature, LogOut, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
+import { guarantorAPI } from '@/lib/api';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useLanguage } from '@/lib/useLanguage';
+
+const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
+const unwrap=(r:any)=>r?.data?.data??r?.data??[];
+const labels:any={sw:{title:'Dashboard ya Mdhamini',welcome:'Karibu',subtitle:'Kagua maombi ya udhamini, maamuzi na historia yako.',requests:'Maombi ya udhamini',pending:'Inasubiri',approved:'Imeidhinishwa',rejected:'Imekataliwa',accept:'Kubali',reject:'Kataa',empty:'Hakuna maombi ya udhamini.',profile:'Wasifu',logout:'Toka',refresh:'Onyesha upya'},en:{title:'Guarantor Dashboard',welcome:'Welcome',subtitle:'Review guarantee requests, decisions and your history.',requests:'Guarantee requests',pending:'Pending',approved:'Approved',rejected:'Rejected',accept:'Approve',reject:'Reject',empty:'No guarantee requests.',profile:'Profile',logout:'Logout',refresh:'Refresh'}};
+
+export default function GuarantorPage(){
+ const router=useRouter();const {lang}=useLanguage();const t=labels[lang];const [user,setUser]=useState<any>(null),[items,setItems]=useState<any[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const load=async()=>{try{const r=await guarantorAPI.mine();const d=unwrap(r);setItems(Array.isArray(d)?d:[])}catch(e:any){setError(e?.response?.data?.message||'Failed to load guarantee requests')}};
+ useEffect(()=>{const token=localStorage.getItem('token'),raw=localStorage.getItem('user');if(!token||!raw){router.push('/login');return}const u=JSON.parse(raw);if(u.role!=='GUARANTOR'){router.push('/dashboard');return}setUser(u);load()},[router]);
+ const act=async(id:number,approve:boolean)=>{setBusy(true);setError('');try{approve?await guarantorAPI.approve(id):await guarantorAPI.reject(id);await load()}catch(e:any){setError(e?.response?.data?.message||'Action failed')}finally{setBusy(false)}};
+ const stats=useMemo(()=>({p:items.filter(x=>x.status==='PENDING').length,a:items.filter(x=>x.status==='APPROVED').length,r:items.filter(x=>x.status==='REJECTED').length}),[items]);
+ const logout=()=>{localStorage.clear();document.cookie='token=; path=/; max-age=0';router.push('/login')};if(!user)return null;
+ return <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"><nav className="sticky top-0 z-40 border-b bg-white/95 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/95"><div className="mx-auto flex max-w-7xl items-center justify-between"><Link href="/" className="font-black">💰 JmkLoanApp</Link><div className="flex items-center gap-2"><LanguageSwitcher/><Link href="/profile" className="hidden rounded-xl px-3 py-2 text-sm font-semibold hover:bg-slate-100 sm:block">{t.profile}</Link><button onClick={logout} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-red-600"><LogOut className="h-4 w-4"/>{t.logout}</button></div></div></nav>
+ <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6"><section className="rounded-3xl bg-gradient-to-br from-indigo-700 to-slate-900 p-6 text-white shadow-xl"><p className="text-sm text-indigo-100">{t.welcome}</p><h1 className="text-3xl font-black">{user.fullName}</h1><p className="mt-2 text-sm text-indigo-100">{t.subtitle}</p></section>
+ <section className="grid gap-4 sm:grid-cols-3">{[[t.pending,stats.p,Clock3],[t.approved,stats.a,CheckCircle2],[t.rejected,stats.r,XCircle]].map(([x,v,I]:any)=><div className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" key={x}><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-3xl font-black">{v}</div><div className="text-sm text-slate-500">{x}</div></div>)}</section>
+ {error&&<div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+ <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="flex justify-between border-b p-5 dark:border-slate-800"><div><h2 className="font-black">{t.requests}</h2><p className="text-sm text-slate-500">{user.email}</p></div><button onClick={load} className="rounded-xl border p-2"><RefreshCw className="h-4 w-4"/></button></div>
+ {items.length===0?<div className="p-10 text-center text-sm text-slate-500">{t.empty}</div>:<div className="divide-y dark:divide-slate-800">{items.map(g=><div key={g.id} className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between"><div><b>Loan #{g.loan?.id}</b><p className="mt-1 text-sm text-slate-500">{money(g.guaranteedAmount)} · {g.relationship||'—'}</p><span className="text-xs font-bold">{g.status}</span></div>{g.status==='PENDING'&&<div className="flex gap-2"><button disabled={busy} onClick={()=>act(g.id,true)} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white"><CheckCircle2 className="mr-1 inline h-3.5 w-3.5"/>{t.accept}</button><button disabled={busy} onClick={()=>act(g.id,false)} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-600"><XCircle className="mr-1 inline h-3.5 w-3.5"/>{t.reject}</button></div>}</div>)}</div>}</section>
+ <Link href="/signatures" className="flex items-center gap-3 rounded-2xl border bg-white p-5 font-bold dark:border-slate-800 dark:bg-slate-900"><FileSignature className="h-5 w-5 text-blue-600"/> {lang==='sw'?'Saini nyaraka za mikopo':'Sign loan documents'}</Link></main></div>
+}
