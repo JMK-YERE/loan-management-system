@@ -14,7 +14,7 @@ public class RepaymentScheduleService{
  @Transactional
  public List<RepaymentSchedule> generate(Loan loan,LoanProduct product,LocalDate startDate){
   List<RepaymentSchedule> old=repo.findByLoanOrderByInstallmentNumberAsc(loan); if(!old.isEmpty()) return old;
-  int periods=product.getDurationUnit()==LoanProduct.DurationUnit.DAYS?loan.getDurationMonths():loan.getDurationMonths();
+  int periods=loan.getDurationMonths();
   int count=product.getRepaymentFrequency()==LoanProduct.RepaymentFrequency.ONE_TIME?1:periods;
   if(product.getRepaymentFrequency()==LoanProduct.RepaymentFrequency.WEEKLY) count=Math.max(1,(int)Math.ceil(periods/4.345));
   if(product.getRepaymentFrequency()==LoanProduct.RepaymentFrequency.DAILY) count=periods;
