@@ -31,7 +31,7 @@ export default function AgreementsPage(){
   }catch(e:any){setMsg(e?.response?.data?.message||'Mkataba haujapatikana au huna ruhusa.')}
  };
 
- const home=role==='LENDER'||role==='ADMIN'?'/lender':'/borrower';
+ const home=role==='LENDER'||role==='ADMIN'?'/lender':role==='GUARANTOR'?'/guarantor':'/borrower';
 
  return <main className="min-h-screen bg-slate-50 p-4 sm:p-6 dark:bg-slate-950">
   <div className="mx-auto max-w-5xl space-y-6">
@@ -54,7 +54,7 @@ export default function AgreementsPage(){
    {loading?<div className="rounded-3xl bg-white p-10 text-center text-slate-500 dark:bg-slate-900">Inapakia...</div>:
     loans.length===0?<div className="rounded-3xl bg-white p-10 text-center text-slate-500 dark:bg-slate-900">Hakuna loan inayopatikana kwa akaunti hii bado.</div>:
     <section className="space-y-4">{loans.map(l=>{
-     const actionable=['PENDING','APPROVED','DISBURSED','ACTIVE'].includes(l.status);
+     const actionable=['APPROVED','DISBURSED','ACTIVE','PAID','DEFAULTED'].includes(l.status);
      return <article key={l.id} className="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex flex-wrap items-start justify-between gap-3">
        <div><div className="flex items-center gap-2"><b className="text-xl">Loan #{l.id}</b><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black dark:bg-slate-800">{l.status}</span></div><p className="mt-1 text-sm text-slate-500">{l.borrower?.fullName||'Borrower'} · {money(l.amount)}</p></div>
