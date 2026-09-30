@@ -18,7 +18,7 @@ import {
   UserRound,
   XCircle,
 } from 'lucide-react';
-import { loanAPI, paymentAPI, guarantorAPI, userAPI } from '../../lib/api';
+import { loanAPI, paymentAPI, guarantorAPI, userAPI, loanProductAPI } from '../../lib/api';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const money = (value: any) =>
@@ -69,6 +69,8 @@ export default function DashboardPage() {
 
   const [borrowerId, setBorrowerId] = useState('');
   const [borrowers, setBorrowers] = useState<any[]>([]);
+  const [loanProducts, setLoanProducts] = useState<any[]>([]);
+  const [loanProductId, setLoanProductId] = useState('');
   const [purpose, setPurpose] = useState('');
 
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -116,7 +118,10 @@ export default function DashboardPage() {
         return;
       }
       setUser(currentUser);
-      if (currentUser.role === 'LENDER') userAPI.borrowers().then((r) => setBorrowers(unwrap(r))).catch(() => setBorrowers([]));
+      if (currentUser.role === 'LENDER') {
+        userAPI.borrowers().then((r) => setBorrowers(unwrap(r))).catch(() => setBorrowers([]));
+        loanProductAPI.active().then((r) => setLoanProducts(unwrap(r))).catch(() => setLoanProducts([]));
+      }
       loadLoans(currentUser);
     } catch {
       router.push('/login');
@@ -165,6 +170,7 @@ export default function DashboardPage() {
     if (!borrowerId || Number(amount) <= 0) return;
     await action(
       () => loanAPI.create(Number(borrowerId), {
+        loanProductId: loanProductId ? Number(loanProductId) : undefined,
         amount: Number(amount),
         interestRate: Number(rate),
         durationMonths: Number(months),
@@ -289,7 +295,14 @@ export default function DashboardPage() {
                 <p className="text-xs text-slate-500">Hesabu riba, ada na marejesho kabla ya kuunda mkopo.</p>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mb-4">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Aina ya mkopo
+                <select value={loanProductId} onChange={(e) => setLoanProductId(e.target.value)} className="mt-1 w-full rounded-xl border p-3 font-normal dark:border-slate-700 dark:bg-slate-950">
+                  <option value="">Manual / legacy terms</option>
+                  {loanProducts.map((p:any)=><option key={p.id} value={p.id}>{p.name} · {p.loanType} · {p.minDuration}-{p.maxDuration} {String(p.durationUnit).toLowerCase()}</option>)}
+                </select>
+              </label>
+            </div><div className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Kiasi
                 <input type="number" min="1000" value={amount} onChange={(e) => setAmount(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3 font-normal dark:border-slate-700 dark:bg-slate-950" />
               </label>
