@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/credit-assessments', label: en ? 'Credit Assessment' : 'Tathmini ya Mikopo', icon: Calculator },
     { href: '/admin/operations', label: en ? 'Operations & Compliance' : 'Operesheni & Compliance', icon: ClipboardList },
     { href: '/admin/features', label: en ? 'All Features' : 'Vipengele Vyote', icon: ShieldCheck },
+    { href: '/admin/organization', label: en ? 'Organizations & Branches' : 'Taasisi & Matawi', icon: Users },
     { href: '/admin/settings', label: en ? 'Settings' : 'Mipangilio', icon: Settings },
   ];
 
