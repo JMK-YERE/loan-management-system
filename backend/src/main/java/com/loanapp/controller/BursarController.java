@@ -115,7 +115,8 @@ public class BursarController {
     }
 
     private String q(Object v) {
-        return """ + String.valueOf(v == null ? "" : v).replace(""", """") + """;
+        String value = String.valueOf(v == null ? "" : v);
+        return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 
     private BigDecimal sum(List<BigDecimal> xs) {
