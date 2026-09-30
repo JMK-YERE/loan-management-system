@@ -42,6 +42,8 @@ public class LoanApplication {
  public User getLender(){return lender;} public void setLender(User v){lender=v;}
  public BigDecimal getAmount(){return amount;} public void setAmount(BigDecimal v){amount=v;}
  public Integer getDuration(){return duration;} public void setDuration(Integer v){duration=v;}
+ // Backward-compatible accessors for legacy reporting code; new code must use duration + durationUnit.
+ public Integer getDurationMonths(){return duration;} public void setDurationMonths(Integer v){duration=v;}
  public LoanProduct.DurationUnit getDurationUnit(){return durationUnit;} public void setDurationUnit(LoanProduct.DurationUnit v){durationUnit=v;}
  public String getPurpose(){return purpose;} public void setPurpose(String v){purpose=v;}
  public BigDecimal getInterestSnapshot(){return interestSnapshot;} public void setInterestSnapshot(BigDecimal v){interestSnapshot=v;}
