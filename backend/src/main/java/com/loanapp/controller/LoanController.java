@@ -33,6 +33,9 @@ public class LoanController {
     @PutMapping("/{id}/approve") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Loan>> approveLoan(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umeidhinishwa",loanService.approveLoan(id,auth.getName())));}
 
+    @PutMapping("/{id}/disburse") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Loan>> disburse(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umetolewa",loanService.releaseApprovedLoan(id,auth.getName())));}
+
     @PutMapping("/{id}/reject") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Loan>> rejectLoan(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umekataliwa",loanService.rejectLoan(id,auth.getName())));}
 }
