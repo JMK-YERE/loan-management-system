@@ -1,6 +1,7 @@
 package com.loanapp.service;
 
 import com.loanapp.dto.LoanApplicationRequest;
+import com.loanapp.dto.LoanRequest;
 import com.loanapp.model.*;
 import com.loanapp.repository.*;
 import org.springframework.stereotype.Service;
