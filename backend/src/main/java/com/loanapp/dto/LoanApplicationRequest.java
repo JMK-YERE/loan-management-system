@@ -4,11 +4,11 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 public class LoanApplicationRequest {
- @NotNull private Long productId;
- @NotNull @DecimalMin("1.00") private BigDecimal amount;
+ @DecimalMin("1.00") @NotNull private BigDecimal amount;
  @NotNull @Min(1) private Integer duration;
  @NotBlank @Size(max=500) private String purpose;
- @AssertTrue(message="Lazima ukubali masharti ya mkopo baada ya kuyasoma") private Boolean termsAccepted;
+ private Long productId;
+ private Boolean termsAccepted = false;
 
  public LoanApplicationRequest(){}
  public Long getProductId(){return productId;} public void setProductId(Long v){productId=v;}
