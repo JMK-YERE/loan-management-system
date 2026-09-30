@@ -14,6 +14,7 @@ interface Announcement {
   emoji: string;
   ctaText: string;
   ctaLink: string;
+  imageUrl: string;
   active: boolean;
   displayOrder: number;
 }
@@ -26,6 +27,7 @@ const emptyForm: Announcement = {
   emoji: '📢',
   ctaText: '',
   ctaLink: '',
+  imageUrl: '',
   active: true,
   displayOrder: 0,
 };
@@ -223,6 +225,11 @@ export default function AnnouncementsPage() {
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Kiungo (Link)</label>
                   <input value={form.ctaLink} onChange={(e) => setForm({ ...form, ctaLink: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-white" placeholder="/register" />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Picha ya tangazo (Image URL)</label>
+                <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-white" placeholder="https://..." />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
