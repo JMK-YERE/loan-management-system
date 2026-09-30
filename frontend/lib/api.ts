@@ -133,3 +133,12 @@ export const creditAssessmentAPI = {
   assess: (applicationId: number, data: { monthlyExpenses: number; existingMonthlyDebt: number }) => api.post('/credit-assessments/' + applicationId, data),
   get: (applicationId: number) => api.get('/credit-assessments/' + applicationId),
 };
+
+
+export const loanQuoteAPI = {
+  quote: (data:any) => api.post('/loan-quotes', data),
+};
+
+export const preAgreementAPI = {
+  pdf: (data:any, purpose:string) => api.post('/pre-agreements/pdf', data, { params: { purpose }, responseType: 'blob' }),
+};
