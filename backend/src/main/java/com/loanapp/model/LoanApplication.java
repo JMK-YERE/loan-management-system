@@ -1,11 +1,14 @@
 package com.loanapp.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="loan_applications")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class LoanApplication {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
  @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="borrower_id",nullable=false) private User borrower;
@@ -16,7 +19,7 @@ public class LoanApplication {
  @Column(length=500) private String purpose;
  @Enumerated(EnumType.STRING) @Column(nullable=false,length=20) private Status status=Status.SUBMITTED;
  @Column(length=1000) private String rejectionReason;
- @OneToOne(fetch=FetchType.LAZY) @JoinColumn(name="loan_id") private Loan loan;
+ @JsonIgnore @OneToOne(fetch=FetchType.LAZY) @JoinColumn(name="loan_id") private Loan loan;
  @Column(nullable=false,updatable=false) private LocalDateTime createdAt;
  private LocalDateTime updatedAt;
  public LoanApplication(){}
