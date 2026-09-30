@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { repaymentAPI, loanAPI } from '@/lib/api';
 const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
 export default function RepaymentsPage(){
- const router=useRouter(); const params=useSearchParams(); const loanId=params.get('loanId');
+ const router=useRouter(); const [loanId,setLoanId]=useState('');
  const [schedule,setSchedule]=useState<any[]>([]),[loan,setLoan]=useState<any>(null),[error,setError]=useState(''),[loading,setLoading]=useState(true);
- useEffect(()=>{const token=localStorage.getItem('token');if(!token){router.push('/login');return;}if(!loanId){setError('Loan haijachaguliwa.');setLoading(false);return;}(async()=>{try{const [s,l]=await Promise.all([repaymentAPI.schedule(Number(loanId)),loanAPI.get(Number(loanId))]);setSchedule(s.data?.data??s.data??[]);setLoan(l.data?.data??l.data);}catch(e:any){setError(e?.response?.data?.message||'Imeshindikana kupakia ratiba.')}finally{setLoading(false)}})()},[router,loanId]);
+ useEffect(()=>{const q=new URLSearchParams(window.location.search).get('loanId');if(q)setLoanId(q);const token=localStorage.getItem('token');if(!token){router.push('/login');return;}if(!loanId){setError('Loan haijachaguliwa.');setLoading(false);return;}(async()=>{try{const [s,l]=await Promise.all([repaymentAPI.schedule(Number(loanId)),loanAPI.get(Number(loanId))]);setSchedule(s.data?.data??s.data??[]);setLoan(l.data?.data??l.data);}catch(e:any){setError(e?.response?.data?.message||'Imeshindikana kupakia ratiba.')}finally{setLoading(false)}})()},[router,loanId]);
  const totalDue=schedule.reduce((n,x)=>n+Number(x.amountDue||0),0),totalPaid=schedule.reduce((n,x)=>n+Number(x.amountPaid||0),0);
  return <main className="min-h-screen bg-slate-50 p-4 dark:bg-slate-950 sm:p-6"><div className="mx-auto max-w-5xl space-y-5">
  <div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-black dark:text-white">Ratiba ya Marejesho</h1><p className="text-sm text-slate-500">Loan #{loanId}{loan?.status?' · '+loan.status:''}</p></div><Link href="/borrower" className="rounded-xl border bg-white px-4 py-2 text-sm font-bold dark:border-slate-800 dark:bg-slate-900 dark:text-white">← Dashboard</Link></div>
