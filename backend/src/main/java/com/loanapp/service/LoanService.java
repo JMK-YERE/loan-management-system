@@ -22,6 +22,7 @@ public class LoanService {
  @Autowired private RepaymentScheduleService scheduleService;
  @Autowired private AuditService auditService;
  @Autowired private GuarantorRepository guarantorRepository;
+ @Autowired private SignatureRepository signatureRepository;
 
  @Transactional
  public Loan createLoan(LoanRequest request,String lenderEmail,Long borrowerId){
@@ -80,6 +81,16 @@ public class LoanService {
   }
   auditService.log(actorEmail,"LOAN_APPROVED","LOAN",id,"Loan approved and repayment schedule prepared");
   return saved;
+ }
+
+ @Transactional
+ public Loan releaseApprovedLoan(Long id,String actorEmail){
+  Loan loan=getLoanById(id); authorizeLenderOrAdmin(loan,actorEmail);
+  if(loan.getStatus()!=Loan.LoanStatus.APPROVED) throw new RuntimeException("Mkopo lazima uwe APPROVED");
+  if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.BORROWER).isEmpty()) throw new RuntimeException("Sahihi ya mkopaji inahitajika");
+  if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.LENDER).isEmpty()) throw new RuntimeException("Sahihi ya mkopeshaji inahitajika");
+  loan.setStatus(Loan.LoanStatus.DISBURSED); loan.setDisbursementDate(LocalDate.now());
+  Loan saved=loanRepository.save(loan); auditService.log(actorEmail,"LOAN_DISBURSED","LOAN",id,"Approved loan released after required signatures"); return saved;
  }
 
  public Loan rejectLoan(Long id,String actorEmail){
