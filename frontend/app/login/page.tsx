@@ -52,6 +52,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <label className="block text-sm font-bold">{en?'Email or phone':'Barua pepe au simu'}<input value={username} onChange={e=>setUsername(e.target.value)} required className={`${cls} mt-1.5`} autoComplete="username"/></label>
               <label className="block text-sm font-bold">Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required className={`${cls} mt-1.5`} autoComplete="current-password"/></label>
+              <div className="text-right -mt-2"><Link href="/forgot-password" className="text-sm font-bold text-blue-600 hover:underline">{en?'Forgot password?':'Umesahau password?'}</Link></div>
               <button disabled={loading} className="w-full rounded-xl bg-blue-600 py-3.5 font-black text-white shadow-lg hover:bg-blue-700 disabled:opacity-50">{loading?(en?'Signing in...':'Inaingia...'):(en?'Sign in':'Ingia')}</button>
             </form>
             <p className="mt-7 text-center text-sm text-slate-500">{en?'No account?':'Huna akaunti?'} <Link href="/register" className="font-bold text-blue-600 hover:underline">{en?'Create one':'Jisajili'}</Link></p>
