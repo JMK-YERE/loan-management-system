@@ -19,7 +19,7 @@ public class User {
     @Column(nullable = false, length = 200) private String fullName;
     @Column(unique = true, nullable = false, length = 150) private String email;
     @Column(unique = true, nullable = false, length = 20) private String phone;
-    @JsonIgnore @JsonIgnore @JsonIgnore @JsonIgnore @JsonIgnore @Column(nullable = true) private String password;
+    @JsonIgnore @Column(nullable = true) private String password;
 
     @Column(name = "national_id", unique = true, length = 50) private String nidaNumber;
 
