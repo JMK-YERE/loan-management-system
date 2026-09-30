@@ -20,6 +20,7 @@ public class LoanService {
  @Autowired private LoanProductRepository productRepository;
  @Autowired private RepaymentScheduleService scheduleService;
  @Autowired private AuditService auditService;
+ @Autowired private GuarantorRepository guarantorRepository;
 
  @Transactional
  public Loan createLoan(LoanRequest request,String lenderEmail,Long borrowerId){
@@ -68,6 +69,7 @@ public class LoanService {
  public Loan approveLoan(Long id,String actorEmail){
   Loan loan=getLoanById(id);authorizeLenderOrAdmin(loan,actorEmail);
   if(loan.getStatus()!=Loan.LoanStatus.PENDING) throw new RuntimeException("Mkopo huu hauko kwenye hatua ya kusubiri idhini");
+  if(loan.getLoanProduct()!=null && loan.getLoanProduct().getLoanType()==LoanProduct.LoanType.INSTALLMENT && guarantorRepository.findByLoanAndStatus(loan,Guarantor.GuarantorStatus.APPROVED).isEmpty()) throw new RuntimeException("Mdhamini aliyeidhinishwa anahitajika kabla ya approval ya mwisho");
   loan.setStatus(Loan.LoanStatus.APPROVED);
   Loan saved=loanRepository.save(loan);
   if(loan.getLoanProduct()!=null){
