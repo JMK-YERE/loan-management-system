@@ -1,19 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { FileSignature, RefreshCw, ShieldCheck } from 'lucide-react';
 import { guarantorAPI, loanAPI, signatureAPI } from '@/lib/api';
 
 export default function SignaturesPage(){
- const router=useRouter(); const params=useSearchParams(); const canvasRef=useState<HTMLCanvasElement|null>(null)[0];
+ const router=useRouter();
  const [canvas,setCanvas]=useState<HTMLCanvasElement|null>(null);
- const [loans,setLoans]=useState<any[]>([]),[loanId,setLoanId]=useState(params.get('loanId')||''),[type,setType]=useState('BORROWER'),[role,setRole]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false);
+ const [loans,setLoans]=useState<any[]>([]),[loanId,setLoanId]=useState(''),[type,setType]=useState('BORROWER'),[role,setRole]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false);
  const [drawing,setDrawing]=useState(false);
- useEffect(()=>{const token=localStorage.getItem('token'),raw=localStorage.getItem('user');if(!token||!raw){router.push('/login');return;}const u=JSON.parse(raw);setRole(u.role);setType(u.role==='GUARANTOR'?'GUARANTOR':u.role==='LENDER'||u.role==='ADMIN'?'LENDER':'BORROWER');
+ useEffect(()=>{const q=new URLSearchParams(window.location.search).get('loanId');if(q)setLoanId(q);const token=localStorage.getItem('token'),raw=localStorage.getItem('user');if(!token||!raw){router.push('/login');return;}const u=JSON.parse(raw);setRole(u.role);setType(u.role==='GUARANTOR'?'GUARANTOR':u.role==='LENDER'||u.role==='ADMIN'?'LENDER':'BORROWER');
   (async()=>{try{if(u.role==='GUARANTOR'){const r=await guarantorAPI.mine();const d=r.data?.data??r.data??[];setLoans(Array.isArray(d)?d.map((g:any)=>g.loan).filter(Boolean):[]);}else{const r=u.role==='LENDER'||u.role==='ADMIN'?await loanAPI.byLender():await loanAPI.byBorrower();setLoans(r.data?.data??r.data??[]);}}catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kupakia mikopo.')}})();
  },[router]);
- useEffect(()=>{if(loanId) setLoanId(loanId)},[loanId]);
  const position=(e:any)=>{if(!canvas)return {x:0,y:0};const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)}};
  const start=(e:any)=>{if(!canvas)return;setDrawing(true);const p=position(e);const ctx=canvas.getContext('2d')!;ctx.beginPath();ctx.moveTo(p.x,p.y)};
  const move=(e:any)=>{if(!drawing||!canvas)return;const p=position(e);const ctx=canvas.getContext('2d')!;ctx.lineWidth=3;ctx.lineCap='round';ctx.lineTo(p.x,p.y);ctx.stroke()};
