@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, adminUserAPI } from '@/lib/api';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useLanguage } from '@/lib/useLanguage';
 
 const STATUS: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
@@ -18,6 +20,8 @@ const ROWS: [string, string][] = [
 ];
 
 export default function AdminUsersPage() {
+  const { lang } = useLanguage();
+  const en = lang === 'en';
   const [users, setUsers] = useState<any[]>([]);
   const [filter, setFilter] = useState('PENDING');
   const [sel, setSel] = useState<any>(null);
@@ -72,8 +76,8 @@ export default function AdminUsersPage() {
   return (
     <div className="p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Watumiaji</h1>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)} className="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+        <div><h1 className="text-2xl font-bold text-gray-900 dark:text-white">{en?'Users':'Watumiaji'}</h1><p className="text-xs text-gray-500">{en?'Production-safe role and account controls':'Udhibiti salama wa role na akaunti'}</p></div>
+        <LanguageSwitcher/><select value={filter} onChange={(e) => setFilter(e.target.value)} className="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
           <option value="PENDING">Wanasubiri</option>
           <option value="APPROVED">Wamekubaliwa</option>
           <option value="REJECTED">Wamekataliwa</option>
@@ -86,6 +90,7 @@ export default function AdminUsersPage() {
       <div className="grid gap-3">
         {users.length === 0 && <p className="text-gray-500">Hakuna watumiaji.</p>}
         {users.map((u) => (
+
           <button key={u.id} onClick={() => open(u.id)} className="text-left bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition flex items-center justify-between gap-3">
             <div>
               <p className="font-semibold text-gray-900 dark:text-white">{u.fullName}</p>
@@ -113,6 +118,22 @@ export default function AdminUsersPage() {
                 {sel.rejectionReason && <p className="mt-2 text-sm text-red-600">Sababu: {sel.rejectionReason}</p>}
               </div>
               <button onClick={() => setSel(null)} className="text-gray-500 text-xl">✕</button>
+            </div>
+
+            <div className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div><b>{en?'Role & account controls':'Udhibiti wa role na akaunti'}</b><p className="text-xs text-gray-500">{en?'Admin accounts cannot be changed here.':'Akaunti za Admin haziwezi kubadilishwa hapa.'}</p></div>
+                {sel.role !== 'ADMIN' && (
+                  <div className="flex flex-wrap gap-2">
+                    <select value={sel.role} onChange={async e=>{try{const r=await adminUserAPI.changeRole(sel.id,e.target.value);setSel(r.data.data);await load();setMsg(en?'Role updated.':'Role imebadilishwa.')}catch(e:any){setMsg(e.response?.data?.message||'Imeshindikana')}}} className="rounded-xl border px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900">
+                      <option value="BORROWER">BORROWER</option><option value="LENDER">LENDER</option><option value="GUARANTOR">GUARANTOR</option>
+                    </select>
+                    <button onClick={async()=>{try{const r=await adminUserAPI.setActive(sel.id,!sel.active);setSel(r.data.data);await load();setMsg(en?'Account status updated.':'Hali ya akaunti imebadilishwa.')}catch(e:any){setMsg(e.response?.data?.message||'Imeshindikana')}}} className={`rounded-xl px-3 py-2 text-sm font-semibold ${sel.active?'bg-red-600 text-white':'bg-emerald-600 text-white'}`}>
+                      {sel.active?(en?'Suspend':'Simamisha'):(en?'Activate':'Washa')}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
