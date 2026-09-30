@@ -40,8 +40,9 @@ export default function LoanOfferPage(){
   const map:any={
    SUBMITTED:'Ombi limetumwa',
    UNDER_REVIEW:'Offer iko tayari / inasubiri acceptance',
-   APPROVED:'Offer imekubaliwa — lender anaendelea',
+   APPROVED:'Loan inaandaliwa',
    REJECTED:'Ombi limekataliwa',
+   CONVERTED:'Offer imekubaliwa — loan imetengenezwa',
    CANCELLED:'Ombi limefungwa'
   };
   return map[status]||status;
@@ -70,7 +71,7 @@ export default function LoanOfferPage(){
    <div className="space-y-4">
    {apps.map(a=>{
     const offerReady=!!a.product&&['UNDER_REVIEW','APPROVED'].includes(a.status);
-    const accepted=!!a.termsAccepted||a.status==='APPROVED';
+    const accepted=!!a.termsAccepted;
     return <section key={a.id} className="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
      <div className="flex flex-wrap items-start justify-between gap-3">
       <div><div className="flex items-center gap-2"><h2 className="text-xl font-black">Application #{a.id}</h2><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black dark:bg-slate-800">{statusLabel(a.status)}</span></div><p className="mt-1 text-sm text-slate-500">{a.product?.name||'Loan product bado haijawekwa'}</p></div>
@@ -87,13 +88,13 @@ export default function LoanOfferPage(){
      </div>
 
      {offerReady&&<div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/30">
-      <div className="flex items-start gap-3"><ShieldCheck className="mt-1 h-5 w-5 text-blue-600"/><div><b>{accepted?'Offer accepted':'Kabla hujakubali'}</b><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{accepted?'Acceptance yako imehifadhiwa. Usibadilishe taarifa za offer; lender ataendelea na workflow.': 'Soma PDF kwanza, kagua kiasi/riba/ada/jumla ya marejesho, kisha kubali masharti.'}</p></div></div>
+      <div className="flex items-start gap-3"><ShieldCheck className="mt-1 h-5 w-5 text-blue-600"/><div><b>{accepted?'Offer accepted':'Kabla hujakubali'}</b><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{accepted?'Acceptance yako imehifadhiwa. Lender sasa ataendelea na approval ya loan; baada ya loan kutengenezwa ndipo e-signature itawezeshwa.': 'Soma PDF kwanza, kagua kiasi/riba/ada/jumla ya marejesho, kisha kubali masharti.'}</p></div></div>
       <div className="mt-4 flex flex-wrap gap-2">
        <button onClick={()=>openPdf(a.id,false)} className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900"><Eye className="h-4 w-4"/>Soma Agreement</button>
        <button onClick={()=>openPdf(a.id,true)} className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900"><Download className="h-4 w-4"/>Download PDF</button>
        {!accepted&&<label className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-900"><input type="checkbox" checked={!!read[a.id]} onChange={e=>setRead({...read,[a.id]:e.target.checked})}/> Nimesoma na nimeelewa</label>}
        {!accepted&&<button disabled={!read[a.id]||busy===a.id} onClick={()=>accept(a.id)} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">{busy===a.id?'Inahifadhi...':'✓ Kubali Offer'}</button>}
-       {accepted&&<><Link href="/agreements" className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">📄 Agreements</Link><Link href="/signatures" className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white"><FileSignature className="h-4 w-4"/>Saini</Link></>}
+       {accepted&&<><Link href="/agreements" className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">📄 Agreements</Link><span className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">Subiri lender aidhinishe na kutengeneza loan</span></>}
       </div>
      </div>}
 
