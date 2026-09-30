@@ -15,9 +15,22 @@ public class LoanApplication {
  @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="product_id",nullable=false) private LoanProduct product;
  @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="lender_id") private User lender;
  @Column(nullable=false,precision=15,scale=2) private BigDecimal amount;
- @Column(nullable=false) private Integer durationMonths;
+ @Column(nullable=false) private Integer duration;
+ @Enumerated(EnumType.STRING) @Column(nullable=false,length=20) private LoanProduct.DurationUnit durationUnit;
  @Column(length=500) private String purpose;
- @Enumerated(EnumType.STRING) @Column(nullable=false,length=20) private Status status=Status.SUBMITTED;
+ @Column(nullable=false,precision=15,scale=2) private BigDecimal interestSnapshot=BigDecimal.ZERO;
+ @Column(nullable=false,precision=15,scale=2) private BigDecimal processingFeeSnapshot=BigDecimal.ZERO;
+ @Column(nullable=false,precision=15,scale=2) private BigDecimal lateFeeSnapshot=BigDecimal.ZERO;
+ @Column(nullable=false,precision=15,scale=2) private BigDecimal totalRepaymentSnapshot=BigDecimal.ZERO;
+ @Column(nullable=false,precision=15,scale=2) private BigDecimal installmentAmountSnapshot=BigDecimal.ZERO;
+ @Column(nullable=false) private Integer installmentCountSnapshot=1;
+ @Column(nullable=false) private Integer gracePeriodDaysSnapshot=0;
+ @Column(nullable=false,length=30) private String interestTypeSnapshot;
+ @Column(nullable=false,length=30) private String repaymentFrequencySnapshot;
+ @Column(nullable=false,length=100) private String termsVersion;
+ @Column(nullable=false) private Boolean termsAccepted=false;
+ private LocalDateTime termsAcceptedAt;
+ @Enumerated(EnumType.STRING) @Column(nullable=false,length=30) private Status status=Status.SUBMITTED;
  @Column(length=1000) private String rejectionReason;
  @JsonIgnore @OneToOne(fetch=FetchType.LAZY) @JoinColumn(name="loan_id") private Loan loan;
  @Column(nullable=false,updatable=false) private LocalDateTime createdAt;
@@ -28,8 +41,21 @@ public class LoanApplication {
  public LoanProduct getProduct(){return product;} public void setProduct(LoanProduct v){product=v;}
  public User getLender(){return lender;} public void setLender(User v){lender=v;}
  public BigDecimal getAmount(){return amount;} public void setAmount(BigDecimal v){amount=v;}
- public Integer getDurationMonths(){return durationMonths;} public void setDurationMonths(Integer v){durationMonths=v;}
+ public Integer getDuration(){return duration;} public void setDuration(Integer v){duration=v;}
+ public LoanProduct.DurationUnit getDurationUnit(){return durationUnit;} public void setDurationUnit(LoanProduct.DurationUnit v){durationUnit=v;}
  public String getPurpose(){return purpose;} public void setPurpose(String v){purpose=v;}
+ public BigDecimal getInterestSnapshot(){return interestSnapshot;} public void setInterestSnapshot(BigDecimal v){interestSnapshot=v;}
+ public BigDecimal getProcessingFeeSnapshot(){return processingFeeSnapshot;} public void setProcessingFeeSnapshot(BigDecimal v){processingFeeSnapshot=v;}
+ public BigDecimal getLateFeeSnapshot(){return lateFeeSnapshot;} public void setLateFeeSnapshot(BigDecimal v){lateFeeSnapshot=v;}
+ public BigDecimal getTotalRepaymentSnapshot(){return totalRepaymentSnapshot;} public void setTotalRepaymentSnapshot(BigDecimal v){totalRepaymentSnapshot=v;}
+ public BigDecimal getInstallmentAmountSnapshot(){return installmentAmountSnapshot;} public void setInstallmentAmountSnapshot(BigDecimal v){installmentAmountSnapshot=v;}
+ public Integer getInstallmentCountSnapshot(){return installmentCountSnapshot;} public void setInstallmentCountSnapshot(Integer v){installmentCountSnapshot=v;}
+ public Integer getGracePeriodDaysSnapshot(){return gracePeriodDaysSnapshot;} public void setGracePeriodDaysSnapshot(Integer v){gracePeriodDaysSnapshot=v;}
+ public String getInterestTypeSnapshot(){return interestTypeSnapshot;} public void setInterestTypeSnapshot(String v){interestTypeSnapshot=v;}
+ public String getRepaymentFrequencySnapshot(){return repaymentFrequencySnapshot;} public void setRepaymentFrequencySnapshot(String v){repaymentFrequencySnapshot=v;}
+ public String getTermsVersion(){return termsVersion;} public void setTermsVersion(String v){termsVersion=v;}
+ public Boolean getTermsAccepted(){return termsAccepted;} public void setTermsAccepted(Boolean v){termsAccepted=v;}
+ public LocalDateTime getTermsAcceptedAt(){return termsAcceptedAt;} public void setTermsAcceptedAt(LocalDateTime v){termsAcceptedAt=v;}
  public Status getStatus(){return status;} public void setStatus(Status v){status=v;}
  public String getRejectionReason(){return rejectionReason;} public void setRejectionReason(String v){rejectionReason=v;}
  public Loan getLoan(){return loan;} public void setLoan(Loan v){loan=v;}
