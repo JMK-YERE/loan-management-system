@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import GlobalTranslator from '@/components/GlobalTranslator';
 
 export const metadata: Metadata = {
   title: 'JmkLoanApp - Mikopo kwa Wote Tanzania',
@@ -13,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sw" suppressHydrationWarning>
-      <body>{children}</body>
+      <body><GlobalTranslator />{children}</body>
     </html>
   );
 }
