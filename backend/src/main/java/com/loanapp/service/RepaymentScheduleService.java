@@ -25,13 +25,13 @@ public class RepaymentScheduleService{
   List<RepaymentSchedule> out=new ArrayList<>(); BigDecimal pR=principal,iR=totalInterest;
   for(int i=1;i<=count;i++){
    BigDecimal p=i==count?pR:pEach, in=i==count?iR:iEach; pR=pR.subtract(p);iR=iR.subtract(in);
-   LocalDate due=scheduleDate(startDate,i,product.getRepaymentFrequency(),product.getDurationUnit());
+   LocalDate due=scheduleDate(startDate,i,periods,product.getRepaymentFrequency(),product.getDurationUnit());
    RepaymentSchedule s=new RepaymentSchedule();s.setLoan(loan);s.setInstallmentNumber(i);s.setDueDate(due);s.setPrincipalDue(p);s.setInterestDue(in);s.setFeesDue(i==1?Optional.ofNullable(loan.getProcessingFee()).orElse(BigDecimal.ZERO).add(Optional.ofNullable(loan.getLawyerFee()).orElse(BigDecimal.ZERO)):BigDecimal.ZERO);s.setAmountDue(s.getPrincipalDue().add(s.getInterestDue()).add(s.getFeesDue()));out.add(repo.save(s));
   }
   return out;
  }
- private LocalDate scheduleDate(LocalDate start,int i,LoanProduct.RepaymentFrequency f,LoanProduct.DurationUnit unit){
-  return switch(f){case ONE_TIME->unit==LoanProduct.DurationUnit.DAYS?start.plusDays(i==1?0: i):start.plusMonths(i);case DAILY->start.plusDays(i);case WEEKLY->start.plusWeeks(i);case MONTHLY->start.plusMonths(i);};
+ private LocalDate scheduleDate(LocalDate start,int i,int duration,LoanProduct.RepaymentFrequency f,LoanProduct.DurationUnit unit){
+  return switch(f){case ONE_TIME->unit==LoanProduct.DurationUnit.DAYS?start.plusDays(duration):start.plusMonths(duration);case DAILY->start.plusDays(i);case WEEKLY->start.plusWeeks(i);case MONTHLY->start.plusMonths(i);};
  }
  public List<RepaymentSchedule> byLoan(Loan loan){return repo.findByLoanOrderByInstallmentNumberAsc(loan);}
  public void markOverdue(){repo.findByStatusAndDueDateBefore(RepaymentSchedule.ScheduleStatus.PENDING,LocalDate.now()).forEach(s->{s.setStatus(RepaymentSchedule.ScheduleStatus.OVERDUE);repo.save(s);});}
