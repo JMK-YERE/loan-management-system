@@ -48,9 +48,17 @@ public class GuarantorController {
     }
 
     @GetMapping("/loan/{loanId}")
-    public ResponseEntity<ApiResponse<List<Guarantor>>> getGuarantorsByLoan(@PathVariable Long loanId) {
-        List<Guarantor> list = guarantorService.getGuarantorsByLoan(loanId);
+    public ResponseEntity<ApiResponse<List<Guarantor>>> getGuarantorsByLoan(@PathVariable Long loanId, Authentication authentication) {
+        List<Guarantor> list = guarantorService.getGuarantorsByLoan(loanId, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Wadhamini wote", list));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('BORROWER')")
+    public ResponseEntity<ApiResponse<Guarantor>> updateGuarantor(
+            @PathVariable Long id, @Valid @RequestBody GuarantorRequest request, Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success("Mdhamini amesasishwa",
+                guarantorService.updateGuarantor(id, request, authentication.getName())));
     }
 
     @GetMapping("/mine")
