@@ -16,25 +16,37 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    @Autowired private AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
-        String message = authService.register(request);
-        return ResponseEntity.ok(ApiResponse.success(message, "OK"));
+        return ResponseEntity.ok(ApiResponse.success(authService.register(request), "OK"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.success("Kuingia kumefanikiwa", response));
+        return ResponseEntity.ok(ApiResponse.success("Kuingia kumefanikiwa", authService.login(request)));
     }
 
     @PostMapping("/set-password")
     public ResponseEntity<ApiResponse<String>> setPassword(@RequestBody Map<String, String> body) {
         authService.setPassword(body.get("token"), body.get("password"));
         return ResponseEntity.ok(ApiResponse.success("Password imewekwa. Sasa unaweza kuingia.", "OK"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody Map<String, String> body) {
+        // Intentionally generic: never reveal whether an email exists.
+        authService.requestPasswordReset(body.get("email"));
+        return ResponseEntity.ok(ApiResponse.success(
+                "Kama email ipo kwenye mfumo na akaunti iko hai, utapokea link ya kubadilisha password.",
+                "EMAIL_IF_ELIGIBLE"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody Map<String, String> body) {
+        authService.resetPassword(body.get("token"), body.get("password"));
+        return ResponseEntity.ok(ApiResponse.success("Password imebadilishwa. Sasa unaweza kuingia.", "OK"));
     }
 
     @GetMapping("/")
