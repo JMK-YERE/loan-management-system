@@ -71,6 +71,16 @@ export const userAPI = {
   guarantors: () => api.get('/users/guarantors'),
 };
 
+export const generalLoanApplicationAPI = {
+  submit: (data:any) => api.post('/general-loan-applications', data),
+  mine: () => api.get('/general-loan-applications/mine'),
+  pending: () => api.get('/general-loan-applications/pending'),
+  review: (id:number) => api.put('/general-loan-applications/'+id+'/review'),
+  assignProduct: (id:number, productId:number) => api.put('/general-loan-applications/'+id+'/assign-product/'+productId),
+  acceptOffer: (id:number) => api.put('/general-loan-applications/'+id+'/accept-offer'),
+  approve: (id:number) => api.put('/general-loan-applications/'+id+'/approve'),
+};
+
 export const loanApplicationAPI = {
   submit: (data:any) => api.post('/loan-applications', data),
   mine: () => api.get('/loan-applications/mine'),
