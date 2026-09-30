@@ -90,6 +90,11 @@ public class LoanService {
   if(loan.getStatus()!=Loan.LoanStatus.APPROVED) throw new RuntimeException("Mkopo lazima uwe APPROVED");
   if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.BORROWER).isEmpty()) throw new RuntimeException("Sahihi ya mkopaji inahitajika");
   if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.LENDER).isEmpty()) throw new RuntimeException("Sahihi ya mkopeshaji inahitajika");
+  if(loan.getLoanProduct()!=null && loan.getLoanProduct().getLoanType()==LoanProduct.LoanType.INSTALLMENT
+      && guarantorRepository.findByLoanAndStatus(loan,Guarantor.GuarantorStatus.APPROVED).stream()
+          .anyMatch(g -> signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.GUARANTOR).stream()
+              .noneMatch(s -> s.getUser().getId().equals(g.getGuarantor().getId()))))
+      throw new RuntimeException("Sahihi ya mdhamini aliyeidhinishwa inahitajika kabla ya disbursement");
   loan.setStatus(Loan.LoanStatus.DISBURSED); loan.setDisbursementDate(LocalDate.now());
   Loan saved=loanRepository.save(loan); auditService.log(actorEmail,"LOAN_DISBURSED","LOAN",id,"Approved loan released after required signatures"); return saved;
  }
