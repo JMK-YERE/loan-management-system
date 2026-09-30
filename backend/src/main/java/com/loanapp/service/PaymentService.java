@@ -29,7 +29,7 @@ public class PaymentService {
         Loan loan=loanRepository.findById(request.getLoanId()).orElseThrow(()->new RuntimeException("Mkopo haujapatikana"));
         User borrower=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Mkopaji hajapatikana"));
         if(!loan.getBorrower().getId().equals(borrower.getId())) throw new RuntimeException("Huna ruhusa ya kulipia mkopo huu");
-        if(loan.getStatus()==Loan.LoanStatus.REJECTED||loan.getStatus()==Loan.LoanStatus.PAID) throw new RuntimeException("Mkopo huu haupokei malipo kwa sasa");
+        if(loan.getStatus()!=Loan.LoanStatus.DISBURSED && loan.getStatus()!=Loan.LoanStatus.DEFAULTED) throw new RuntimeException("Mkopo huu haujafikia hatua ya kupokea marejesho");
         if(request.getAmount()==null||request.getAmount().compareTo(BigDecimal.ZERO)<=0) throw new RuntimeException("Kiasi cha malipo lazima kiwe zaidi ya sifuri");
         Payment.PaymentMethod method;
         try{method=Payment.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase());}catch(Exception e){throw new RuntimeException("Njia ya malipo si sahihi");}
