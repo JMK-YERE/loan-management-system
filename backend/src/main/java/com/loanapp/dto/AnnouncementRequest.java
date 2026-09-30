@@ -27,6 +27,9 @@ public class AnnouncementRequest {
     @Size(max = 200)
     private String ctaLink;
 
+    @Size(max = 500)
+    private String imageUrl;
+
     private Boolean active;
 
     private Integer displayOrder;
@@ -35,7 +38,7 @@ public class AnnouncementRequest {
     }
 
     public AnnouncementRequest(String title, String content, String tag, String color,
-                               String emoji, String ctaText, String ctaLink,
+                               String emoji, String ctaText, String ctaLink, String imageUrl,
                                Boolean active, Integer displayOrder) {
         this.title = title;
         this.content = content;
@@ -44,6 +47,7 @@ public class AnnouncementRequest {
         this.emoji = emoji;
         this.ctaText = ctaText;
         this.ctaLink = ctaLink;
+        this.imageUrl = imageUrl;
         this.active = active;
         this.displayOrder = displayOrder;
     }
@@ -68,6 +72,8 @@ public class AnnouncementRequest {
 
     public String getCtaLink() { return ctaLink; }
     public void setCtaLink(String ctaLink) { this.ctaLink = ctaLink; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
