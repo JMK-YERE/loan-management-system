@@ -24,7 +24,7 @@ public class PdfAgreementService {
    d.add(new Paragraph("JMK LOAN - LOAN AGREEMENT",title)); d.add(new Paragraph("Mkataba wa Mkopo / Loan Agreement")); d.add(new Paragraph(" "));
    d.add(new Paragraph("Loan #"+l.getId(),h)); d.add(new Paragraph("Borrower: "+l.getBorrower().getFullName()+" ("+l.getBorrower().getEmail()+")"));
    d.add(new Paragraph("Lender: "+l.getLender().getFullName()+" ("+l.getLender().getEmail()+")"));
-   d.add(new Paragraph("Principal: TZS "+l.getAmount())); d.add(new Paragraph("Interest rate: "+l.getInterestRate()+"%")); d.add(new Paragraph("Duration: "+l.getDurationMonths()+" months"));
+   d.add(new Paragraph("Principal: TZS "+l.getAmount())); d.add(new Paragraph("Interest rate: "+l.getInterestRate()+"%")); d.add(new Paragraph("Duration: "+l.getDurationMonths()+" "+(l.getDurationUnit()==null?"MONTHS":l.getDurationUnit())));
    d.add(new Paragraph("Processing fee: TZS "+l.getProcessingFee())); d.add(new Paragraph("Lawyer fee: TZS "+l.getLawyerFee())); d.add(new Paragraph("Total repayment: TZS "+l.getTotalRepayment()));
    d.add(new Paragraph("Purpose: "+(l.getPurpose()==null?"—":l.getPurpose()))); d.add(new Paragraph("Status: "+l.getStatus()));
    d.add(new Paragraph("Next due date: "+(l.getNextDueDate()==null?"—":l.getNextDueDate())));
