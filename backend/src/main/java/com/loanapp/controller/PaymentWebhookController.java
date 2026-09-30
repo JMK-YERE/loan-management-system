@@ -6,9 +6,9 @@ import javax.crypto.Mac; import javax.crypto.spec.SecretKeySpec; import java.sec
 
 @RestController @RequestMapping("/api/webhooks/payments")
 public class PaymentWebhookController{
- private final PaymentRepository payments; private final LoanRepository loans; private final WebhookEventRepository events;
+ private final PaymentRepository payments; private final LoanRepository loans; private final WebhookEventRepository events; private final com.loanapp.service.PaymentAllocationService allocation; private final com.loanapp.service.AuditService audit;
  @Value("${app.payments.webhook-secret:}") private String secret;
- public PaymentWebhookController(PaymentRepository payments,LoanRepository loans,WebhookEventRepository events){this.payments=payments;this.loans=loans;this.events=events;}
+ public PaymentWebhookController(PaymentRepository payments,LoanRepository loans,WebhookEventRepository events,com.loanapp.service.PaymentAllocationService allocation,com.loanapp.service.AuditService audit){this.payments=payments;this.loans=loans;this.events=events;this.allocation=allocation;this.audit=audit;}
  @PostMapping @Transactional public ResponseEntity<?> webhook(@RequestHeader(value="X-Signature",required=false) String signature,@RequestBody Map<String,Object> body){
   if(secret.isBlank()) return ResponseEntity.status(503).body(Map.of("status","NOT_CONFIGURED"));
   String tx=String.valueOf(body.getOrDefault("transactionId",""));String status=String.valueOf(body.getOrDefault("status","")).toUpperCase();
@@ -17,7 +17,7 @@ public class PaymentWebhookController{
   Payment p=payments.findByTransactionId(tx).orElseThrow(()->new RuntimeException("Transaction not found"));
   String eventKey="PAYMENT:"+tx;
   if(events.existsByEventKey(eventKey)) return ResponseEntity.ok(Map.of("status","OK","idempotent",true));
-  if("SUCCESS".equals(status)){ p.setStatus(Payment.PaymentStatus.SUCCESS);p.setPaidAt(LocalDateTime.now());payments.save(p);var loan=p.getLoan();var paid=payments.findByLoanAndStatus(loan,Payment.PaymentStatus.SUCCESS).stream().map(Payment::getAmount).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add);if(paid.compareTo(loan.getTotalRepayment())>=0)loan.setStatus(com.loanapp.model.Loan.LoanStatus.PAID);else if(loan.getStatus()==com.loanapp.model.Loan.LoanStatus.APPROVED||loan.getStatus()==com.loanapp.model.Loan.LoanStatus.PENDING)loan.setStatus(com.loanapp.model.Loan.LoanStatus.DISBURSED);loans.save(loan);}
+  if("SUCCESS".equals(status)){ if(p.getStatus()==Payment.PaymentStatus.SUCCESS){events.save(new WebhookEvent(eventKey,status));return ResponseEntity.ok(Map.of("status","OK","idempotent",true));} var loan=p.getLoan(); if(loan.getStatus()!=com.loanapp.model.Loan.LoanStatus.DISBURSED && loan.getStatus()!=com.loanapp.model.Loan.LoanStatus.DEFAULTED) return ResponseEntity.badRequest().body(Map.of("status","LOAN_NOT_REPAYABLE")); p.setStatus(Payment.PaymentStatus.SUCCESS);p.setPaidAt(LocalDateTime.now());payments.save(p); allocation.allocate(p);var paid=payments.findByLoanAndStatus(loan,Payment.PaymentStatus.SUCCESS).stream().map(Payment::getAmount).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add);if(paid.compareTo(loan.getTotalRepayment())>=0)loan.setStatus(com.loanapp.model.Loan.LoanStatus.PAID);loans.save(loan);audit.log("PAYMENT_WEBHOOK","PAYMENT_WEBHOOK","PAYMENT",p.getId(),"Verified provider webhook: "+status); }
   else if("FAILED".equals(status)) {p.setStatus(Payment.PaymentStatus.FAILED);payments.save(p);}
   else if("REVERSED".equals(status)) {p.setStatus(Payment.PaymentStatus.REVERSED);payments.save(p);}
   else return ResponseEntity.badRequest().body(Map.of("status","UNSUPPORTED_STATUS"));
