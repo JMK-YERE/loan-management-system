@@ -130,7 +130,7 @@ export default function Home() {
       <section id="how" className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="text-center"><h2 className="text-3xl font-black sm:text-4xl">{t.howTitle}</h2><p className="mt-3 text-slate-600 dark:text-slate-400">{t.howSub}</p></div>
-          <div className="mt-12 grid gap-5 md:grid-cols-4">
+          <div className="mt-12 grid gap-5 md:grid-cols-3 lg:grid-cols-6">
             {t.steps.map(([num,title,desc]) => <div key={num} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="text-4xl font-black text-blue-600">{num}</div><h3 className="mt-5 font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{desc}</p>
             </div>)}

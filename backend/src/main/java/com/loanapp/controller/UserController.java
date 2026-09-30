@@ -25,4 +25,14 @@ public class UserController {
                 .toList();
         return ResponseEntity.ok(ApiResponse.success("Wakopaji waliopo", data));
     }
+
+    @GetMapping("/guarantors")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<List<Map<String,Object>>>> guarantors() {
+        List<Map<String,Object>> data = userRepository.findByRole(User.Role.GUARANTOR).stream()
+                .filter(u -> Boolean.TRUE.equals(u.getActive()) && u.getStatus() == User.UserStatus.APPROVED)
+                .map(u -> { Map<String,Object> m = new java.util.LinkedHashMap<>(); m.put("id",u.getId()); m.put("fullName",u.getFullName()); m.put("email",u.getEmail()); m.put("phone",u.getPhone()); return m; })
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success("Wadhamini waliopo", data));
+    }
 }

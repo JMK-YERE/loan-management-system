@@ -117,6 +117,7 @@ export default function DashboardPage() {
         router.push('/admin/dashboard');
         return;
       }
+      if (currentUser.role === 'LENDER') { router.push('/lender'); return; }
       if (currentUser.role === 'BORROWER') { router.push('/borrower'); return; }
       if (currentUser.role === 'GUARANTOR') { router.push('/guarantor'); return; }
       setUser(currentUser);
