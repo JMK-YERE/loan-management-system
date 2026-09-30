@@ -1,6 +1,8 @@
 package com.loanapp.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,18 +19,18 @@ public class User {
     @Column(nullable = false, length = 200) private String fullName;
     @Column(unique = true, nullable = false, length = 150) private String email;
     @Column(unique = true, nullable = false, length = 20) private String phone;
-    @Column(nullable = true) private String password;
+    @JsonIgnore @JsonIgnore @JsonIgnore @JsonIgnore @JsonIgnore @Column(nullable = true) private String password;
 
     @Column(name = "national_id", unique = true, length = 50) private String nidaNumber;
 
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private Role role;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private UserStatus status = UserStatus.PENDING;
 
-    @Column(unique = true, length = 100) private String verificationToken;
-    private LocalDateTime tokenExpiry;
+    @Column(unique = true, length = 100) @JsonIgnore private String verificationToken;
+    @JsonIgnore private LocalDateTime tokenExpiry;
 
-    @Column(unique = true, length = 120) private String passwordResetToken;
-    private LocalDateTime passwordResetExpiry;
+    @Column(unique = true, length = 120) @JsonIgnore private String passwordResetToken;
+    @JsonIgnore private LocalDateTime passwordResetExpiry;
 
     @Column(length = 500) private String profilePicture;
     @Column(length = 500) private String rejectionReason;
