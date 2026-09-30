@@ -8,6 +8,10 @@ public class LoanApplicationRequest {
  @NotNull @Min(1) private Integer duration;
  @NotBlank @Size(max=500) private String purpose;
  private Long productId;
+ @NotNull @DecimalMin("0.00") private BigDecimal monthlyExpenses;
+ @NotNull @DecimalMin("0.00") private BigDecimal existingMonthlyDebt;
+ @Size(max=500) private String collateralDescription;
+ @DecimalMin("0.00") private BigDecimal collateralValue=BigDecimal.ZERO;
  private Boolean termsAccepted = false;
 
  public LoanApplicationRequest(){}
@@ -15,5 +19,9 @@ public class LoanApplicationRequest {
  public BigDecimal getAmount(){return amount;} public void setAmount(BigDecimal v){amount=v;}
  public Integer getDuration(){return duration;} public void setDuration(Integer v){duration=v;}
  public String getPurpose(){return purpose;} public void setPurpose(String v){purpose=v;}
+ public BigDecimal getMonthlyExpenses(){return monthlyExpenses;} public void setMonthlyExpenses(BigDecimal v){monthlyExpenses=v;}
+ public BigDecimal getExistingMonthlyDebt(){return existingMonthlyDebt;} public void setExistingMonthlyDebt(BigDecimal v){existingMonthlyDebt=v;}
+ public String getCollateralDescription(){return collateralDescription;} public void setCollateralDescription(String v){collateralDescription=v;}
+ public BigDecimal getCollateralValue(){return collateralValue;} public void setCollateralValue(BigDecimal v){collateralValue=v;}
  public Boolean getTermsAccepted(){return termsAccepted;} public void setTermsAccepted(Boolean v){termsAccepted=v;}
 }
