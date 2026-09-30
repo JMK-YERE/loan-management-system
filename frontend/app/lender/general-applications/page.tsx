@@ -3,7 +3,6 @@
 import {useEffect,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import api from '@/lib/api';
-import Link from 'next/link';
 import {loanProductAPI} from '@/lib/api';
 
 const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
