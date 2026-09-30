@@ -47,6 +47,12 @@ export const announcementAPI = {
   delete: (id: number) => api.delete(`/announcements/${id}`),
 };
 
+export const adminUserAPI = {
+  list: () => api.get('/admin/users'),
+  changeRole: (id: number, role: string) => api.patch('/admin/users/' + id + '/role', { role }),
+  setActive: (id: number, active: boolean) => api.patch('/admin/users/' + id + '/active', { active }),
+};
+
 export const adminAPI = {
   stats: () => api.get('/admin/stats'),
   list: (status?: string) => api.get('/admin/applicants', { params: status ? { status } : {} }),
