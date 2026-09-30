@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Base64;
 import java.util.Locale;
+import java.util.Map;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AuthService {
@@ -29,6 +31,7 @@ public class AuthService {
     @Value("${app.admin.email}") private String adminEmail;
     @Value("${app.admin.username:admin}") private String adminUsername;
     @Value("${app.frontend.url:}") private String frontendUrl;
+    @Value("${google.client.id:}") private String googleClientId;
 
     public String register(RegisterRequest r) {
         if (r.getRole() == User.Role.ADMIN) throw new RuntimeException("Role hii hairuhusiwi");
@@ -76,6 +79,26 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
         return AuthResponse.builder().token(token).userId(user.getId()).fullName(user.getFullName())
                 .email(user.getEmail()).role(user.getRole().name()).build();
+    }
+
+    public AuthResponse loginWithGoogle(String credential) {
+        if (googleClientId == null || googleClientId.isBlank()) throw new RuntimeException("Google Sign-In haijawekwa kwenye mfumo");
+        try {
+            String url="https://oauth2.googleapis.com/tokeninfo?id_token="+java.net.URLEncoder.encode(credential, java.nio.charset.StandardCharsets.UTF_8);
+            Map<?,?> claims=new RestTemplate().getForObject(url, Map.class);
+            if(claims==null) throw new RuntimeException("Google credential haijasomwa");
+            if(!googleClientId.equals(String.valueOf(claims.get("aud")))) throw new RuntimeException("Google client ID si sahihi");
+            String issuer=String.valueOf(claims.get("iss"));
+            if(!"https://accounts.google.com".equals(issuer) && !"accounts.google.com".equals(issuer)) throw new RuntimeException("Google issuer si sahihi");
+            if(!"true".equalsIgnoreCase(String.valueOf(claims.get("email_verified")))) throw new RuntimeException("Google email haijathibitishwa");
+            String email=String.valueOf(claims.get("email")).trim().toLowerCase(Locale.ROOT);
+            User user=userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Akaunti ya email hii haipo. Jisajili kwanza kwa taarifa kamili za KYC."));
+            if(!Boolean.TRUE.equals(user.getActive()) || user.getStatus()!=User.UserStatus.APPROVED) throw new RuntimeException("Akaunti yako haijakubaliwa bado");
+            String token=jwtUtil.generateToken(user.getEmail(),user.getRole().name());
+            return AuthResponse.builder().token(token).userId(user.getId()).fullName(user.getFullName()).email(user.getEmail()).role(user.getRole().name()).build();
+        } catch (org.springframework.web.client.RestClientException ex) {
+            throw new RuntimeException("Google Sign-In imeshindikana. Jaribu tena.");
+        }
     }
 
     public void setPassword(String token, String newPassword) {
