@@ -3,6 +3,7 @@ package com.loanapp.service;
 import com.loanapp.dto.LoanRequest;
 import com.loanapp.model.*;
 import com.loanapp.repository.LoanProductRepository;
+import com.loanapp.repository.GuarantorRepository;
 import com.loanapp.repository.LoanRepository;
 import com.loanapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
