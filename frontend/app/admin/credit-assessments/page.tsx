@@ -1,0 +1,69 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { RefreshCw, ShieldCheck, AlertTriangle, Calculator } from 'lucide-react';
+import { creditAssessmentAPI, loanApplicationAPI } from '@/lib/api';
+import { useLanguage } from '@/lib/useLanguage';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+
+const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
+const unwrap=(r:any)=>r?.data?.data??r?.data??[];
+
+export default function CreditAssessmentsPage(){
+  const {lang}=useLanguage(); const en=lang==='en';
+  const [apps,setApps]=useState<any[]>([]); const [selected,setSelected]=useState<any>(null);
+  const [expenses,setExpenses]=useState(''); const [debt,setDebt]=useState('');
+  const [assessment,setAssessment]=useState<any>(null); const [message,setMessage]=useState(''); const [busy,setBusy]=useState(false);
+
+  const load=async()=>{
+    try{const r=await loanApplicationAPI.pending();setApps(unwrap(r));setMessage('');}
+    catch(e:any){setMessage(e?.response?.data?.message||(en?'Unable to load pending applications.':'Imeshindikana kupakia maombi yanayosubiri.'));}
+  };
+  useEffect(()=>{load();},[]);
+
+  const run=async()=>{
+    if(!selected)return;
+    setBusy(true);setMessage('');
+    try{
+      const r=await creditAssessmentAPI.assess(selected.id,{monthlyExpenses:Number(expenses||0),existingMonthlyDebt:Number(debt||0)});
+      setAssessment(r.data?.data??r.data);
+      setMessage(en?'Assessment completed. Use it as decision support for human review.':'Assessment imekamilika. Tumia kama msaada wa kufanya review ya binadamu.');
+    }catch(e:any){setMessage(e?.response?.data?.message||(en?'Assessment failed.':'Assessment imeshindikana.'))}
+    finally{setBusy(false);}
+  };
+
+  return <div className="p-4 sm:p-6 lg:p-8">
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><p className="text-sm font-bold text-blue-600">JmkLoanApp</p><h1 className="text-3xl font-black">{en?'Credit Assessment':'Tathmini ya Mkopo'}</h1><p className="mt-1 text-slate-500">{en?'Structured affordability and risk signals before approval.':'Tathmini ya uwezo wa kulipa na viashiria vya hatari kabla ya approval.'}</p></div>
+      <div className="flex gap-2"><LanguageSwitcher/><button onClick={load} className="rounded-xl border p-2.5"><RefreshCw className="h-4 w-4"/></button></div>
+    </div>
+
+    {message&&<div className="mb-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">{message}</div>}
+
+    <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <section className="rounded-3xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-4 flex items-center gap-3"><Calculator className="h-5 w-5 text-blue-600"/><h2 className="text-xl font-black">{en?'Pending applications':'Maombi yanayosubiri'}</h2></div>
+        <div className="space-y-3">
+          {apps.length===0?<p className="text-sm text-slate-500">{en?'No pending applications.':'Hakuna maombi yanayosubiri.'}</p>:apps.map(a=><button key={a.id} onClick={()=>{setSelected(a);setAssessment(null);setExpenses('');setDebt('');}} className={`w-full rounded-2xl border p-4 text-left transition ${selected?.id===a.id?'border-blue-500 bg-blue-50 dark:bg-blue-950/30':'hover:border-blue-300'}`}>
+            <div className="flex items-center justify-between"><b>#{a.id} · {a.borrower?.fullName||'Borrower'}</b><span className="text-xs font-bold">{a.status}</span></div>
+            <div className="mt-2 text-sm text-slate-500">{money(a.amount)} · {a.durationMonths} {en?'months':'miezi'}</div>
+          </button>)}
+        </div>
+      </section>
+
+      <section className="rounded-3xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        {!selected?<div className="py-12 text-center text-slate-500">{en?'Select an application to start an assessment.':'Chagua ombi kuanza tathmini.'}</div>:
+        <><div className="mb-5"><h2 className="text-xl font-black">#{selected.id} · {selected.borrower?.fullName}</h2><p className="text-sm text-slate-500">{money(selected.amount)} · {selected.durationMonths} {en?'months':'miezi'}</p></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-sm font-semibold">{en?'Monthly expenses':'Matumizi ya mwezi'}<input value={expenses} onChange={e=>setExpenses(e.target.value)} type="number" min="0" className="mt-2 w-full rounded-xl border p-3 bg-transparent" placeholder="0"/></label>
+          <label className="text-sm font-semibold">{en?'Existing monthly debt':'Madeni ya mwezi'}<input value={debt} onChange={e=>setDebt(e.target.value)} type="number" min="0" className="mt-2 w-full rounded-xl border p-3 bg-transparent" placeholder="0"/></label>
+        </div>
+        <button disabled={busy} onClick={run} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-bold text-white disabled:opacity-50"><ShieldCheck className="h-4 w-4"/>{busy?(en?'Assessing...':'Inatathmini...'):(en?'Run assessment':'Fanya tathmini')}</button>
+        {assessment&&<div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {[['Score',assessment.score],['Risk',assessment.riskLevel],['Affordability',assessment.affordability],['Recommended',money(assessment.recommendedAmount)],['Monthly surplus',money(assessment.monthlySurplus)],['Estimated installment',money(assessment.estimatedInstallment)]].map(([k,v]:any)=><div key={k} className="rounded-2xl border p-4"><div className="text-xs font-bold text-slate-500">{k}</div><div className="mt-1 text-lg font-black">{v}</div></div>)}
+          <div className="sm:col-span-2 flex gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800"><AlertTriangle className="h-5 w-5 shrink-0"/><span>{en?'This is decision support, not an automatic approval. Review the underlying customer information before making a lending decision.':'Hii ni decision support, si approval ya moja kwa moja. Kagua taarifa za mteja kabla ya kufanya uamuzi wa mkopo.'}</span></div>
+        </div>}</>}
+      </section>
+    </div>
+  </div>;
+}
