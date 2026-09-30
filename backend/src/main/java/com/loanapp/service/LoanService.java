@@ -59,8 +59,11 @@ public class LoanService {
   if(product!=null && product.getInterestType()==LoanProduct.InterestType.FLAT){
    interest=amount.multiply(rate).divide(BigDecimal.valueOf(100),2,RoundingMode.HALF_UP);
   } else {
-   interest=amount.multiply(rate).divide(BigDecimal.valueOf(100),2,RoundingMode.HALF_UP)
-    .multiply(BigDecimal.valueOf(duration)).divide(BigDecimal.valueOf(12),2,RoundingMode.HALF_UP);
+   BigDecimal periodFraction = product != null && product.getDurationUnit() == LoanProduct.DurationUnit.DAYS
+    ? BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(365),10,RoundingMode.HALF_UP)
+    : BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(12),10,RoundingMode.HALF_UP);
+   interest=amount.multiply(rate).divide(BigDecimal.valueOf(100),10,RoundingMode.HALF_UP)
+    .multiply(periodFraction).setScale(2,RoundingMode.HALF_UP);
   }
   return amount.add(interest).setScale(2,RoundingMode.HALF_UP);
  }
