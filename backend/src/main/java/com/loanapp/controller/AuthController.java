@@ -4,6 +4,8 @@ import com.loanapp.dto.ApiResponse;
 import com.loanapp.dto.AuthResponse;
 import com.loanapp.dto.LoginRequest;
 import com.loanapp.dto.RegisterRequest;
+import com.loanapp.dto.PasswordActionRequest;
+import com.loanapp.dto.ForgotPasswordRequest;
 import com.loanapp.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,23 +31,23 @@ public class AuthController {
     }
 
     @PostMapping("/set-password")
-    public ResponseEntity<ApiResponse<String>> setPassword(@RequestBody Map<String, String> body) {
-        authService.setPassword(body.get("token"), body.get("password"));
+    public ResponseEntity<ApiResponse<String>> setPassword(@Valid @RequestBody PasswordActionRequest body) {
+        authService.setPassword(body.getToken(), body.getPassword());
         return ResponseEntity.ok(ApiResponse.success("Password imewekwa. Sasa unaweza kuingia.", "OK"));
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody Map<String, String> body) {
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest body) {
         // Intentionally generic: never reveal whether an email exists.
-        authService.requestPasswordReset(body.get("email"));
+        authService.requestPasswordReset(body.getEmail());
         return ResponseEntity.ok(ApiResponse.success(
                 "Kama email ipo kwenye mfumo na akaunti iko hai, utapokea link ya kubadilisha password.",
                 "EMAIL_IF_ELIGIBLE"));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody Map<String, String> body) {
-        authService.resetPassword(body.get("token"), body.get("password"));
+    public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody PasswordActionRequest body) {
+        authService.resetPassword(body.getToken(), body.getPassword());
         return ResponseEntity.ok(ApiResponse.success("Password imebadilishwa. Sasa unaweza kuingia.", "OK"));
     }
 
