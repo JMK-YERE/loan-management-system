@@ -25,6 +25,9 @@ public class GuarantorService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AuditService auditService;
+
     public Guarantor addGuarantor(Long loanId, GuarantorRequest request, String lenderEmail) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Mkopo haujapatikana"));
@@ -70,10 +73,35 @@ public class GuarantorService {
         return g;
     }
 
-    public List<Guarantor> getGuarantorsByLoan(Long loanId) {
+    public List<Guarantor> getGuarantorsByLoan(Long loanId, String email) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Mkopo haujapatikana"));
+        User actor=userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana"));
+        boolean participant=actor.getRole()==User.Role.ADMIN
+                || loan.getLender().getId().equals(actor.getId())
+                || loan.getBorrower().getId().equals(actor.getId())
+                || guarantorRepository.findByLoan(loan).stream().anyMatch(g->g.getGuarantor().getId().equals(actor.getId()));
+        if(!participant) throw new RuntimeException("Huna ruhusa kuona taarifa za wadhamini wa mkopo huu");
         return guarantorRepository.findByLoan(loan);
+    }
+
+    public Guarantor updateGuarantor(Long id, GuarantorRequest request, String email) {
+        Guarantor current=guarantorRepository.findById(id).orElseThrow(() -> new RuntimeException("Mdhamini hajapatikana"));
+        User borrower=userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Mkopaji hajapatikana"));
+        if(!current.getLoan().getBorrower().getId().equals(borrower.getId())) throw new RuntimeException("Huna ruhusa");
+        if(current.getLoan().getStatus()!=Loan.LoanStatus.PENDING) throw new RuntimeException("Mdhamini anaweza kubadilishwa kabla ya loan approval tu");
+        User replacement=userRepository.findById(request.getGuarantorId()).orElseThrow(() -> new RuntimeException("Mdhamini mpya hajapatikana"));
+        if(replacement.getRole()!=User.Role.GUARANTOR || !Boolean.TRUE.equals(replacement.getActive()) || replacement.getStatus()!=User.UserStatus.APPROVED)
+            throw new RuntimeException("Mtumiaji aliyechaguliwa si mdhamini aliyeidhinishwa");
+        if(replacement.getId().equals(borrower.getId())) throw new RuntimeException("Mkopaji hawezi kuwa mdhamini wake");
+        current.setGuarantor(replacement);
+        current.setGuaranteedAmount(request.getGuaranteedAmount());
+        current.setRelationship(request.getRelationship());
+        current.setStatus(Guarantor.GuarantorStatus.PENDING);
+        current.setApprovedAt(null);
+        Guarantor saved=guarantorRepository.save(current);
+        auditService.log(email,"GUARANTOR_UPDATED","GUARANTOR",id,"Borrower updated guarantor and guarantee amount");
+        return saved;
     }
 
     public List<Guarantor> getGuarantorsByUser(String email) {
