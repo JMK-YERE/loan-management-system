@@ -15,9 +15,13 @@ public class RepaymentScheduleService{
  public List<RepaymentSchedule> generate(Loan loan,LoanProduct product,LocalDate startDate){
   List<RepaymentSchedule> old=repo.findByLoanOrderByInstallmentNumberAsc(loan); if(!old.isEmpty()) return old;
   int periods=loan.getDurationMonths();
-  int count=product.getRepaymentFrequency()==LoanProduct.RepaymentFrequency.ONE_TIME?1:periods;
-  if(product.getRepaymentFrequency()==LoanProduct.RepaymentFrequency.WEEKLY) count=Math.max(1,(int)Math.ceil(periods/4.345));
-  if(product.getRepaymentFrequency()==LoanProduct.RepaymentFrequency.DAILY) count=periods;
+  int effectiveDays=loan.getDurationUnit()==LoanProduct.DurationUnit.DAYS?periods:Math.max(1,periods*30);
+  int count=switch(product.getRepaymentFrequency()){
+   case ONE_TIME -> 1;
+   case DAILY -> effectiveDays;
+   case WEEKLY -> Math.max(1,(int)Math.ceil(effectiveDays/7.0));
+   case MONTHLY -> loan.getDurationUnit()==LoanProduct.DurationUnit.MONTHS?periods:Math.max(1,(int)Math.ceil(effectiveDays/30.0));
+  };
   BigDecimal principal=loan.getAmount().setScale(2,RoundingMode.HALF_UP);
   BigDecimal totalInterest=loan.getTotalRepayment().subtract(principal).subtract(Optional.ofNullable(loan.getProcessingFee()).orElse(BigDecimal.ZERO)).subtract(Optional.ofNullable(loan.getLawyerFee()).orElse(BigDecimal.ZERO)).max(BigDecimal.ZERO);
   BigDecimal pEach=principal.divide(BigDecimal.valueOf(count),2,RoundingMode.DOWN);
