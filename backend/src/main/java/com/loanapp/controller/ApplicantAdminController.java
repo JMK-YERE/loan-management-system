@@ -6,7 +6,8 @@ import com.loanapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;nimport com.loanapp.service.NotificationService;
+import org.springframework.web.bind.annotation.*;
+import com.loanapp.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.*;
