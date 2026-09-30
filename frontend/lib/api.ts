@@ -80,6 +80,8 @@ export const loanApplicationAPI = {
   reject: (id:number, reason?:string) => api.put('/loan-applications/'+id+'/reject', {reason}),
 };
 
+export const repaymentAPI = { schedule: (loanId: number) => api.get('/loans/' + loanId + '/schedule'), };
+
 export const loanAPI = {
   byLender: () => api.get('/loans/lender'),
   byBorrower: () => api.get('/loans/borrower'),
