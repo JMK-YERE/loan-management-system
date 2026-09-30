@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Clock3, CreditCard, FileText, LogOut, RefreshCw, ShieldCheck, WalletCards } from 'lucide-react';
-import { loanAPI, paymentAPI } from '@/lib/api';
+import { loanAPI, paymentAPI, loanApplicationAPI, loanProductAPI } from '@/lib/api';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/lib/useLanguage';
 
@@ -14,9 +14,10 @@ const labels:any={sw:{title:'Dashboard ya Mkopaji',welcome:'Karibu',subtitle:'Dh
 
 export default function BorrowerPage(){
  const router=useRouter(); const {lang}=useLanguage(); const t=labels[lang];
+ const [products,setProducts]=useState<any[]>([]),[applications,setApplications]=useState<any[]>([]),[productId,setProductId]=useState(''),[amount,setAmount]=useState(''),[duration,setDuration]=useState(''),[purpose,setPurpose]=useState(''),[submitting,setSubmitting]=useState(false);
  const [user,setUser]=useState<any>(null),[loans,setLoans]=useState<any[]>([]),[loading,setLoading]=useState(true),[err,setErr]=useState('');
  useEffect(()=>{const token=localStorage.getItem('token'),raw=localStorage.getItem('user');if(!token||!raw){router.push('/login');return}const u=JSON.parse(raw);if(u.role!=='BORROWER'){router.push('/dashboard');return}setUser(u);load();},[router]);
- const load=async()=>{setLoading(true);try{const r=await loanAPI.byBorrower();setLoans(Array.isArray(unwrap(r))?unwrap(r):[]);setErr('')}catch(e:any){setErr(e?.response?.data?.message||'Failed to load loans')}finally{setLoading(false)}};
+ const load=async()=>{setLoading(true);try{const [r,a,p]=await Promise.all([loanAPI.byBorrower(),loanApplicationAPI.mine(),loanProductAPI.active()]);setApplications(Array.isArray(unwrap(a))?unwrap(a):[]);setProducts(Array.isArray(unwrap(p))?unwrap(p):[]);setLoans(Array.isArray(unwrap(r))?unwrap(r):[]);setErr('')}catch(e:any){setErr(e?.response?.data?.message||'Failed to load loans')}finally{setLoading(false)}};
  const stats=useMemo(()=>({total:loans.length,active:loans.filter(x=>['APPROVED','DISBURSED'].includes(x.status)).length,paid:loans.filter(x=>x.status==='PAID').length,pending:loans.filter(x=>x.status==='PENDING').length}),[loans]);
  const logout=()=>{localStorage.clear();document.cookie='token=; path=/; max-age=0';router.push('/login')};
  if(!user)return null;
@@ -27,6 +28,18 @@ export default function BorrowerPage(){
   </div></nav>
   <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
    <section className="rounded-3xl bg-gradient-to-br from-blue-700 to-slate-900 p-6 text-white shadow-xl"><p className="text-sm text-blue-100">{t.welcome}</p><h1 className="text-3xl font-black">{user.fullName}</h1><p className="mt-2 text-sm text-blue-100">{t.subtitle}</p></section>
+   <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-blue-900 dark:bg-slate-900">
+    <div className="flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-600"><WalletCards className="h-5 w-5"/></div><div><h2 className="text-xl font-black">{lang==='sw'?'Omba Mkopo':'Apply for a loan'}</h2><p className="text-sm text-slate-500">{lang==='sw'?'Chagua bidhaa, kiasi na muda. Ombi litaenda kwa mkopeshaji kwa review.':'Choose a product, amount and duration. Your application goes to a lender for review.'}</p></div></div>
+    <form onSubmit={async e=>{e.preventDefault();setSubmitting(true);setErr('');try{await loanApplicationAPI.submit({productId:Number(productId),amount:Number(amount),durationMonths:Number(duration),purpose});setErr(lang==='sw'?'Ombi limetumwa kwa mkopeshaji.':'Application submitted for lender review.');setAmount('');setDuration('');setPurpose('');await load();}catch(e:any){setErr(e?.response?.data?.message||'Failed');}finally{setSubmitting(false)}}} className="mt-5 grid gap-3 md:grid-cols-4">
+      <select required value={productId} onChange={e=>{setProductId(e.target.value);const p=products.find(x=>String(x.id)===e.target.value);if(p){setAmount(p.minAmount);setDuration(p.minDuration)}}} className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"><option value="">{lang==='sw'?'Chagua bidhaa ya mkopo':'Choose loan product'}</option>{products.map(p=><option key={p.id} value={p.id}>{p.name} · {money(p.minAmount)}–{money(p.maxAmount)}</option>)}</select>
+      <input required type="number" min="1" value={amount} onChange={e=>setAmount(e.target.value)} placeholder={lang==='sw'?'Kiasi':'Amount'} className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
+      <input required type="number" min="1" value={duration} onChange={e=>setDuration(e.target.value)} placeholder={lang==='sw'?'Muda (miezi)':'Duration (months)'} className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
+      <input required value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder={lang==='sw'?'Madhumuni':'Purpose'} className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
+      <button disabled={submitting} className="rounded-xl bg-blue-600 px-4 py-3 font-black text-white md:col-span-4">{submitting?(lang==='sw'?'Inatuma...':'Submitting...'):(lang==='sw'?'Tuma ombi':'Submit application')}</button>
+    </form>
+   </section>
+   <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="border-b p-5 dark:border-slate-800"><h2 className="font-black">{lang==='sw'?'Hatua za maombi':'Application journey'}</h2></div><div className="grid gap-3 p-5 md:grid-cols-5">{(lang==='sw'?['Jisajili','Admin anakubali','Omba mkopo','Mkopeshaji anakagua','Mdhamini + approval → mkopo']:['Register','Admin approval','Apply for loan','Lender review','Guarantor + approval → loan']).map((x,i)=><div key={x} className="rounded-2xl border p-4 dark:border-slate-800"><div className="text-xs font-black text-blue-600">STEP {i+1}</div><div className="mt-2 text-sm font-bold">{x}</div></div>)}</div></section>
+   <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="border-b p-5 dark:border-slate-800"><h2 className="font-black">{lang==='sw'?'Maombi yangu':'My applications'}</h2></div>{applications.length===0?<div className="p-6 text-sm text-slate-500">{lang==='sw'?'Hujaomba mkopo bado.':'You have not applied for a loan yet.'}</div>:<div className="divide-y dark:divide-slate-800">{applications.map(a=><div key={a.id} className="flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between"><div><b>Application #{a.id}</b><p className="text-sm text-slate-500">{a.product?.name} · {money(a.amount)} · {a.durationMonths} months</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold dark:bg-slate-800">{a.status}</span></div>)}</div>}</section>
    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[[t.total,stats.total,FileText],[t.active,stats.active,WalletCards],[t.pending,stats.pending,Clock3],[t.paid,stats.paid,CheckCircle2]].map(([x,v,I]:any)=><div className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" key={x}><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-3xl font-black">{v}</div><div className="text-sm text-slate-500">{x}</div></div>)}</section>
    {err&&<div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{err}</div>}
    <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="flex items-center justify-between border-b p-5 dark:border-slate-800"><div><h2 className="font-black">{t.loans}</h2><p className="text-sm text-slate-500">{user.email}</p></div><button onClick={load} className="rounded-xl border p-2"><RefreshCw className="h-4 w-4"/></button></div>
