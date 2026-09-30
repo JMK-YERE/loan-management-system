@@ -6,6 +6,7 @@ import com.loanapp.repository.LoanProductRepository;
 import com.loanapp.repository.GuarantorRepository;
 import com.loanapp.repository.LoanRepository;
 import com.loanapp.repository.UserRepository;
+import com.loanapp.repository.SignatureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
