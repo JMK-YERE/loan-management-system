@@ -97,7 +97,7 @@ public class GuarantorAgreementPdfService {
             else {
                 PdfPTable gt=new PdfPTable(4); gt.setWidthPercentage(100); gt.setWidths(new float[]{1.5f,1.1f,1.1f,1});
                 header(gt,"Mdhamini",bold); header(gt,"Kiasi cha dhamana",bold); header(gt,"Uhusiano",bold); header(gt,"Hali",bold);
-                for(Guarantor g:gs){row(gt,safe(g.getGuarantor().getFullName()),money(g.getGuaranteedAmount()),safe(g.getRelationship()),safe(g.getStatus().name()),body);}
+                for(Guarantor g:gs){row(gt,safe(g.getGuarantor().getFullName()),money(g.getGuaranteedAmount()),safe(g.getRelationship()),safe(g.getStatus().name()));}
                 d.add(gt);
                 d.add(new Paragraph("Mdhamini anaona kiasi cha mkopo, kiasi anachowajibika kudhamini na masharti ya wajibu wake kabla ya kukubali na kusaini.",small));
             }
@@ -109,7 +109,7 @@ public class GuarantorAgreementPdfService {
                 PdfPTable st=new PdfPTable(6); st.setWidthPercentage(100);
                 header(st,"#",bold); header(st,"Tarehe",bold); header(st,"Principal",bold); header(st,"Riba",bold); header(st,"Ada",bold); header(st,"Jumla",bold);
                 for(RepaymentSchedule s:ss){
-                    row(st,String.valueOf(s.getInstallmentNumber()),s.getDueDate()==null?"—":s.getDueDate().format(DATE),money(s.getPrincipalDue()),money(s.getInterestDue()),money(s.getFeesDue()),money(s.getAmountDue()),body);
+                    row(st,String.valueOf(s.getInstallmentNumber()),s.getDueDate()==null?"—":s.getDueDate().format(DATE),money(s.getPrincipalDue()),money(s.getInterestDue()),money(s.getFeesDue()),money(s.getAmountDue()));
                 }
                 d.add(st);
             }
@@ -135,8 +135,8 @@ public class GuarantorAgreementPdfService {
             header(sigt,"Mhusika",bold); header(sigt,"Tarehe/Muda",bold); header(sigt,"Hali",bold);
             for(Signature.SignatureType type:Signature.SignatureType.values()){
                 signatures.findByLoan(l).stream().filter(s->s.getSignatureType()==type).findFirst().ifPresentOrElse(
-                    s->row(sigt,type.name(),s.getSignedAt()==null?"—":s.getSignedAt().format(DT),"SIGNED",body),
-                    ()->row(sigt,type.name(),"—","NOT SIGNED",body));
+                    s->row(sigt,type.name(),s.getSignedAt()==null?"—":s.getSignedAt().format(DT),"SIGNED"),
+                    ()->row(sigt,type.name(),"—","NOT SIGNED"));
             }
             d.add(sigt);
 
