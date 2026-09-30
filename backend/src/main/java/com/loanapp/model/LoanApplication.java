@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class LoanApplication {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
  @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="borrower_id",nullable=false) private User borrower;
- @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="product_id",nullable=false) private LoanProduct product;
+ @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="product_id",nullable=true) private LoanProduct product;
  @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="lender_id") private User lender;
  @Column(nullable=false,precision=15,scale=2) private BigDecimal amount;
  @Column(nullable=false) private Integer duration;
@@ -42,7 +42,6 @@ public class LoanApplication {
  public User getLender(){return lender;} public void setLender(User v){lender=v;}
  public BigDecimal getAmount(){return amount;} public void setAmount(BigDecimal v){amount=v;}
  public Integer getDuration(){return duration;} public void setDuration(Integer v){duration=v;}
- // Backward-compatible accessors for legacy reporting code; new code must use duration + durationUnit.
  public Integer getDurationMonths(){return duration;} public void setDurationMonths(Integer v){duration=v;}
  public LoanProduct.DurationUnit getDurationUnit(){return durationUnit;} public void setDurationUnit(LoanProduct.DurationUnit v){durationUnit=v;}
  public String getPurpose(){return purpose;} public void setPurpose(String v){purpose=v;}
@@ -50,7 +49,7 @@ public class LoanApplication {
  public BigDecimal getProcessingFeeSnapshot(){return processingFeeSnapshot;} public void setProcessingFeeSnapshot(BigDecimal v){processingFeeSnapshot=v;}
  public BigDecimal getLateFeeSnapshot(){return lateFeeSnapshot;} public void setLateFeeSnapshot(BigDecimal v){lateFeeSnapshot=v;}
  public BigDecimal getTotalRepaymentSnapshot(){return totalRepaymentSnapshot;} public void setTotalRepaymentSnapshot(BigDecimal v){totalRepaymentSnapshot=v;}
- public BigDecimal getInstallmentAmountSnapshot(){return installmentAmountSnapshot;} public void setInstallmentAmountSnapshot(BigDecimal v){installmentAmountSnapshot=v;}
+ public BigDecimal getInstallmentAmountSnapshot(){return installmentAmountSnapshot;} public void setInstallmentAmountSnapshot(Integer v){installmentAmountSnapshot=BigDecimal.valueOf(v); } public void setInstallmentAmountSnapshot(BigDecimal v){installmentAmountSnapshot=v;}
  public Integer getInstallmentCountSnapshot(){return installmentCountSnapshot;} public void setInstallmentCountSnapshot(Integer v){installmentCountSnapshot=v;}
  public Integer getGracePeriodDaysSnapshot(){return gracePeriodDaysSnapshot;} public void setGracePeriodDaysSnapshot(Integer v){gracePeriodDaysSnapshot=v;}
  public String getInterestTypeSnapshot(){return interestTypeSnapshot;} public void setInterestTypeSnapshot(String v){interestTypeSnapshot=v;}
