@@ -31,7 +31,7 @@ public class LoanProduct {
  public LoanType getLoanType(){return loanType;} public void setLoanType(LoanType v){loanType=v;}
  public BigDecimal getMinAmount(){return minAmount;} public void setMinAmount(BigDecimal v){minAmount=v;}
  public BigDecimal getMaxAmount(){return maxAmount;} public void setMaxAmount(Integer v){maxDuration=v;}
- public BigDecimal getMinDuration(){return BigDecimal.valueOf(minDuration == null ? 0 : minDuration);} 
+ public Integer getMinDuration(){return minDuration;} 
  public void setMinDuration(Integer v){minDuration=v;}
  public Integer getMaxDuration(){return maxDuration;} public void setMaxDuration(Integer v){maxDuration=v;}
  public DurationUnit getDurationUnit(){return durationUnit;} public void setDurationUnit(DurationUnit v){durationUnit=v;}
