@@ -44,7 +44,7 @@ public class PaymentService {
     public Payment confirmPayment(Long id,String transactionId,String actorEmail){
         Payment payment=paymentRepository.findById(id).orElseThrow(()->new RuntimeException("Malipo hayajapatikana"));
         User actor=userRepository.findByEmail(actorEmail).orElseThrow(()->new RuntimeException("Mtumiaji hajapatikana"));
-        if(actor.getRole()!=User.Role.ADMIN&&!payment.getLoan().getLender().getId().equals(actor.getId())) throw new RuntimeException("Huna ruhusa ya kuthibitisha malipo haya");
+        if(actor.getRole()!=User.Role.ADMIN && actor.getRole()!=User.Role.BURSER && !payment.getLoan().getLender().getId().equals(actor.getId())) throw new RuntimeException("Huna ruhusa ya kuthibitisha malipo haya");
         if(payment.getStatus()==Payment.PaymentStatus.SUCCESS) return payment;
         payment.setStatus(Payment.PaymentStatus.SUCCESS);
         if(transactionId!=null&&!transactionId.isBlank()) payment.setTransactionId(transactionId.trim());
