@@ -54,7 +54,12 @@ public class GeneralLoanApplicationService {
  }
 
  public List<LoanApplication> mine(String email){User b=users.findByEmail(email).orElseThrow();return apps.findByBorrowerOrderByCreatedAtDesc(b);}
- public List<LoanApplication> pending(){return apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.SUBMITTED);}
+ public List<LoanApplication> pending(){
+  List<LoanApplication> out=new java.util.ArrayList<>(apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.SUBMITTED));
+  out.addAll(apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.UNDER_REVIEW));
+  out.sort(java.util.Comparator.comparing(LoanApplication::getCreatedAt));
+  return out;
+}
  private LoanApplication get(Long id){return apps.findById(id).orElseThrow(()->new RuntimeException("Ombi halijapatikana"));}
 
  static class LoanRequestMapper{com.loanapp.dto.LoanRequest map(LoanApplication a){com.loanapp.dto.LoanRequest r=new com.loanapp.dto.LoanRequest();r.setLoanProductId(a.getProduct().getId());r.setAmount(a.getAmount());r.setDurationMonths(a.getDuration());r.setPurpose(a.getPurpose());r.setInterestRate(a.getInterestSnapshot());r.setProcessingFee(a.getProcessingFeeSnapshot());r.setLawyerRequired(false);return r;}}
