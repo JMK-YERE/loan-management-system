@@ -28,7 +28,7 @@ public class LoanController {
     public ResponseEntity<ApiResponse<List<Loan>>> getLoansByBorrower(Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mikopo yako",loanService.getLoansByBorrower(auth.getName())));}
 
     @GetMapping("/{id}") @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<Loan>> getLoanById(@PathVariable Long id){return ResponseEntity.ok(ApiResponse.success("Mkopo umepatikana",loanService.getLoanById(id)));}
+    public ResponseEntity<ApiResponse<Loan>> getLoanById(@PathVariable Long id,Authentication auth){ Loan loan=loanService.getLoanById(id); if(!loanService.canView(loan,auth.getName())) throw new RuntimeException("Huna ruhusa kuona mkopo huu"); return ResponseEntity.ok(ApiResponse.success("Mkopo umepatikana",loan));}
 
     @PutMapping("/{id}/approve") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<Loan>> approveLoan(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Mkopo umeidhinishwa",loanService.approveLoan(id,auth.getName())));}
