@@ -81,6 +81,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(Arrays.asList(
                 frontendUrl,
                 "https://loan-management-system-3awf.onrender.com",
+                "https://jmkloanapp-frontend.onrender.com",
                 "http://localhost:3000"
         ));
 
