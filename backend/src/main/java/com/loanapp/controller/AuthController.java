@@ -30,6 +30,13 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Kuingia kumefanikiwa", authService.login(request)));
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> google(@RequestBody Map<String,String> body) {
+        String credential=body==null?null:body.get("credential");
+        if(credential==null || credential.isBlank()) throw new RuntimeException("Google credential inahitajika");
+        return ResponseEntity.ok(ApiResponse.success("Google sign-in imefanikiwa", authService.loginWithGoogle(credential)));
+    }
+
     @PostMapping("/set-password")
     public ResponseEntity<ApiResponse<String>> setPassword(@Valid @RequestBody PasswordActionRequest body) {
         authService.setPassword(body.getToken(), body.getPassword());
