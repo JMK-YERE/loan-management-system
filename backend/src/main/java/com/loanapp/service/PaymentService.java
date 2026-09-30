@@ -22,6 +22,7 @@ public class PaymentService {
     @Autowired private LoanRepository loanRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private AuditService auditService;
+    @Autowired private PaymentAllocationService paymentAllocationService;
 
     @Transactional
     public Payment createPayment(PaymentRequest request,String email){
@@ -48,7 +49,7 @@ public class PaymentService {
         payment.setStatus(Payment.PaymentStatus.SUCCESS);
         if(transactionId!=null&&!transactionId.isBlank()) payment.setTransactionId(transactionId.trim());
         payment.setPaidAt(LocalDateTime.now());
-        Payment saved=paymentRepository.save(payment); Loan loan=saved.getLoan();
+        Payment saved=paymentRepository.save(payment); paymentAllocationService.allocate(saved); Loan loan=saved.getLoan();
         BigDecimal paid=paymentRepository.findByLoanAndStatus(loan,Payment.PaymentStatus.SUCCESS).stream().map(Payment::getAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
         if(paid.compareTo(loan.getTotalRepayment())>=0) loan.setStatus(Loan.LoanStatus.PAID);
         else if(loan.getStatus()==Loan.LoanStatus.APPROVED) loan.setStatus(Loan.LoanStatus.DISBURSED);
