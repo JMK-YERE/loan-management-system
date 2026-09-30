@@ -10,46 +10,28 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
-    private String fullName;
+    @Column(nullable = false, length = 200) private String fullName;
+    @Column(unique = true, nullable = false, length = 150) private String email;
+    @Column(unique = true, nullable = false, length = 20) private String phone;
+    @Column(nullable = true) private String password;
 
-    @Column(unique = true, nullable = false, length = 150)
-    private String email;
+    @Column(name = "national_id", unique = true, length = 50) private String nidaNumber;
 
-    @Column(unique = true, nullable = false, length = 20)
-    private String phone;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private Role role;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private UserStatus status = UserStatus.PENDING;
 
-    @Column(nullable = true)
-    private String password;
-
-    @Column(name = "national_id", unique = true, length = 50)
-    private String nidaNumber;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Role role;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private UserStatus status = UserStatus.PENDING;
-
-    @Column(unique = true, length = 100)
-    private String verificationToken;
-
+    @Column(unique = true, length = 100) private String verificationToken;
     private LocalDateTime tokenExpiry;
 
-    @Column(length = 500)
-    private String profilePicture;
+    @Column(unique = true, length = 120) private String passwordResetToken;
+    private LocalDateTime passwordResetExpiry;
 
-    @Column(length = 500)
-    private String rejectionReason;
-
-    @Column(nullable = false)
-    private Boolean active = false;
+    @Column(length = 500) private String profilePicture;
+    @Column(length = 500) private String rejectionReason;
+    @Column(nullable = false) private Boolean active = false;
 
     @Column(length = 30) private String idType;
     private LocalDate dateOfBirth;
@@ -68,15 +50,14 @@ public class User {
     @Column(length = 40) private String kinRelationship;
     @Column(columnDefinition = "TEXT") private String photoData;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
+    @Column(nullable = false, updatable = false) private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public User() {}
 
     public User(Long id, String fullName, String email, String phone, String password, String nidaNumber,
                 Role role, UserStatus status, String verificationToken, LocalDateTime tokenExpiry,
+                String passwordResetToken, LocalDateTime passwordResetExpiry,
                 String profilePicture, String rejectionReason, Boolean active, String idType,
                 LocalDate dateOfBirth, String gender, String maritalStatus, String nationality,
                 String address, String city, String country, String employmentStatus, String occupation,
@@ -84,16 +65,16 @@ public class User {
                 String kinRelationship, String photoData, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id=id; this.fullName=fullName; this.email=email; this.phone=phone; this.password=password;
         this.nidaNumber=nidaNumber; this.role=role; this.status=status; this.verificationToken=verificationToken;
-        this.tokenExpiry=tokenExpiry; this.profilePicture=profilePicture; this.rejectionReason=rejectionReason;
-        this.active=active; this.idType=idType; this.dateOfBirth=dateOfBirth; this.gender=gender;
-        this.maritalStatus=maritalStatus; this.nationality=nationality; this.address=address; this.city=city;
-        this.country=country; this.employmentStatus=employmentStatus; this.occupation=occupation;
-        this.employer=employer; this.monthlyIncome=monthlyIncome; this.kinName=kinName; this.kinPhone=kinPhone;
+        this.tokenExpiry=tokenExpiry; this.passwordResetToken=passwordResetToken; this.passwordResetExpiry=passwordResetExpiry;
+        this.profilePicture=profilePicture; this.rejectionReason=rejectionReason; this.active=active;
+        this.idType=idType; this.dateOfBirth=dateOfBirth; this.gender=gender; this.maritalStatus=maritalStatus;
+        this.nationality=nationality; this.address=address; this.city=city; this.country=country;
+        this.employmentStatus=employmentStatus; this.occupation=occupation; this.employer=employer;
+        this.monthlyIncome=monthlyIncome; this.kinName=kinName; this.kinPhone=kinPhone;
         this.kinRelationship=kinRelationship; this.photoData=photoData; this.createdAt=createdAt; this.updatedAt=updatedAt;
     }
 
     public static Builder builder() { return new Builder(); }
-
     public static class Builder {
         private final User u = new User();
         public Builder id(Long v){u.id=v;return this;} public Builder fullName(String v){u.fullName=v;return this;}
@@ -101,6 +82,7 @@ public class User {
         public Builder password(String v){u.password=v;return this;} public Builder nidaNumber(String v){u.nidaNumber=v;return this;}
         public Builder role(Role v){u.role=v;return this;} public Builder status(UserStatus v){u.status=v;return this;}
         public Builder verificationToken(String v){u.verificationToken=v;return this;} public Builder tokenExpiry(LocalDateTime v){u.tokenExpiry=v;return this;}
+        public Builder passwordResetToken(String v){u.passwordResetToken=v;return this;} public Builder passwordResetExpiry(LocalDateTime v){u.passwordResetExpiry=v;return this;}
         public Builder profilePicture(String v){u.profilePicture=v;return this;} public Builder rejectionReason(String v){u.rejectionReason=v;return this;}
         public Builder active(Boolean v){u.active=v;return this;} public Builder idType(String v){u.idType=v;return this;}
         public Builder dateOfBirth(LocalDate v){u.dateOfBirth=v;return this;} public Builder gender(String v){u.gender=v;return this;}
@@ -124,6 +106,8 @@ public class User {
     public UserStatus getStatus(){return status;} public void setStatus(UserStatus v){status=v;}
     public String getVerificationToken(){return verificationToken;} public void setVerificationToken(String v){verificationToken=v;}
     public LocalDateTime getTokenExpiry(){return tokenExpiry;} public void setTokenExpiry(LocalDateTime v){tokenExpiry=v;}
+    public String getPasswordResetToken(){return passwordResetToken;} public void setPasswordResetToken(String v){passwordResetToken=v;}
+    public LocalDateTime getPasswordResetExpiry(){return passwordResetExpiry;} public void setPasswordResetExpiry(LocalDateTime v){passwordResetExpiry=v;}
     public String getProfilePicture(){return profilePicture;} public void setProfilePicture(String v){profilePicture=v;}
     public String getRejectionReason(){return rejectionReason;} public void setRejectionReason(String v){rejectionReason=v;}
     public Boolean getActive(){return active;} public void setActive(Boolean v){active=v;}
@@ -146,11 +130,8 @@ public class User {
     public LocalDateTime getCreatedAt(){return createdAt;} public void setCreatedAt(LocalDateTime v){createdAt=v;}
     public LocalDateTime getUpdatedAt(){return updatedAt;} public void setUpdatedAt(LocalDateTime v){updatedAt=v;}
 
-    @PrePersist
-    protected void onCreate() { createdAt=LocalDateTime.now(); updatedAt=LocalDateTime.now(); }
-
-    @PreUpdate
-    protected void onUpdate() { updatedAt=LocalDateTime.now(); }
+    @PrePersist protected void onCreate(){createdAt=LocalDateTime.now();updatedAt=LocalDateTime.now();}
+    @PreUpdate protected void onUpdate(){updatedAt=LocalDateTime.now();}
 
     public enum Role { LENDER, BORROWER, GUARANTOR, ADMIN }
     public enum UserStatus { PENDING, APPROVED, REJECTED }
