@@ -8,6 +8,7 @@ import {
   LockKeyhole, Menu, ShieldCheck, Users, X,
 } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { announcementAPI } from '@/lib/api';
 import { getInitialLanguage, translations, Lang } from '@/lib/i18n';
 
 const images = [
@@ -24,6 +25,7 @@ export default function Home() {
   const [lang, setLang] = useState<Lang>('sw');
   const [slide, setSlide] = useState(0);
   const [menu, setMenu] = useState(false);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const t = translations[lang];
 
   useEffect(() => {
@@ -33,6 +35,8 @@ export default function Home() {
     window.addEventListener('jmk-language-change', handler);
     return () => window.removeEventListener('jmk-language-change', handler);
   }, []);
+
+  useEffect(() => { announcementAPI.getPublic().then(r => setAnnouncements(r.data?.data || [])).catch(() => setAnnouncements([])); }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setSlide((s) => (s + 1) % images.length), 5500);
@@ -103,6 +107,16 @@ export default function Home() {
           {images.map((_, i) => <button key={i} onClick={() => setSlide(i)} aria-label={`Slide ${i + 1}`} className={`h-2 rounded-full transition-all ${i === slide ? 'w-9 bg-white' : 'w-2 bg-white/40'}`} />)}
         </div>
       </section>
+
+      {announcements.length > 0 && <section className="bg-white py-12 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-7 flex items-end justify-between gap-4"><div><p className="font-bold text-blue-600">JmkLoanApp</p><h2 className="text-2xl font-black sm:text-3xl">{lang==='sw'?'Matangazo na Ofa Mpya':'Latest announcements & offers'}</h2></div><span className="text-sm text-slate-500">{lang==='sw'?'Taarifa rasmi kutoka admin':'Official updates from admin'}</span></div>
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{announcements.map(a=><article key={a.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            {a.imageUrl ? <img src={a.imageUrl} alt={a.title} className="h-44 w-full object-cover" /> : <div className={`flex h-20 items-center px-6 bg-gradient-to-r ${a.color || 'from-blue-500 to-indigo-600'}`}><span className="text-3xl">{a.emoji || '📢'}</span></div>}
+            <div className="p-5"><span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">{a.tag || 'Habari'}</span><h3 className="mt-3 text-lg font-black">{a.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{a.content}</p>{a.ctaText && a.ctaLink && <Link href={a.ctaLink} className="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white">{a.ctaText}</Link>}</div>
+          </article>)}</div>
+        </div>
+      </section>}
 
       <section id="features" className="bg-slate-50 py-20 dark:bg-slate-900/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
