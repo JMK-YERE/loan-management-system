@@ -29,7 +29,7 @@ const SW_TO_EN: Record<string,string> = {
 
 const EN_TO_SW: Record<string,string> = Object.fromEntries(Object.entries(SW_TO_EN).map(([a,b])=>[b,a]));
 
-function apply(root: Node, dict: Record<string,string>) {
+function apply(root: ParentNode, dict: Record<string,string>) {
  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
  const nodes: Text[]=[]; let n: Node|null;
  while((n=walker.nextNode())) nodes.push(n as Text);
