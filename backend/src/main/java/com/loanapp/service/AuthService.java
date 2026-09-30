@@ -34,7 +34,7 @@ public class AuthService {
     @Value("${google.client.id:}") private String googleClientId;
 
     public String register(RegisterRequest r) {
-        if (r.getRole() == User.Role.ADMIN) throw new RuntimeException("Role hii hairuhusiwi");
+        if (r.getRole() == User.Role.ADMIN || r.getRole() == User.Role.BURSER) throw new RuntimeException("Role hii haiwezi kujisajili. Admin ndiye anayempa mtumiaji role hii.");
         if (Period.between(r.getDateOfBirth(), LocalDate.now()).getYears() < 18)
             throw new RuntimeException("Lazima uwe na umri wa miaka 18 au zaidi");
 
