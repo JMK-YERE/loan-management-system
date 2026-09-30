@@ -68,6 +68,16 @@ export const adminAPI = {
 export const userAPI = {
   me: () => api.get('/me'),
   borrowers: () => api.get('/users/borrowers'),
+  guarantors: () => api.get('/users/guarantors'),
+};
+
+export const loanApplicationAPI = {
+  submit: (data:any) => api.post('/loan-applications', data),
+  mine: () => api.get('/loan-applications/mine'),
+  pending: () => api.get('/loan-applications/pending'),
+  review: (id:number) => api.put('/loan-applications/'+id+'/review'),
+  approve: (id:number) => api.put('/loan-applications/'+id+'/approve'),
+  reject: (id:number, reason?:string) => api.put('/loan-applications/'+id+'/reject', {reason}),
 };
 
 export const loanAPI = {
