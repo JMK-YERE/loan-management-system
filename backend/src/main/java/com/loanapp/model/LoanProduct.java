@@ -1,11 +1,13 @@
 package com.loanapp.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="loan_products")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class LoanProduct {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
  @Column(nullable=false,unique=true,length=100) private String name;
@@ -28,8 +30,9 @@ public class LoanProduct {
  public String getName(){return name;} public void setName(String v){name=v;}
  public LoanType getLoanType(){return loanType;} public void setLoanType(LoanType v){loanType=v;}
  public BigDecimal getMinAmount(){return minAmount;} public void setMinAmount(BigDecimal v){minAmount=v;}
- public BigDecimal getMaxAmount(){return maxAmount;} public void setMaxAmount(BigDecimal v){maxAmount=v;}
- public Integer getMinDuration(){return minDuration;} public void setMinDuration(Integer v){minDuration=v;}
+ public BigDecimal getMaxAmount(){return maxAmount;} public void setMaxAmount(Integer v){maxDuration=v;}
+ public BigDecimal getMinDuration(){return BigDecimal.valueOf(minDuration == null ? 0 : minDuration);} 
+ public void setMinDuration(Integer v){minDuration=v;}
  public Integer getMaxDuration(){return maxDuration;} public void setMaxDuration(Integer v){maxDuration=v;}
  public DurationUnit getDurationUnit(){return durationUnit;} public void setDurationUnit(DurationUnit v){durationUnit=v;}
  public BigDecimal getInterestRate(){return interestRate;} public void setInterestRate(BigDecimal v){interestRate=v;}
