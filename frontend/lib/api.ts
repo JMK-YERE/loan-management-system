@@ -126,7 +126,10 @@ export const signatureAPI = {
 export default api;
 
 export const agreementAPI = {
-  download: (loanId: number) => api.get('/agreements/' + loanId + '.pdf', { responseType: 'blob' }),
+  preview: (loanId: number) => api.get('/loan-agreements/' + loanId + '/preview', { responseType: 'blob' }),
+  download: (loanId: number) => api.get('/loan-agreements/' + loanId + '/pdf', { responseType: 'blob' }),
+  applicationPreview: (applicationId: number) => api.get('/agreements/application/' + applicationId + '/preview', { responseType: 'blob' }),
+  applicationDownload: (applicationId: number) => api.get('/agreements/application/' + applicationId + '/pdf', { responseType: 'blob' }),
 };
 
 export const mobileMoneyAPI = {
