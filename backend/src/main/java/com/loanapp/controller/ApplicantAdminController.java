@@ -3,11 +3,11 @@ package com.loanapp.controller;
 import com.loanapp.dto.ApiResponse;
 import com.loanapp.model.User;
 import com.loanapp.repository.UserRepository;
+import com.loanapp.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.loanapp.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -17,8 +17,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/admin/applicants")
 public class ApplicantAdminController {
 
-    @Autowired private UserRepository repo;n    @Autowired private NotificationService notifications;
-    @Value("${app.frontend.url}") private String frontendUrl;
+    @Autowired
+    private UserRepository repo;
+
+    @Autowired
+    private NotificationService notifications;
+
+    @Value("${app.frontend.url:}")
+    private String frontendUrl;
 
     public static Map<String, Object> toMap(User u, boolean full) {
         Map<String, Object> m = new LinkedHashMap<>();
@@ -75,16 +81,29 @@ public class ApplicantAdminController {
         User u = repo.findById(id).orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana"));
         if (u.getRole() == User.Role.ADMIN) throw new RuntimeException("Haiwezekani");
         if (Boolean.TRUE.equals(u.getActive())) throw new RuntimeException("Mtumiaji tayari ana akaunti hai");
+
         String token = UUID.randomUUID().toString();
         u.setStatus(User.UserStatus.APPROVED);
         u.setRejectionReason(null);
         u.setVerificationToken(token);
         u.setTokenExpiry(LocalDateTime.now().plusDays(2));
         repo.save(u);
+
+        String link = frontendUrl + "/set-password?token=" + token;
+        boolean emailSent = false;
+        try {
+            notifications.sendPasswordSetupEmail(u, link, 48);
+            emailSent = true;
+        } catch (Exception ignored) {
+        }
+
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("setPasswordLink", frontendUrl + "/set-password?token=" + token);
+        data.put("setPasswordLink", link);
         data.put("expiresInHours", 48);
-        return ResponseEntity.ok(ApiResponse.success("Amekubaliwa. Mtumie link ya kuweka password.", data));
+        data.put("emailSent", emailSent);
+        return ResponseEntity.ok(ApiResponse.success(
+                emailSent ? "Amekubaliwa. Link ya kuweka password imetumwa kwenye email." : "Amekubaliwa. Email haikutumwa; tumia link ya kuweka password.",
+                data));
     }
 
     @PostMapping("/{id}/reject")
