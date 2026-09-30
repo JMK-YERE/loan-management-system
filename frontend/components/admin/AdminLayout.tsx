@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Megaphone, Users, Settings, LogOut, ArrowLeft, Menu, X, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Users, Settings, LogOut, ArrowLeft, Menu, X, BarChart3, WalletCards } from 'lucide-react';
 import { useAuth } from '@/store/auth';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/announcements', label: 'Matangazo', icon: Megaphone },
     { href: '/admin/users', label: 'Watumiaji', icon: Users },
     { href: '/admin/reports', label: 'Ripoti', icon: BarChart3 },
+    { href: '/admin/loan-products', label: 'Loan Products', icon: WalletCards },
     { href: '/admin/settings', label: 'Mipangilio', icon: Settings },
   ];
 
