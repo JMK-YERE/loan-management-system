@@ -120,10 +120,15 @@ export const mobileMoneyAPI = {
   checkout: (paymentId: number, phone: string) => api.post('/mobile-money/checkout/' + paymentId, { phone }),
 };
 
-
 export const loanProductAPI = {
   active: () => api.get('/loan-products'),
   all: () => api.get('/loan-products/all'),
   create: (data: any) => api.post('/loan-products', data),
   setActive: (id: number, value: boolean) => api.patch('/loan-products/' + id + '/active', null, { params: { value } }),
+};
+
+export const creditAssessmentAPI = {
+  assess: (applicationId: number, data: { monthlyExpenses: number; existingMonthlyDebt: number }) =>
+    api.post('/credit-assessments/' + applicationId, data),
+  get: (applicationId: number) => api.get('/credit-assessments/' + applicationId),
 };
