@@ -38,7 +38,7 @@ public class AdminStatsController {
         long defaultedLoans = loanRepository.countByStatus(Loan.LoanStatus.DEFAULTED);
         long totalPayments = paymentRepository.count();
         BigDecimal portfolio = loanRepository.sumAmount();
-        BigDecimal repayments = paymentRepository.sumSuccessfulAmount();
+        BigDecimal repayments = paymentRepository.sumAmountByStatus(Payment.PaymentStatus.SUCCESS);
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("totalUsers", totalUsers);
