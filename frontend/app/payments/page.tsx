@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';\nimport { useRouter } from 'next/navigation';
 import { CreditCard, Smartphone } from 'lucide-react';
 import { loanAPI, paymentAPI, mobileMoneyAPI } from '@/lib/api';
 
 export default function PaymentsPage(){
+ const router=useRouter();
  const [loans,setLoans]=useState<any[]>([]);const [loanId,setLoanId]=useState('');const [amount,setAmount]=useState('');const [method,setMethod]=useState('MPESA');const [phone,setPhone]=useState('');const [msg,setMsg]=useState('');const [busy,setBusy]=useState(false);
- useEffect(()=>{const q=new URLSearchParams(window.location.search).get('loanId');if(q)setLoanId(q);(async()=>{try{const r=await loanAPI.byBorrower();setLoans(r.data?.data||r.data||[])}catch(e){setMsg('Imeshindikana kupakia mikopo.')}})()},[]);
+ useEffect(()=>{const raw=localStorage.getItem('user');const token=localStorage.getItem('token');if(!token||!raw){router.push('/login');return;}try{const u=JSON.parse(raw);if(u.role!=='BORROWER'){router.push(u.role==='BURSER'?'/bursar':u.role==='LENDER'?'/lender':'/dashboard');return;}const q=new URLSearchParams(window.location.search).get('loanId');if(q)setLoanId(q);(async()=>{try{const r=await loanAPI.byBorrower();setLoans(r.data?.data||r.data||[])}catch(e){setMsg('Imeshindikana kupakia mikopo.')}})()}catch{router.push('/login')}},[router]);
  const pay=async(e:any)=>{e.preventDefault();setBusy(true);setMsg('');try{const p=await paymentAPI.create({loanId:Number(loanId),amount:Number(amount),paymentMethod:method});const payment=p.data?.data||p.data;if(['MPESA','MIXX_BY_YAS','AIRTEL_MONEY','HALOPESA','TANQR','TIPS','TISS'].includes(method)){const r=await mobileMoneyAPI.checkout(payment.id,phone);const data=r.data?.data||r.data;setMsg(data?.message||('Gateway status: '+data?.status));}else{setMsg('Malipo yameandikwa PENDING. Bursar/Lender atayalinganisha na kuthibitisha baada ya kuona cash au bank transaction. Reference ya mfumo: '+payment.transactionId);}}catch(e:any){setMsg(e?.response?.data?.message||'Malipo yameshindwa kuanzishwa.')}finally{setBusy(false)}};
  return <main className="min-h-screen bg-slate-50 p-6 dark:bg-slate-950"><div className="mx-auto max-w-3xl space-y-6">
   <section className="rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-900"><div className="mb-4 flex justify-end"><button type="button" onClick={()=>window.history.back()} className="rounded-xl border px-4 py-2 text-sm font-bold">← Rudi nyuma</button></div><div className="flex items-center gap-3"><div className="rounded-xl bg-emerald-50 p-3 text-emerald-600"><CreditCard/></div><div><h1 className="text-2xl font-black">Malipo ya Mkopo</h1><p className="text-sm text-slate-500">M-Pesa, Mixx by Yas, Airtel Money, HaloPesa, TANQR, TIPS na TISS. Mfumo hutenganisha channel/rail na reconciliation ya lender/bursar.</p></div></div></section>
