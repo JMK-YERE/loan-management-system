@@ -2,6 +2,7 @@ package com.loanapp.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -66,6 +67,7 @@ public class Loan {
     @Column(precision = 15, scale = 2)
     private BigDecimal collateralValue = BigDecimal.ZERO;
 
+    @JsonIgnore
     @Lob
     @Column(columnDefinition = "TEXT")
     private String collateralPhotoData;
