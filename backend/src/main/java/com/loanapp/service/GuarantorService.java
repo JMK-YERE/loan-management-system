@@ -163,12 +163,14 @@ public class GuarantorService {
         Guarantor g=findByRemoteToken(token);
         if(g.getStatus()!=Guarantor.GuarantorStatus.PENDING) throw new RuntimeException("Kiungo hiki hakisubiri sahihi");
         Loan l=g.getLoan();
-        return Map.of("guarantorId",g.getId(),"loanId",l.getId(),"borrowerName",l.getBorrower().getFullName(),
-          "loanAmount",l.getAmount(),"guarantorName",g.getGuarantorName(),"guarantorPhone",g.getGuarantorPhone()==null?"":g.getGuarantorPhone(),
-          "guaranteedAmount",g.getGuaranteedAmount(),"relationship",g.getRelationship()==null?"":g.getRelationship(),
-          "purpose",l.getPurpose()==null?"":l.getPurpose(),"interestRate",l.getInterestRate(),"processingFee",l.getProcessingFee(),
-          "totalRepayment",l.getTotalRepayment(),"duration",l.getDurationMonths(),"durationUnit",l.getDurationUnit()==null?"MONTHS":l.getDurationUnit(),
-          "nextDueDate",l.getNextDueDate()==null?"":l.getNextDueDate(),"expiresAt",g.getRemoteExpiresAt());
+        Map<String,Object> out=new java.util.LinkedHashMap<>();
+        out.put("guarantorId",g.getId());out.put("loanId",l.getId());out.put("borrowerName",l.getBorrower().getFullName());
+        out.put("loanAmount",l.getAmount());out.put("guarantorName",g.getGuarantorName());out.put("guarantorPhone",g.getGuarantorPhone()==null?"":g.getGuarantorPhone());
+        out.put("guaranteedAmount",g.getGuaranteedAmount());out.put("relationship",g.getRelationship()==null?"":g.getRelationship());
+        out.put("purpose",l.getPurpose()==null?"":l.getPurpose());out.put("interestRate",l.getInterestRate());out.put("processingFee",l.getProcessingFee());
+        out.put("totalRepayment",l.getTotalRepayment());out.put("duration",l.getDurationMonths());out.put("durationUnit",l.getDurationUnit()==null?"MONTHS":l.getDurationUnit());
+        out.put("nextDueDate",l.getNextDueDate()==null?"":l.getNextDueDate());out.put("expiresAt",g.getRemoteExpiresAt());
+        return out;
     }
 
     @Transactional
