@@ -54,6 +54,10 @@ export const systemAPI = {
   status: () => api.get('/admin/system/status'),
 };
 
+export const managementFinanceAPI = {
+  statement: () => api.get('/management/financial-statement'),
+};
+
 export const adminUserAPI = {
   list: () => api.get('/admin/users'),
   changeRole: (id: number, role: string) => api.patch('/admin/users/' + id + '/role', { role }),
