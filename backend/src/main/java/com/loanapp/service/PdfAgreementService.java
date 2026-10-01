@@ -60,6 +60,20 @@ public class PdfAgreementService {
        for(Object p:photos) addImageData(d,String.valueOf(p),"Collateral photo",h,420,260);
       }catch(Exception ignored){}
     }
+    if(c.getDocumentDataJson()!=null){
+      try{
+       var docs=new com.fasterxml.jackson.databind.ObjectMapper().readValue(c.getDocumentDataJson(),java.util.List.class);
+       d.add(new Paragraph("Supporting documents: "+docs.size(),h));
+       for(Object item:docs){
+        if(item instanceof java.util.Map<?,?> m){
+         String name=String.valueOf(m.get("name"));
+         String data=String.valueOf(m.get("data"));
+         d.add(new Paragraph("Document: "+name));
+         if(data.startsWith("data:image/")) addImageData(d,data,"Document image",h,420,260);
+        }
+       }
+      }catch(Exception ignored){}
+    }
    }
    d.add(new Paragraph("Status: "+l.getStatus()));
    d.add(new Paragraph("Next due date: "+(l.getNextDueDate()==null?"—":l.getNextDueDate())));
