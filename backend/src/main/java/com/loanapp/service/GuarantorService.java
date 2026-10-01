@@ -28,6 +28,9 @@ public class GuarantorService {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private NotificationService notifications;
+
     public Guarantor addGuarantor(Long loanId, GuarantorRequest request, String lenderEmail) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Mkopo haujapatikana"));
@@ -35,6 +38,10 @@ public class GuarantorService {
         if (!loan.getLender().getId().equals(lender.getId()) && lender.getRole() != User.Role.ADMIN) throw new RuntimeException("Huna ruhusa ya kuongeza mdhamini kwenye mkopo huu");
         User guarantor = userRepository.findById(request.getGuarantorId())
                 .orElseThrow(() -> new RuntimeException("Mdhamini hajapatikana"));
+
+        if (guarantor.getId().equals(loan.getBorrower().getId())) {
+            throw new RuntimeException("Mkopaji hawezi kuwa mdhamini wake mwenyewe");
+        }
 
         Guarantor g = Guarantor.builder()
                 .loan(loan)
@@ -44,7 +51,22 @@ public class GuarantorService {
                 .status(Guarantor.GuarantorStatus.PENDING)
                 .build();
 
-        return guarantorRepository.save(g);
+        Guarantor saved = guarantorRepository.save(g);
+        String text = "JmkLoanApp: umeombwa kuwa mdhamini wa " + loan.getBorrower().getFullName()
+                + ". Kiasi cha mkopo TZS " + loan.getAmount()
+                + ", exposure yako TZS " + request.getGuaranteedAmount()
+                + ". Ingia kwenye mfumo kusoma mkataba na kukubali/kukataa.";
+        notifications.sendSms(guarantor.getPhone(), text);
+        if (guarantor.getEmail() != null && !guarantor.getEmail().isBlank()) {
+            notifications.sendEmail(guarantor.getEmail(), "JmkLoanApp - Ombi la Udhamini",
+                    "<div style='font-family:Arial,sans-serif'><p>Habari " + guarantor.getFullName()
+                    + ",</p><p>Umeombwa kuwa mdhamini wa " + loan.getBorrower().getFullName()
+                    + ". Kiasi cha mkopo ni TZS " + loan.getAmount()
+                    + " na exposure yako ni TZS " + request.getGuaranteedAmount()
+                    + ".</p><p>Ingia JmkLoanApp kusoma mkataba na kukubali au kukataa.</p></div>");
+        }
+        auditService.log(lenderEmail,"GUARANTOR_ASSIGNED","GUARANTOR",saved.getId(),"Guarantor notified with loan amount and guarantee exposure");
+        return saved;
     }
 
     public Guarantor approveGuarantor(Long id, String email) {
