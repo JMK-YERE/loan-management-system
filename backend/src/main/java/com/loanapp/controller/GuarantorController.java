@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/guarantors")
@@ -38,6 +39,24 @@ public class GuarantorController {
             Authentication authentication) {
         return ResponseEntity.ok(ApiResponse.success("Mdhamini wa onsite amerekodiwa na kusaini",
                 guarantorService.addOnsiteGuarantor(loanId, request, authentication.getName())));
+    }
+
+    @PostMapping("/loan/{loanId}/remote-invite")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String,Object>>> remoteInvite(@PathVariable Long loanId,@RequestBody Map<String,Object> body,Authentication authentication){
+        java.math.BigDecimal amount=new java.math.BigDecimal(String.valueOf(body.getOrDefault("guaranteedAmount","0")));
+        Map<String,Object> result=guarantorService.createRemoteInvite(loanId,String.valueOf(body.getOrDefault("name","")),String.valueOf(body.getOrDefault("phone","")),String.valueOf(body.getOrDefault("idNumber","")),String.valueOf(body.getOrDefault("relationship","")),amount,authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success("Remote guarantor link imetengenezwa",result));
+    }
+
+    @GetMapping("/remote/{token}")
+    public ResponseEntity<ApiResponse<Map<String,Object>>> remoteDetails(@PathVariable String token){
+        return ResponseEntity.ok(ApiResponse.success("Taarifa za signing",guarantorService.getRemoteInvite(token)));
+    }
+
+    @PostMapping("/remote/{token}/sign")
+    public ResponseEntity<ApiResponse<Map<String,Object>>> remoteSign(@PathVariable String token,@RequestBody Map<String,String> body){
+        return ResponseEntity.ok(ApiResponse.success("Mdhamini amesaini",guarantorService.signRemote(token,body.get("signatureData"),body.get("deviceInfo"))));
     }
 
     @PutMapping("/{id}/approve")
