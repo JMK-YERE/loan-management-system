@@ -26,7 +26,7 @@ public class GeneralLoanApplicationService {
   User b=users.findByEmail(email).orElseThrow(()->new RuntimeException("Mkopaji hajapatikana"));
   if(b.getRole()!=User.Role.BORROWER||!Boolean.TRUE.equals(b.getActive())||b.getStatus()!=User.UserStatus.APPROVED)throw new RuntimeException("Akaunti ya mkopaji haijakamilika au haijaidhinishwa");
   if(!apps.findByBorrowerOrderByCreatedAtDesc(b).stream().noneMatch(a->a.getStatus()==LoanApplication.Status.SUBMITTED||a.getStatus()==LoanApplication.Status.UNDER_REVIEW))throw new RuntimeException("Una ombi la mkopo ambalo bado linashughulikiwa");
-  LoanApplication a=new LoanApplication();a.setBorrower(b);a.setAmount(r.getAmount());a.setDuration(r.getDuration());a.setPurpose(r.getPurpose().trim());a.setDurationUnit(LoanProduct.DurationUnit.DAYS);
+  LoanApplication a=new LoanApplication();a.setBorrower(b);a.setAmount(r.getAmount());a.setDuration(r.getDuration());a.setPurpose(r.getPurpose().trim());a.setMonthlyExpenses(r.getMonthlyExpenses());a.setExistingMonthlyDebt(r.getExistingMonthlyDebt());a.setCollateralDescription(r.getCollateralDescription()==null?null:r.getCollateralDescription().trim());a.setCollateralValue(r.getCollateralValue()==null?BigDecimal.ZERO:r.getCollateralValue());a.setDurationUnit(LoanProduct.DurationUnit.DAYS);
   a.setInterestSnapshot(BigDecimal.ZERO);a.setProcessingFeeSnapshot(BigDecimal.ZERO);a.setLateFeeSnapshot(BigDecimal.ZERO);a.setTotalRepaymentSnapshot(r.getAmount());a.setInstallmentAmountSnapshot(r.getAmount());a.setInstallmentCountSnapshot(1);a.setTermsVersion("PENDING_LENDER_OFFER");a.setTermsAccepted(false);
   LoanApplication saved=apps.save(a);audit.log(email,"GENERAL_LOAN_REQUEST_SUBMITTED","LOAN_APPLICATION",saved.getId(),"Borrower requested a loan without selecting a visible product");return saved;
  }
@@ -38,7 +38,7 @@ public class GeneralLoanApplicationService {
  @Transactional public LoanApplication assignProduct(Long id,Long productId,String email){
   LoanApplication a=get(id);User actor=users.findByEmail(email).orElseThrow();if(actor.getRole()!=User.Role.LENDER&&actor.getRole()!=User.Role.ADMIN)throw new RuntimeException("Huna ruhusa");if(a.getStatus()!=LoanApplication.Status.UNDER_REVIEW)throw new RuntimeException("Ombi lazima liwe UNDER_REVIEW");
   LoanProduct p=products.findById(productId).orElseThrow(()->new RuntimeException("Loan product haijapatikana"));if(!Boolean.TRUE.equals(p.getActive()))throw new RuntimeException("Loan product haifanyi kazi");
-  LoanQuoteRequest qreq=new LoanQuoteRequest();qreq.setProductId(productId);qreq.setAmount(a.getAmount());qreq.setDuration(a.getDuration());LoanQuoteResponse q=quotes.quote(qreq);
+  LoanQuoteRequest qreq=new LoanQuoteRequest();qreq.setProductId(productId);qreq.setAmount(a.getAmount());qreq.setDuration(normalizeRequestedDuration(a.getDuration(),p));LoanQuoteResponse q=quotes.quote(qreq);a.setDuration(qreq.getDuration());
   a.setProduct(p);a.setDurationUnit(p.getDurationUnit());a.setInterestSnapshot(q.interest);a.setProcessingFeeSnapshot(q.processingFee);a.setLateFeeSnapshot(q.lateFee);a.setTotalRepaymentSnapshot(q.totalRepayment);a.setInstallmentAmountSnapshot(q.installmentAmount);a.setInstallmentCountSnapshot(q.installmentCount);a.setGracePeriodDaysSnapshot(q.gracePeriodDays);a.setInterestTypeSnapshot(q.interestType);a.setRepaymentFrequencySnapshot(q.repaymentFrequency);a.setTermsVersion(q.termsVersion);a.setTermsAccepted(false);a.setTermsAcceptedAt(null);
   audit.log(email,"LOAN_PRODUCT_ASSIGNED","LOAN_APPLICATION",id,"Product assigned and borrower offer generated");return apps.save(a);
  }
@@ -54,7 +54,16 @@ public class GeneralLoanApplicationService {
  }
 
  public List<LoanApplication> mine(String email){User b=users.findByEmail(email).orElseThrow();return apps.findByBorrowerOrderByCreatedAtDesc(b);}
- public List<LoanApplication> pending(){return apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.SUBMITTED);}
+ public List<LoanApplication> pending(){
+  List<LoanApplication> out=new java.util.ArrayList<>(apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.SUBMITTED));
+  out.addAll(apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.UNDER_REVIEW));
+  out.sort(java.util.Comparator.comparing(LoanApplication::getCreatedAt));
+  return out;
+ }
+ private int normalizeRequestedDuration(int requestedDays,LoanProduct product){
+  if(product.getDurationUnit()==LoanProduct.DurationUnit.DAYS) return requestedDays;
+  return Math.max(1,(int)Math.ceil(requestedDays/30.0));
+ }
  private LoanApplication get(Long id){return apps.findById(id).orElseThrow(()->new RuntimeException("Ombi halijapatikana"));}
 
  static class LoanRequestMapper{com.loanapp.dto.LoanRequest map(LoanApplication a){com.loanapp.dto.LoanRequest r=new com.loanapp.dto.LoanRequest();r.setLoanProductId(a.getProduct().getId());r.setAmount(a.getAmount());r.setDurationMonths(a.getDuration());r.setPurpose(a.getPurpose());r.setInterestRate(a.getInterestSnapshot());r.setProcessingFee(a.getProcessingFeeSnapshot());r.setLawyerRequired(false);return r;}}
