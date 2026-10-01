@@ -62,9 +62,25 @@ public class LoanCollateralController {
             photos.add(s);
         }
         if(photos.size()>10) throw new RuntimeException("Dhamana moja inaweza kuwa na picha 10 kwa sasa");
+        Object docsObj=body.get("documents");
+        List<Map<String,String>> documents=new ArrayList<>();
+        if(docsObj instanceof List<?> list) for(Object item:list) {
+            if(!(item instanceof Map<?,?> raw)) continue;
+            String name=String.valueOf(raw.getOrDefault("name","document"));
+            String data=String.valueOf(raw.getOrDefault("data",""));
+            if(data.isBlank() || !data.startsWith("data:")) throw new RuntimeException("Nyaraka ya dhamana si sahihi");
+            if(data.length()>7000000) throw new RuntimeException("Nyaraka ya dhamana ni kubwa sana");
+            documents.add(Map.of("name",name,"data",data));
+        }
+        if(documents.size()>10) throw new RuntimeException("Dhamana moja inaweza kuwa na nyaraka 10 kwa sasa");
         LoanCollateral c=new LoanCollateral();
         c.setLoan(l); c.setType(type); c.setDescription(description); c.setValue(value);
-        try { c.setPhotoDataJson(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(photos)); } catch (Exception e) { throw new RuntimeException("Picha za dhamana hazikuandaliwa"); }
+        try {
+            var mapper=new com.fasterxml.jackson.databind.ObjectMapper();
+            c.setPhotoDataJson(mapper.writeValueAsString(photos));
+            c.setDocumentDataJson(mapper.writeValueAsString(documents));
+        } catch (Exception e) { throw new RuntimeException("Evidence za dhamana hazikuandaliwa"); }
+        c.setDocumentReference(documents.stream().map(x->x.get("name")).reduce((a,b)->a+", "+b).orElse(null));
         c.setCapturedBy(auth.getName()); c.setVerificationStatus("PENDING"); c.setCapturedAt(LocalDateTime.now());
         try { return ResponseEntity.ok(ApiResponse.success("Dhamana imehifadhiwa",collaterals.save(c))); }
         catch(Exception e){throw new RuntimeException("Dhamana haijahifadhiwa",e);}
