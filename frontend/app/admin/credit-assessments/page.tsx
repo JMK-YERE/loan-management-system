@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {useRouter} from 'next/navigation';
 import {RefreshCw,ShieldCheck,Calculator} from 'lucide-react';
 import {creditAssessmentAPI,loanApplicationAPI} from '@/lib/api';
 import {useLanguage} from '@/lib/useLanguage';
@@ -7,7 +8,9 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
 const unwrap=(r:any)=>r?.data?.data??r?.data??[];
 export default function CreditAssessmentsPage(){
+ const router=useRouter();
  const {lang}=useLanguage();const en=lang==='en';const [apps,setApps]=useState<any[]>([]);const [selected,setSelected]=useState<any>();const [expenses,setExpenses]=useState('');const [debt,setDebt]=useState('');const [assessment,setAssessment]=useState<any>();const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);
+ useEffect(()=>{const raw=localStorage.getItem('user');if(!raw){router.push('/login');return;}try{const u=JSON.parse(raw);if(u.role!=='ADMIN'){router.push(u.role==='LENDER'?'/lender/credit-assessments':'/dashboard');}}catch{router.push('/login')}},[router]);
  const load=async()=>{try{setApps(unwrap(await loanApplicationAPI.pending()));}catch(e:any){setMessage(e?.response?.data?.message||(en?'Unable to load pending applications.':'Imeshindikana kupakia maombi.'));}};useEffect(()=>{load()},[]);
  const run=async()=>{if(!selected)return;setBusy(true);setMessage('');try{const r=await creditAssessmentAPI.assess(selected.id,{monthlyExpenses:Number(expenses||0),existingMonthlyDebt:Number(debt||0)});setAssessment(r.data?.data??r.data);setMessage(en?'Assessment completed.':'Tathmini imekamilika.')}catch(e:any){setMessage(e?.response?.data?.message||(en?'Assessment failed.':'Tathmini imeshindikana.'))}finally{setBusy(false)}};
  return <div className="p-4 sm:p-6 lg:p-8"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-sm font-bold text-blue-600">JmkLoanApp</p><h1 className="text-3xl font-black">{en?'Credit Assessment':'Tathmini ya Mkopo'}</h1><p className="text-slate-500">{en?'Affordability and risk signals before human approval.':'Uwezo wa kulipa na viashiria vya hatari kabla ya uamuzi wa binadamu.'}</p></div><div className="flex gap-2"><LanguageSwitcher/><button onClick={load} className="rounded-xl border p-2.5"><RefreshCw className="h-4 w-4"/></button></div></div>
