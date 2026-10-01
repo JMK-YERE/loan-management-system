@@ -55,6 +55,10 @@ public class Guarantor {
 
     private LocalDateTime approvedAt;
     private LocalDateTime capturedAt;
+    @Column(length = 128) private String remoteTokenHash;
+    private LocalDateTime remoteExpiresAt;
+    private LocalDateTime remoteSignedAt;
+    @JsonIgnore @Column(columnDefinition = "TEXT") private String remoteSignatureData;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -83,6 +87,10 @@ public class Guarantor {
         public Builder capturedBy(String v) { g.capturedBy = v; return this; }
         public Builder approvedAt(LocalDateTime v) { g.approvedAt = v; return this; }
         public Builder capturedAt(LocalDateTime v) { g.capturedAt = v; return this; }
+        public Builder remoteTokenHash(String v) { g.remoteTokenHash = v; return this; }
+        public Builder remoteExpiresAt(LocalDateTime v) { g.remoteExpiresAt = v; return this; }
+        public Builder remoteSignedAt(LocalDateTime v) { g.remoteSignedAt = v; return this; }
+        public Builder remoteSignatureData(String v) { g.remoteSignatureData = v; return this; }
         public Builder createdAt(LocalDateTime v) { g.createdAt = v; return this; }
 
         public Guarantor build() {
@@ -120,6 +128,14 @@ public class Guarantor {
     public void setApprovedAt(LocalDateTime v) { approvedAt = v; }
     public LocalDateTime getCapturedAt() { return capturedAt; }
     public void setCapturedAt(LocalDateTime v) { capturedAt = v; }
+    public String getRemoteTokenHash() { return remoteTokenHash; }
+    public void setRemoteTokenHash(String v) { remoteTokenHash = v; }
+    public LocalDateTime getRemoteExpiresAt() { return remoteExpiresAt; }
+    public void setRemoteExpiresAt(LocalDateTime v) { remoteExpiresAt = v; }
+    public LocalDateTime getRemoteSignedAt() { return remoteSignedAt; }
+    public void setRemoteSignedAt(LocalDateTime v) { remoteSignedAt = v; }
+    public String getRemoteSignatureData() { return remoteSignatureData; }
+    public void setRemoteSignatureData(String v) { remoteSignatureData = v; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime v) { createdAt = v; }
 
