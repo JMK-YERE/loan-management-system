@@ -4,7 +4,7 @@ import {useEffect,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {CheckCircle2,Clock3,FileSignature,FileText,LogOut,RefreshCw,ShieldCheck} from 'lucide-react';
-import {generalLoanApplicationAPI,loanAPI} from '@/lib/api';
+import {generalLoanApplicationAPI,loanAPI,notificationAPI} from '@/lib/api';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {useLanguage} from '@/lib/useLanguage';
 
@@ -119,7 +119,7 @@ export default function LenderPage(){
       <Link href={'/lender/onsite-guarantor?loanId='+l.id} className="block w-full rounded-xl border border-amber-300 px-3 py-2 text-center text-xs font-bold text-amber-700">📸 Mdhamini onsite — picha + sahihi</Link><Link href={'/lender/remote-guarantor?loanId='+l.id} className="block w-full rounded-xl border border-cyan-300 px-3 py-2 text-center text-xs font-bold text-cyan-700">🔗 Mdhamini remote — signing link</Link><Link href={'/lender/collateral?loanId='+l.id} className="block w-full rounded-xl border border-purple-300 px-3 py-2 text-center text-xs font-bold text-purple-700">📷 Dhamana — picha nyingi + verification</Link>
      </div>}
      {l.status==='APPROVED'&&<div className="mt-4 flex flex-wrap gap-2">
-      <Link href={'/agreements?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Agreement</Link>
+      <Link href={'/agreements?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Agreement</Link><button disabled={busy} onClick={()=>action(()=>notificationAPI.remindLoan(l.id),'Reminder imetumwa kwa SMS/WhatsApp/Email kulingana na provider.')} className="rounded-xl border border-cyan-300 px-3 py-2 text-xs font-bold text-cyan-700">🔔 Tuma reminder</button>
       <Link href={'/signatures?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Signatures</Link>
       <Link href={'/lender/onsite-guarantor?loanId='+l.id} className="rounded-xl border border-amber-300 px-3 py-2 text-xs font-bold text-amber-700">📸 Mdhamini onsite</Link>
       <button disabled={busy} onClick={()=>action(()=>loanAPI.disburse(l.id),'Mkopo umetolewa.')} className="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white">Disburse Loan</button>
