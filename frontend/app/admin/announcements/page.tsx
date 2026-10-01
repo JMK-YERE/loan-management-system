@@ -153,6 +153,7 @@ export default function AnnouncementsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                <button onClick={async () => { try { const res=await announcementAPI.broadcastBorrowers(a.id!); alert('Sent: ' + (res.data?.data ?? 0)); } catch (e:any) { alert(e.response?.data?.message || 'Failed'); } }} className="rounded-lg px-3 py-2 text-xs font-bold text-blue-600">Notify</button>
                 <button onClick={() => handleToggle(a)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition" title={a.active ? 'Zima' : 'Washa'}>
                   {a.active ? <Eye className="w-5 h-5 text-green-600" /> : <EyeOff className="w-5 h-5 text-gray-400" />}
                 </button>
