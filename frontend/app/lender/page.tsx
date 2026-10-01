@@ -4,7 +4,7 @@ import {useEffect,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {CheckCircle2,Clock3,FileSignature,FileText,LogOut,RefreshCw,ShieldCheck} from 'lucide-react';
-import {generalLoanApplicationAPI,loanAPI,guarantorAPI,userAPI} from '@/lib/api';
+import {generalLoanApplicationAPI,loanAPI} from '@/lib/api';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {useLanguage} from '@/lib/useLanguage';
 
@@ -13,13 +13,13 @@ const unwrap=(r:any)=>r?.data?.data??r?.data??[];
 
 export default function LenderPage(){
  const router=useRouter();const {lang}=useLanguage();const en=lang==='en';
- const [user,setUser]=useState<any>(null),[apps,setApps]=useState<any[]>([]),[loans,setLoans]=useState<any[]>([]),[guarantors,setGuarantors]=useState<any[]>([]);
+ const [user,setUser]=useState<any>(null),[apps,setApps]=useState<any[]>([]),[loans,setLoans]=useState<any[]>([]);
  const [selected,setSelected]=useState<Record<number,string>>({}),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
 
  const load=async()=>{
   try{
-   const [a,l,g]=await Promise.all([generalLoanApplicationAPI.pending(),loanAPI.byLender(),userAPI.guarantors()]);
-   setApps(unwrap(a));setLoans(unwrap(l));setGuarantors(unwrap(g));
+   const [a,l]=await Promise.all([generalLoanApplicationAPI.pending(),loanAPI.byLender()]);
+   setApps(unwrap(a));setLoans(unwrap(l));
   }catch(e:any){setMessage(e?.response?.data?.message||(en?'Failed to load lender workspace.':'Imeshindikana kupakia workspace ya mkopeshaji.'))}
  };
 
@@ -39,8 +39,8 @@ export default function LenderPage(){
  };
 
  const pendingApps=apps.filter(a=>a.status==='SUBMITTED').length;
- const offers=apps.filter(a=>a.status==='UNDER_REVIEW'&&a.product).length;
- const pendingLoans=loans.filter(l=>l.status==='PENDING').length;
+ const offers=apps.filter(a=>a.status==='OFFER_READY').length;
+ const pendingLoans=apps.filter(a=>a.status==='OFFER_ACCEPTED').length;
  const approvedLoans=loans.filter(l=>l.status==='APPROVED').length;
 
  const logout=()=>{localStorage.clear();document.cookie='token=; path=/; max-age=0';router.push('/login')};
@@ -81,6 +81,24 @@ export default function LenderPage(){
 
    <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5 dark:border-slate-800">
+     <div><h2 className="text-xl font-black">Applications zinazohitaji action</h2><p className="text-sm text-slate-500">Kila request inaonekana hapa na action yake inayofuata.</p></div>
+     <Link href="/lender/general-applications" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white">Fungua Queue</Link>
+    </div>
+    <div className="space-y-3 p-5">
+     {apps.length===0?<div className="rounded-2xl bg-slate-50 p-6 text-center text-sm text-slate-500 dark:bg-slate-950">Hakuna application inayosubiri.</div>:apps.slice(0,8).map(a=><div key={a.id} className="rounded-2xl border p-4 dark:border-slate-800">
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><b>Application #{a.id}</b><p className="text-sm text-slate-500">{a.borrower?.fullName||'Mkopaji'} · {money(a.amount)} · {a.duration} {a.durationUnit||'DAYS'}</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black dark:bg-slate-800">{a.status}</span></div>
+      <div className="mt-3 flex flex-wrap gap-2">
+       {a.status==='SUBMITTED'&&<button disabled={busy} onClick={()=>action(()=>generalLoanApplicationAPI.review(a.id),'Application imehamia UNDER_REVIEW.')} className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white">Anza Review</button>}
+       {a.status==='UNDER_REVIEW'&&<Link href="/lender/general-applications" className="rounded-xl border px-4 py-2 text-xs font-black">Chagua Product / Tengeneza Offer</Link>}
+       {a.status==='OFFER_READY'&&<Link href="/lender/general-applications" className="rounded-xl border border-amber-300 px-4 py-2 text-xs font-black text-amber-700">Subiri Borrower Accept</Link>}
+       {a.status==='OFFER_ACCEPTED'&&<Link href="/lender/general-applications" className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white">Final Approval</Link>}
+      </div>
+     </div>)}
+    </div>
+   </section>
+
+   <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5 dark:border-slate-800">
      <div><h2 className="text-xl font-black">{en?'Application workflow':'Mtiririko wa maombi'}</h2><p className="text-sm text-slate-500">Application → Review → Offer → Borrower accepts → Create loan → Final approval → Signatures → Disbursement</p></div>
      <button onClick={load} className="rounded-xl border p-2"><RefreshCw className="h-4 w-4"/></button>
     </div>
@@ -96,7 +114,7 @@ export default function LenderPage(){
     <div className="grid gap-4 p-5 md:grid-cols-2">{loans.filter(l=>['PENDING','APPROVED'].includes(l.status)).map(l=><div key={l.id} className="rounded-2xl border p-5 dark:border-slate-800">
      <div className="flex justify-between gap-3"><div><b>Loan #{l.id}</b><p className="text-sm text-slate-500">{l.borrower?.fullName} · {money(l.amount)}</p></div><span className="text-xs font-black">{l.status}</span></div>
      {l.status==='PENDING'&&<div className="mt-4 space-y-3">
-      <div className="flex gap-2"><select value={selected[l.id]||''} onChange={e=>setSelected({...selected,[l.id]:e.target.value})} className="min-w-0 flex-1 rounded-xl border p-2 text-sm dark:border-slate-700 dark:bg-slate-950"><option value="">Mdhamini (optional) — tumia dhamana kama inafaa</option>{guarantors.map(g=><option key={g.id} value={g.id}>{g.fullName} · {g.phone}</option>)}</select><button disabled={busy||!selected[l.id]} onClick={()=>action(()=>guarantorAPI.add(l.id,{guarantorId:Number(selected[l.id]),guaranteedAmount:l.amount,relationship:'Loan guarantor'}),'Ombi la udhamini limetumwa.')} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">Tuma</button></div>
+      
       <button disabled={busy} onClick={()=>action(()=>loanAPI.approve(l.id),'Approval ya mwisho imekamilika.')} className="w-full rounded-xl border border-emerald-300 px-3 py-2 text-xs font-bold text-emerald-700">Final Approve Loan</button>
       <Link href={'/lender/onsite-guarantor?loanId='+l.id} className="block w-full rounded-xl border border-amber-300 px-3 py-2 text-center text-xs font-bold text-amber-700">📸 Mdhamini yupo hapa — Capture photo + signature</Link><Link href={'/lender/collateral?loanId='+l.id} className="block w-full rounded-xl border border-purple-300 px-3 py-2 text-center text-xs font-bold text-purple-700">📷 Dhamana — picha nyingi + verification</Link>
      </div>}
