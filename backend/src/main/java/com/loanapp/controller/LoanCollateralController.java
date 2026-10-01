@@ -66,8 +66,8 @@ public class LoanCollateralController {
         List<Map<String,String>> documents=new ArrayList<>();
         if(docsObj instanceof List<?> list) for(Object item:list) {
             if(!(item instanceof Map<?,?> raw)) continue;
-            String name=String.valueOf(raw.getOrDefault("name","document"));
-            String data=String.valueOf(raw.getOrDefault("data",""));
+            Object nameObj=raw.get("name"); String name=String.valueOf(nameObj==null?"document":nameObj);
+            Object dataObj=raw.get("data"); String data=String.valueOf(dataObj==null?"":dataObj);
             if(data.isBlank() || !data.startsWith("data:")) throw new RuntimeException("Nyaraka ya dhamana si sahihi");
             if(data.length()>7000000) throw new RuntimeException("Nyaraka ya dhamana ni kubwa sana");
             documents.add(Map.of("name",name,"data",data));
