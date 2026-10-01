@@ -27,6 +27,9 @@ public class LoanRequest {
     private BigDecimal processingFee;
     private Boolean lawyerRequired = false;
     private BigDecimal lawyerFee;
+    private String collateralDescription;
+    private BigDecimal collateralValue;
+    private String collateralPhotoData;
 
     public LoanRequest() {}
 
@@ -65,6 +68,12 @@ public class LoanRequest {
 
     public BigDecimal getLawyerFee() { return lawyerFee; }
     public void setLawyerFee(BigDecimal lawyerFee) { this.lawyerFee = lawyerFee; }
+    public String getCollateralDescription() { return collateralDescription; }
+    public void setCollateralDescription(String v) { collateralDescription=v; }
+    public BigDecimal getCollateralValue() { return collateralValue; }
+    public void setCollateralValue(BigDecimal v) { collateralValue=v; }
+    public String getCollateralPhotoData() { return collateralPhotoData; }
+    public void setCollateralPhotoData(String v) { collateralPhotoData=v; }
 
     public static Builder builder() { return new Builder(); }
 
