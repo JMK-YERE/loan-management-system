@@ -14,7 +14,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/bursar")
-@PreAuthorize("hasAnyRole('BURSER','ADMIN')")
+@PreAuthorize("hasRole('BURSER')")
 public class BursarController {
     private final LoanRepository loans;
     private final PaymentRepository payments;
