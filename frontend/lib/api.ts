@@ -36,6 +36,7 @@ export const authAPI = {
   setPassword: (data: any) => api.post('/auth/set-password', data),
   forgotPassword: (data: any) => api.post('/auth/forgot-password', data),
   resetPassword: (data: any) => api.post('/auth/reset-password', data),
+  changePassword: (data: any) => api.put('/auth/change-password', data),
   health: () => api.get('/auth/health'),
 };
 
