@@ -39,8 +39,7 @@ public class GuarantorAgreementPdfService {
         List<Guarantor> gs=guarantors.findByLoan(l);
         boolean party=u.getRole()==User.Role.ADMIN
                 || (l.getBorrower()!=null&&l.getBorrower().getId().equals(u.getId()))
-                || (l.getLender()!=null&&l.getLender().getId().equals(u.getId()))
-                || gs.stream().anyMatch(g->g.getGuarantor()!=null&&g.getGuarantor().getId().equals(u.getId()));
+                || (l.getLender()!=null&&l.getLender().getId().equals(u.getId()));
         if(!party) throw new RuntimeException("Huna ruhusa ya kuona agreement hii");
 
         try {
