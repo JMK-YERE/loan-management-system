@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/general-loan-applications")
@@ -22,6 +23,11 @@ public class GeneralLoanApplicationController {
  public ResponseEntity<ApiResponse<List<LoanApplication>>> mine(Authentication auth){return ResponseEntity.ok(ApiResponse.success("Maombi yako",service.mine(auth.getName())));}
  @GetMapping("/pending") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
  public ResponseEntity<ApiResponse<List<LoanApplication>>> pending(){return ResponseEntity.ok(ApiResponse.success("General loan requests",service.pending()));}
+ @PutMapping("/{id}/collateral-photo")
+ @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+ public ResponseEntity<ApiResponse<LoanApplication>> collateralPhoto(@PathVariable Long id,@RequestBody Map<String,String> body,Authentication auth){
+  return ResponseEntity.ok(ApiResponse.success("Picha ya dhamana imehifadhiwa",service.captureCollateralPhoto(id,body.get("photoData"),auth.getName())));
+ }
  @PutMapping("/{id}/review") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
  public ResponseEntity<ApiResponse<LoanApplication>> review(@PathVariable Long id,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Ombi liko review",service.startReview(id,auth.getName())));}
  @PutMapping("/{id}/assign-product/{productId}") @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
