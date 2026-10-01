@@ -49,6 +49,7 @@ export default function ProfilePage() {
         <Link href={me?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} className="text-sm text-blue-600 font-semibold">← Rudi</Link>
         {error && <p className="mt-4 text-red-600 text-sm">{error}</p>}
         {me && (
+          <>
           <div className="mt-4 bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
             <div className="flex gap-4 items-center mb-6">
               {me.photo ? (
@@ -84,6 +85,7 @@ export default function ProfilePage() {
               <button disabled={pwBusy} className="rounded-xl bg-blue-600 px-4 py-3 font-bold text-white disabled:opacity-50">{pwBusy?'Inahifadhi...':'Badilisha Password'}</button>
             </form>
           </div>
+          </>
         )}
       </div>
     </div>
