@@ -47,6 +47,7 @@ export const announcementAPI = {
   create: (data: any) => api.post('/announcements', data),
   update: (id: number, data: any) => api.put(`/announcements/${id}`, data),
   delete: (id: number) => api.delete(`/announcements/${id}`),
+  broadcastBorrowers: (id: number) => api.post(`/announcements/${id}/broadcast-borrowers`),
 };
 
 export const systemAPI = {
