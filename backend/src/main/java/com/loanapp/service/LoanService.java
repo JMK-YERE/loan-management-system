@@ -78,7 +78,6 @@ public class LoanService {
  public Loan approveLoan(Long id,String actorEmail){
   Loan loan=getLoanById(id);authorizeLenderOrAdmin(loan,actorEmail);
   if(loan.getStatus()!=Loan.LoanStatus.PENDING) throw new RuntimeException("Mkopo huu hauko kwenye hatua ya kusubiri idhini");
-  if(loan.getLoanProduct()!=null && loan.getLoanProduct().getLoanType()==LoanProduct.LoanType.INSTALLMENT && guarantorRepository.findByLoanAndStatus(loan,Guarantor.GuarantorStatus.APPROVED).isEmpty()) throw new RuntimeException("Mdhamini aliyeidhinishwa anahitajika kabla ya approval ya mwisho");
   loan.setStatus(Loan.LoanStatus.APPROVED);
   Loan saved=loanRepository.save(loan);
   if(loan.getLoanProduct()!=null){
@@ -96,11 +95,10 @@ public class LoanService {
   if(loan.getStatus()!=Loan.LoanStatus.APPROVED) throw new RuntimeException("Mkopo lazima uwe APPROVED");
   if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.BORROWER).isEmpty()) throw new RuntimeException("Sahihi ya mkopaji inahitajika");
   if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.LENDER).isEmpty()) throw new RuntimeException("Sahihi ya mkopeshaji inahitajika");
-  if(loan.getLoanProduct()!=null && loan.getLoanProduct().getLoanType()==LoanProduct.LoanType.INSTALLMENT
-      && guarantorRepository.findByLoanAndStatus(loan,Guarantor.GuarantorStatus.APPROVED).stream()
-          .anyMatch(g -> signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.GUARANTOR).stream()
+  var approvedGuarantors=guarantorRepository.findByLoanAndStatus(loan,Guarantor.GuarantorStatus.APPROVED);
+  if(!approvedGuarantors.isEmpty() && approvedGuarantors.stream().anyMatch(g -> signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.GUARANTOR).stream()
               .noneMatch(s -> s.getUser().getId().equals(g.getGuarantor().getId()))))
-      throw new RuntimeException("Sahihi ya mdhamini aliyeidhinishwa inahitajika kabla ya disbursement");
+      throw new RuntimeException("Mdhamini aliyeidhinishwa lazima asaini kabla ya disbursement");
   loan.setStatus(Loan.LoanStatus.DISBURSED); loan.setDisbursementDate(LocalDate.now());
   Loan saved=loanRepository.save(loan); auditService.log(actorEmail,"LOAN_DISBURSED","LOAN",id,"Approved loan released after required signatures"); return saved;
  }
