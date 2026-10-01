@@ -2,6 +2,7 @@ package com.loanapp.controller;
 
 import com.loanapp.dto.ApiResponse;
 import com.loanapp.dto.GuarantorRequest;
+import com.loanapp.dto.OnsiteGuarantorRequest;
 import com.loanapp.model.Guarantor;
 import com.loanapp.service.GuarantorService;
 import jakarta.validation.Valid;
@@ -27,6 +28,16 @@ public class GuarantorController {
             @Valid @RequestBody GuarantorRequest request, Authentication authentication) {
         Guarantor g = guarantorService.addGuarantor(loanId, request, authentication.getName());
         return ResponseEntity.ok(ApiResponse.success("Mdhamini ameongezwa", g));
+    }
+
+    @PostMapping("/loan/{loanId}/onsite")
+    @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
+    public ResponseEntity<ApiResponse<Guarantor>> addOnsite(
+            @PathVariable Long loanId,
+            @Valid @RequestBody OnsiteGuarantorRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success("Mdhamini wa onsite amerekodiwa na kusaini",
+                guarantorService.addOnsiteGuarantor(loanId, request, authentication.getName())));
     }
 
     @PutMapping("/{id}/approve")
