@@ -113,6 +113,12 @@ export const paymentAPI = {
     api.put(`/payments/${id}/confirm`, null, { params: { transactionId } }),
 };
 
+export const collateralAPI = {
+  byLoan: (loanId:number) => api.get(`/loans/${loanId}/collaterals`),
+  add: (loanId:number, data:any) => api.post(`/loans/${loanId}/collaterals`, data),
+  verify: (loanId:number, collateralId:number) => api.put(`/loans/${loanId}/collaterals/${collateralId}/verify`),
+};
+
 export const guarantorAPI = {
   byLoan: (loanId: number) => api.get(`/guarantors/loan/${loanId}`),
   mine: () => api.get('/guarantors/mine'),
