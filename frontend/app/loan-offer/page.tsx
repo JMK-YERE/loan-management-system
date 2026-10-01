@@ -39,7 +39,9 @@ export default function LoanOfferPage(){
  const statusLabel=(status:string)=>{
   const map:any={
    SUBMITTED:'Ombi limetumwa',
-   UNDER_REVIEW:'Offer iko tayari / inasubiri acceptance',
+   UNDER_REVIEW:'Lender review inaendelea',
+   OFFER_READY:'Offer iko tayari — soma na ukubali',
+   OFFER_ACCEPTED:'Offer imekubaliwa — lender anaendelea',
    APPROVED:'Loan inaandaliwa',
    REJECTED:'Ombi limekataliwa',
    CONVERTED:'Offer imekubaliwa — loan imetengenezwa',
@@ -70,12 +72,12 @@ export default function LoanOfferPage(){
 
    <div className="space-y-4">
    {apps.map(a=>{
-    const offerReady=!!a.product&&['UNDER_REVIEW','APPROVED'].includes(a.status);
+    const offerReady=!!a.product&&['OFFER_READY'].includes(a.status);
     const accepted=!!a.termsAccepted;
     return <section key={a.id} className="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
      <div className="flex flex-wrap items-start justify-between gap-3">
       <div><div className="flex items-center gap-2"><h2 className="text-xl font-black">Application #{a.id}</h2><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black dark:bg-slate-800">{statusLabel(a.status)}</span></div><p className="mt-1 text-sm text-slate-500">{a.product?.name||'Loan product bado haijawekwa'}</p></div>
-      {accepted?<span className="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-black text-emerald-700"><CheckCircle2 className="mr-1 inline h-4 w-4"/>Accepted</span>:offerReady?<span className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-black text-amber-700"><Clock3 className="mr-1 inline h-4 w-4"/>Action required</span>:null}
+      {(accepted||a.status==='OFFER_ACCEPTED')?<span className="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-black text-emerald-700"><CheckCircle2 className="mr-1 inline h-4 w-4"/>Accepted</span>:offerReady?<span className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-black text-amber-700"><Clock3 className="mr-1 inline h-4 w-4"/>Action required</span>:null}
      </div>
 
      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -92,9 +94,9 @@ export default function LoanOfferPage(){
       <div className="mt-4 flex flex-wrap gap-2">
        <button onClick={()=>openPdf(a.id,false)} className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900"><Eye className="h-4 w-4"/>Soma Agreement</button>
        <button onClick={()=>openPdf(a.id,true)} className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900"><Download className="h-4 w-4"/>Download PDF</button>
-       {!accepted&&<label className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-900"><input type="checkbox" checked={!!read[a.id]} onChange={e=>setRead({...read,[a.id]:e.target.checked})}/> Nimesoma na nimeelewa</label>}
-       {!accepted&&<button disabled={!read[a.id]||busy===a.id} onClick={()=>accept(a.id)} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">{busy===a.id?'Inahifadhi...':'✓ Kubali Offer'}</button>}
-       {accepted&&<><Link href="/agreements" className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">📄 Agreements</Link><span className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">Subiri lender aidhinishe na kutengeneza loan</span></>}
+       {!accepted&&a.status==='OFFER_READY'&&<label className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-semibold dark:bg-slate-900"><input type="checkbox" checked={!!read[a.id]} onChange={e=>setRead({...read,[a.id]:e.target.checked})}/> Nimesoma na nimeelewa</label>}
+       {!accepted&&a.status==='OFFER_READY'&&<button disabled={!read[a.id]||busy===a.id} onClick={()=>accept(a.id)} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50">{busy===a.id?'Inahifadhi...':'✓ Kubali Offer'}</button>}
+       {(accepted||a.status==='OFFER_ACCEPTED')&&<><Link href="/agreements" className="flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-black dark:bg-slate-900">📄 Agreements</Link><span className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">Subiri lender aidhinishe na kutengeneza loan</span></>}
       </div>
      </div>}
 
