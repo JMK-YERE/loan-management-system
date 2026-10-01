@@ -53,7 +53,9 @@ export default function LoginPage() {
             <div className="mb-7"><div className="text-3xl">🔐</div><h2 className="mt-3 text-3xl font-black">{en?'Welcome back':'Karibu tena'}</h2><p className="mt-2 text-sm text-slate-500">{en?'Sign in to continue to your dashboard.':'Ingia kuendelea kwenye dashboard yako.'}</p></div>
             {error && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">⚠️ {error}</div>}
             {googleClientId && <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onLoad={() => { const g=(window as any).google; if(g){ g.accounts.id.initialize({client_id:googleClientId,callback:(r:any)=>handleGoogle(r.credential)}); g.accounts.id.renderButton(document.getElementById('google-signin')!,{theme:'outline',size:'large',width:380,text:'continue_with'}); } }} />}
-            {googleClientId && <div className="mb-5"><div id="google-signin" className="flex justify-center" /></div>}
+            <div className="mb-5">
+              {googleClientId ? <div id="google-signin" className="flex justify-center" /> : <button type="button" onClick={()=>setError(en?'Google Sign-In is not configured on this deployment yet.':'Google Sign-In bado haijawekewa Google Client ID kwenye deployment hii.')} className="w-full rounded-xl border border-slate-300 bg-white py-3 font-black text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white">Continue with Google</button>}
+            </div>
             <form onSubmit={handleLogin} className="space-y-5">
               <label className="block text-sm font-bold">{en?'Email or phone':'Barua pepe au simu'}<input value={username} onChange={e=>setUsername(e.target.value)} required className={`${cls} mt-1.5`} autoComplete="username"/></label>
               <label className="block text-sm font-bold">Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required className={`${cls} mt-1.5`} autoComplete="current-password"/></label>
