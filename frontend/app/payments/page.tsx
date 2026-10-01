@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';\nimport { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CreditCard, Smartphone } from 'lucide-react';
 import { loanAPI, paymentAPI, mobileMoneyAPI } from '@/lib/api';
 
@@ -12,7 +13,7 @@ export default function PaymentsPage(){
  return <main className="min-h-screen bg-slate-50 p-6 dark:bg-slate-950"><div className="mx-auto max-w-3xl space-y-6">
   <section className="rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-900"><div className="mb-4 flex justify-end"><button type="button" onClick={()=>window.history.back()} className="rounded-xl border px-4 py-2 text-sm font-bold">← Rudi nyuma</button></div><div className="flex items-center gap-3"><div className="rounded-xl bg-emerald-50 p-3 text-emerald-600"><CreditCard/></div><div><h1 className="text-2xl font-black">Malipo ya Mkopo</h1><p className="text-sm text-slate-500">M-Pesa, Mixx by Yas, Airtel Money, HaloPesa, TANQR, TIPS na TISS. Mfumo hutenganisha channel/rail na reconciliation ya lender/bursar.</p></div></div></section>
   <form onSubmit={pay} className="space-y-4 rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-900"><select required value={loanId} onChange={e=>setLoanId(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"><option value="">Chagua loan</option>{loans.filter(l=>!['PAID','REJECTED'].includes(l.status)).map(l=><option key={l.id} value={l.id}>Loan #{l.id} · TZS {l.amount} · {l.status}</option>)}</select>
-  <input required type="number" min="1" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="Kiasi cha kulipa" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
+  <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm dark:border-blue-900 dark:bg-blue-950/30">Chagua loan kisha mfumo utahesabu salio lake kutoka kwenye payments zilizothibitishwa. Usilipe zaidi ya salio linalodaiwa.</div><input required type="number" min="1" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="Kiasi cha kulipa" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
   <select value={method} onChange={e=>setMethod(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950">{['MPESA','MIXX_BY_YAS','AIRTEL_MONEY','HALOPESA','TANQR','TIPS','TISS','BANK_TRANSFER','CASH'].map(x=><option key={x}>{x}</option>)}</select>
   {['MPESA','MIXX_BY_YAS','AIRTEL_MONEY','HALOPESA'].includes(method)&&<input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+2557XXXXXXXX" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>}
   <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-950"><Smartphone className="mb-2 h-5 w-5"/>TANQR/TIPS/TISS na mobile-money hutegemea provider/rail configuration ya taasisi. Credentials hubaki server-side; Bursar anaona reconciliation na reference ya kila malipo.</div>
