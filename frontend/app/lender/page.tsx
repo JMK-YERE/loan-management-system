@@ -102,6 +102,7 @@ export default function LenderPage(){
      {l.status==='APPROVED'&&<div className="mt-4 flex flex-wrap gap-2">
       <Link href={'/agreements?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Agreement</Link>
       <Link href={'/signatures?loanId='+l.id} className="rounded-xl border px-3 py-2 text-xs font-bold">Signatures</Link>
+      <Link href={'/lender/onsite-guarantor?loanId='+l.id} className="rounded-xl border border-amber-300 px-3 py-2 text-xs font-bold text-amber-700">📸 Mdhamini onsite</Link>
       <button disabled={busy} onClick={()=>action(()=>loanAPI.disburse(l.id),'Mkopo umetolewa.')} className="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white">Disburse Loan</button>
      </div>}
     </div>)}</div>}
