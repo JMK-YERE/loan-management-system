@@ -53,6 +53,18 @@ public class GeneralLoanApplicationService {
   LoanRequestMapper mapper=new LoanRequestMapper();Loan loan=loans.createLoan(mapper.map(a),a.getLender().getEmail(),a.getBorrower().getId());a.setLoan(loan);a.setStatus(LoanApplication.Status.CONVERTED);audit.log(email,"GENERAL_LOAN_APPROVED","LOAN_APPLICATION",id,"General request converted to loan #"+loan.getId());return apps.save(a);
  }
 
+ @Transactional
+ public LoanApplication captureCollateralPhoto(Long id,String photoData,String email){
+  LoanApplication a=get(id); User actor=users.findByEmail(email).orElseThrow();
+  if(actor.getRole()!=User.Role.LENDER&&actor.getRole()!=User.Role.ADMIN) throw new RuntimeException("Huna ruhusa");
+  if(a.getStatus()==LoanApplication.Status.CONVERTED) throw new RuntimeException("Application tayari imegeuzwa kuwa loan");
+  if(photoData==null||photoData.isBlank()||!photoData.startsWith("data:image/")) throw new RuntimeException("Picha ya dhamana si sahihi");
+  if(photoData.length()>5000000) throw new RuntimeException("Picha ni kubwa sana");
+  a.setCollateralPhotoData(photoData);
+  audit.log(email,"COLLATERAL_PHOTO_CAPTURED","LOAN_APPLICATION",id,"Lender captured collateral evidence");
+  return apps.save(a);
+ }
+
  public List<LoanApplication> mine(String email){User b=users.findByEmail(email).orElseThrow();return apps.findByBorrowerOrderByCreatedAtDesc(b);}
  public List<LoanApplication> pending(){
   List<LoanApplication> out=new java.util.ArrayList<>(apps.findByStatusOrderByCreatedAtAsc(LoanApplication.Status.SUBMITTED));
