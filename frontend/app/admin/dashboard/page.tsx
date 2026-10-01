@@ -41,7 +41,7 @@ export default function AdminDashboard(){
 <Link href="/admin/users" className="flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold dark:bg-slate-950">{en?'Review users':'Kagua watumiaji'}<ArrowRight className="h-4 w-4"/></Link>
 <Link href="/lender/general-applications" className="flex items-center justify-between rounded-xl bg-blue-50 p-3 font-semibold text-blue-700 dark:bg-blue-950/30">{en?'Loan application queue':'Queue ya maombi ya mikopo'}<ArrowRight className="h-4 w-4"/></Link>
 <Link href="/admin/announcements" className="flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold dark:bg-slate-950">{en?'Announcements':'Matangazo'}<ArrowRight className="h-4 w-4"/></Link>
-<Link href="/bursar" className="flex items-center justify-between rounded-xl bg-emerald-50 p-3 font-semibold text-emerald-700 dark:bg-emerald-950/30">{en?'Bursar / reconciliation':'Bursar / reconciliation'}<ArrowRight className="h-4 w-4"/></Link>
+
 </div></div>
     </div>
   </div>;
