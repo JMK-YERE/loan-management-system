@@ -4,7 +4,7 @@ import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {CheckCircle2,Clock3,CreditCard,Download,FileSignature,FileText,LogOut,RefreshCw,ShieldCheck,WalletCards} from 'lucide-react';
-import {generalLoanApplicationAPI,loanAPI,guarantorAPI} from '@/lib/api';
+import {generalLoanApplicationAPI,loanAPI,repaymentAPI} from '@/lib/api';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {useLanguage} from '@/lib/useLanguage';
 
@@ -14,13 +14,14 @@ const statusLabel:any={SUBMITTED:'Lender anasubiri kuanza review',UNDER_REVIEW:'
 
 export default function BorrowerPage(){
  const router=useRouter();const {lang}=useLanguage();const [user,setUser]=useState<any>(null);
- const [applications,setApplications]=useState<any[]>([]),[loans,setLoans]=useState<any[]>([]),[guarantees,setGuarantees]=useState<any[]>([]);
+ const [applications,setApplications]=useState<any[]>([]),[loans,setLoans]=useState<any[]>([]),[schedules,setSchedules]=useState<Record<number,any[]>>({});
  const [loading,setLoading]=useState(true),[msg,setMsg]=useState(''),[amount,setAmount]=useState(''),[duration,setDuration]=useState(''),[purpose,setPurpose]=useState(''),[submitting,setSubmitting]=useState(false);
 
  const load=async()=>{
   setLoading(true);setMsg('');
-  try{const [a,l,g]=await Promise.all([generalLoanApplicationAPI.mine(),loanAPI.byBorrower(),guarantorAPI.mine()]);
-   setApplications(Array.isArray(unwrap(a))?unwrap(a):[]);setLoans(Array.isArray(unwrap(l))?unwrap(l):[]);setGuarantees(Array.isArray(unwrap(g))?unwrap(g):[]);
+  try{const [a,l]=await Promise.all([generalLoanApplicationAPI.mine(),loanAPI.byBorrower()]);
+   const loanList=Array.isArray(unwrap(l))?unwrap(l):[]; setApplications(Array.isArray(unwrap(a))?unwrap(a):[]);setLoans(loanList);
+   const pairs=await Promise.all(loanList.map(async (x:any)=>{try{const r=await repaymentAPI.schedule(Number(x.id));return [x.id,Array.isArray(unwrap(r))?unwrap(r):[]] as const}catch{return [x.id,[]] as const}})); setSchedules(Object.fromEntries(pairs));
   }catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kupakia taarifa.')}finally{setLoading(false)}
  };
  useEffect(()=>{const token=localStorage.getItem('token'),raw=localStorage.getItem('user');if(!token||!raw){router.push('/login');return}const u=JSON.parse(raw);if(u.role!=='BORROWER'){router.push('/dashboard');return}setUser(u);load()},[router]);
@@ -34,8 +35,9 @@ export default function BorrowerPage(){
  const active=loans.filter(x=>['APPROVED','DISBURSED','ACTIVE','DEFAULTED'].includes(x.status));
  const nextDue=active.filter(x=>x.nextDueDate).sort((a,b)=>String(a.nextDueDate).localeCompare(String(b.nextDueDate)))[0];
  const days=nextDue?.nextDueDate?Math.ceil((new Date(nextDue.nextDueDate+'T23:59:59').getTime()-Date.now())/86400000):null;
- const pendingApplication=applications.find(a=>['SUBMITTED','UNDER_REVIEW'].includes(a.status));
- const stats={applications:applications.length,active:active.length,paid:loans.filter(x=>x.status==='PAID').length,guarantees:guarantees.length};
+ const pendingApplication=applications.find(a=>['SUBMITTED','UNDER_REVIEW','OFFER_READY','OFFER_ACCEPTED'].includes(a.status));
+ const allSchedule=Object.values(schedules).flat(); const totalPaid=allSchedule.reduce((n:any,x:any)=>n+Number(x.amountPaid||0),0); const totalDue=allSchedule.reduce((n:any,x:any)=>n+Number(x.amountDue||0),0); const balance=Math.max(0,totalDue-totalPaid);
+ const stats={applications:applications.length,active:active.length,paid:totalPaid,balance};
  const logout=()=>{localStorage.clear();document.cookie='token=; path=/; max-age=0';router.push('/login')};
  if(!user)return null;
 
@@ -63,7 +65,7 @@ export default function BorrowerPage(){
    {msg&&<div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">{msg}</div>}
 
    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    {[['Maombi',stats.applications,FileText],['Loans active',stats.active,WalletCards],['Imelipwa',stats.paid,CheckCircle2],['Udhamini wangu',stats.guarantees,ShieldCheck]].map(([label,value,I]:any)=><div key={label} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-3xl font-black">{value}</div><div className="text-sm text-slate-500">{label}</div></div>)}
+    {[['Maombi',stats.applications,FileText],['Loans active',stats.active,WalletCards],['Imelipwa',stats.paid,CheckCircle2],['Salio la marejesho',stats.balance,WalletCards]].map(([label,value,I]:any)=><div key={label} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-3xl font-black">{value}</div><div className="text-sm text-slate-500">{label}</div></div>)}
    </section>
 
    <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-blue-900 dark:bg-slate-900">
@@ -83,11 +85,11 @@ export default function BorrowerPage(){
 
    <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5 dark:border-slate-800"><div><h2 className="font-black">Application Tracker</h2><p className="text-sm text-slate-500">Hapa ndipo utaona kama lender ameanza review, ameweka offer au loan imetengenezwa.</p></div>{pendingApplication&&<Link href="/loan-offer" className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white">Fungua hatua inayofuata</Link>}</div>
-    {loading?<div className="p-8 text-center text-sm text-slate-500">Inapakia...</div>:applications.length===0?<div className="p-8 text-sm text-slate-500">Hujaomba mkopo bado.</div>:<div className="divide-y dark:divide-slate-800">{applications.map(a=>{const steps=['SUBMITTED','UNDER_REVIEW','CONVERTED'];const current=Math.max(0,steps.indexOf(a.status));return <article key={a.id} className="p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><b>Application #{a.id}</b><p className="mt-1 text-sm text-slate-500">{money(a.amount)} · {a.duration} {a.durationUnit||'DAYS'} · {a.purpose}</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black dark:bg-slate-800">{statusLabel[a.status]||a.status}</span></div><div className="mt-4 grid gap-2 sm:grid-cols-3">{steps.map((s,i)=><div key={s} className={'rounded-xl border p-3 text-xs font-bold '+(i<=current?'border-emerald-300 bg-emerald-50 text-emerald-700':'opacity-50 dark:border-slate-800')}><div>{i+1}. {s==='SUBMITTED'?'Imetumwa':s==='UNDER_REVIEW'?'Lender review':'Loan imetengenezwa'}</div>{i===current&&<div className="mt-1 text-[10px]">← hatua ya sasa</div>}</div>)}</div><div className="mt-4 flex flex-wrap gap-2">{a.status==='UNDER_REVIEW'&&<Link href="/loan-offer" className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Angalia Offer</Link>}{a.status==='CONVERTED'&&<Link href="/agreements" className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white">Fungua Agreement</Link>}</div></article>})}</div>}
+    {loading?<div className="p-8 text-center text-sm text-slate-500">Inapakia...</div>:applications.length===0?<div className="p-8 text-sm text-slate-500">Hujaomba mkopo bado.</div>:<div className="divide-y dark:divide-slate-800">{applications.map(a=>{const steps=['SUBMITTED','UNDER_REVIEW','OFFER_READY','OFFER_ACCEPTED','CONVERTED'];const current=Math.max(0,steps.indexOf(a.status));return <article key={a.id} className="p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><b>Application #{a.id}</b><p className="mt-1 text-sm text-slate-500">{money(a.amount)} · {a.duration} {a.durationUnit||'DAYS'} · {a.purpose}</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black dark:bg-slate-800">{statusLabel[a.status]||a.status}</span></div><div className="mt-4 grid gap-2 sm:grid-cols-3">{steps.map((s,i)=><div key={s} className={'rounded-xl border p-3 text-xs font-bold '+(i<=current?'border-emerald-300 bg-emerald-50 text-emerald-700':'opacity-50 dark:border-slate-800')}><div>{i+1}. {s==='SUBMITTED'?'Imetumwa':s==='UNDER_REVIEW'?'Lender review':s==='OFFER_READY'?'Offer tayari':s==='OFFER_ACCEPTED'?'Offer imekubaliwa':'Loan imetengenezwa'}</div>{i===current&&<div className="mt-1 text-[10px]">← hatua ya sasa</div>}</div>)}</div><div className="mt-4 flex flex-wrap gap-2">{['OFFER_READY','OFFER_ACCEPTED'].includes(a.status)&&<Link href="/loan-offer" className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Angalia Offer</Link>}{a.status==='CONVERTED'&&<Link href="/agreements" className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white">Fungua Agreement</Link>}</div></article>})}</div>}
    </section>
 
    <section className="grid gap-4 lg:grid-cols-3">
-    <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900 dark:bg-amber-950/30"><div className="text-xs font-black uppercase text-amber-700">Deni linalofuata</div><div className="mt-2 text-2xl font-black">{nextDue?money(nextDue.amount||0):'—'}</div><div className="mt-1 text-sm">{nextDue?'Loan #'+nextDue.id+' · '+nextDue.nextDueDate:'Hakuna due date'}</div></div>
+    <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900 dark:bg-amber-950/30"><div className="text-xs font-black uppercase text-amber-700">Deni linalofuata</div><div className="mt-2 text-2xl font-black">{nextDue?money((schedules[nextDue.id]||[]).filter((x:any)=>x.status!=='PAID').reduce((n:any,x:any)=>n+Math.max(0,Number(x.amountDue||0)-Number(x.amountPaid||0)),0)):'—'}</div><div className="mt-1 text-sm">{nextDue?'Loan #'+nextDue.id+' · '+nextDue.nextDueDate:'Hakuna due date'}</div></div>
     <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/30"><div className="text-xs font-black uppercase text-blue-700">Siku zilizobaki</div><div className="mt-2 text-3xl font-black">{days===null?'—':Math.abs(days)}</div><div className="mt-1 text-sm">{days===null?'Hakuna loan active':days<0?'Siku zimepita tangu due date':'Hadi due date'}</div></div>
     <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-900 dark:bg-emerald-950/30"><div className="text-xs font-black uppercase text-emerald-700">Loan status</div><div className="mt-2 text-xl font-black">{nextDue?.status?statusLabel[nextDue.status]||nextDue.status:'Hakuna loan active'}</div><div className="mt-3 flex flex-wrap gap-2">{nextDue&&<><Link href={'/payments?loanId='+nextDue.id} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white"><CreditCard className="mr-1 inline h-3.5 w-3.5"/>Lipa</Link><Link href={'/agreements?loanId='+nextDue.id} className="rounded-xl border px-3 py-2 text-xs font-black"><FileText className="mr-1 inline h-3.5 w-3.5"/>Agreement</Link></>}</div></div>
    </section>
