@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.Map;
 
@@ -50,6 +51,15 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(
                 "Kama email ipo kwenye mfumo na akaunti iko hai, utapokea link ya kubadilisha password.",
                 "EMAIL_IF_ELIGIBLE"));
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            @RequestBody Map<String, String> body, Authentication authentication) {
+        authService.changePassword(authentication.getName(),
+                body == null ? null : body.get("currentPassword"),
+                body == null ? null : body.get("newPassword"));
+        return ResponseEntity.ok(ApiResponse.success("Password imebadilishwa.", "OK"));
     }
 
     @PostMapping("/reset-password")
