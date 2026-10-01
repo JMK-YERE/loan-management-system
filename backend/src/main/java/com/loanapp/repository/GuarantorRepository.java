@@ -16,4 +16,6 @@ public interface GuarantorRepository extends JpaRepository<Guarantor, Long> {
     List<Guarantor> findByGuarantor(User guarantor);
 
     List<Guarantor> findByLoanAndStatus(Loan loan, Guarantor.GuarantorStatus status);
+
+    java.util.Optional<Guarantor> findByRemoteTokenHash(String remoteTokenHash);
 }
