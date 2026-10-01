@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';\nimport { useRouter } from 'next/navigation';
 import { Download, Eye, FileSignature, FileText, RefreshCw, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { agreementAPI, loanAPI } from '@/lib/api';
@@ -8,18 +8,18 @@ import { agreementAPI, loanAPI } from '@/lib/api';
 const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
 
 export default function AgreementsPage(){
- const [loans,setLoans]=useState<any[]>([]),[msg,setMsg]=useState(''),[role,setRole]=useState(''),[loading,setLoading]=useState(true);
+ const router=useRouter(); const [loans,setLoans]=useState<any[]>([]),[msg,setMsg]=useState(''),[role,setRole]=useState(''),[loading,setLoading]=useState(true);
 
  const load=async()=>{
   setLoading(true);
   try{
-   const u=JSON.parse(localStorage.getItem('user')||'{}');setRole(u.role||'');
+   const u=JSON.parse(localStorage.getItem('user')||'{}');setRole(u.role||''); if(!['BORROWER','LENDER','ADMIN'].includes(u.role)){router.push(u.role==='BURSER'?'/bursar':'/login');return;}
    const r=u.role==='LENDER'||u.role==='ADMIN'?await loanAPI.byLender():await loanAPI.byBorrower();
    setLoans(r.data?.data||r.data||[]);
   }catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kupakia mikopo.')}
   finally{setLoading(false)}
  };
- useEffect(()=>{load()},[]);
+ useEffect(()=>{load()},[router]);
 
  const open=async(id:number,download=false)=>{
   try{
@@ -31,7 +31,7 @@ export default function AgreementsPage(){
   }catch(e:any){setMsg(e?.response?.data?.message||'Mkataba haujapatikana au huna ruhusa.')}
  };
 
- const home=role==='LENDER'||role==='ADMIN'?'/lender':role==='GUARANTOR'?'/guarantor':'/borrower';
+ const home=role==='LENDER'?'/lender':role==='ADMIN'?'/admin/dashboard':'/borrower';
 
  return <main className="min-h-screen bg-slate-50 p-4 sm:p-6 dark:bg-slate-950">
   <div className="mx-auto max-w-5xl space-y-6">
