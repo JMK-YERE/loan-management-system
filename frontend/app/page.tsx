@@ -109,6 +109,16 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="border-b border-slate-200 bg-white py-8 dark:border-slate-800 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Link href="/loan-guide" className="rounded-2xl border p-5 font-black">📄 Soma / Pakua Mwongozo</Link>
+            <Link href="/register" className="rounded-2xl bg-blue-600 p-5 font-black text-white">📝 Fungua Akaunti</Link>
+            <Link href="/login" className="rounded-2xl border p-5 font-black">🔐 Ingia Dashboard</Link>
+          </div>
+        </div>
+      </section>
+
       {announcements.length > 0 && <section className="bg-white py-12 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-7 flex items-end justify-between gap-4"><div><p className="font-bold text-blue-600">JmkLoanApp</p><h2 className="text-2xl font-black sm:text-3xl">{lang==='sw'?'Matangazo na Ofa Mpya':'Latest announcements & offers'}</h2></div><span className="text-sm text-slate-500">{lang==='sw'?'Taarifa rasmi kutoka admin':'Official updates from admin'}</span></div>
