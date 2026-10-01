@@ -7,6 +7,7 @@ import com.loanapp.repository.GuarantorRepository;
 import com.loanapp.repository.LoanRepository;
 import com.loanapp.repository.SignatureRepository;
 import com.loanapp.repository.UserRepository;
+import com.loanapp.repository.LoanCollateralRepository;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.ByteArrayOutputStream;
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PdfAgreementService {
- private final LoanRepository loans; private final UserRepository users; private final SignatureRepository signatures; private final GuarantorRepository guarantors;
- public PdfAgreementService(LoanRepository loans,UserRepository users,SignatureRepository signatures,GuarantorRepository guarantors){this.loans=loans;this.users=users;this.signatures=signatures;this.guarantors=guarantors;}
+ private final LoanRepository loans; private final UserRepository users; private final SignatureRepository signatures; private final GuarantorRepository guarantors; private final LoanCollateralRepository collaterals;
+ public PdfAgreementService(LoanRepository loans,UserRepository users,SignatureRepository signatures,GuarantorRepository guarantors,LoanCollateralRepository collaterals){this.loans=loans;this.users=users;this.signatures=signatures;this.guarantors=guarantors;this.collaterals=collaterals;}
 
  public byte[] generate(Long id,String email){
   Loan l=loans.findById(id).orElseThrow(()->new RuntimeException("Mkopo haujapatikana"));
@@ -47,6 +48,19 @@ public class PdfAgreementService {
    d.add(new Paragraph("Collateral: "+(l.getCollateralDescription()==null?"Hakuna":l.getCollateralDescription())));
    d.add(new Paragraph("Collateral value: TZS "+(l.getCollateralValue()==null?"0":l.getCollateralValue())));
    addImageData(d,l.getCollateralPhotoData(),"Collateral evidence photo",h,420,260);
+   d.add(new Paragraph("Collateral evidence records",h));
+   var collateralRecords=collaterals.findByLoanOrderByIdAsc(l);
+   if(collateralRecords.isEmpty()) d.add(new Paragraph("Hakuna collateral record ya ziada iliyowekwa."));
+   for(var c:collateralRecords){
+    d.add(new Paragraph("Type: "+c.getType()+" | Value: TZS "+c.getValue()+" | Verification: "+c.getVerificationStatus()));
+    d.add(new Paragraph("Description: "+c.getDescription()));
+    if(c.getPhotoDataJson()!=null){
+      try{
+       var photos=new com.fasterxml.jackson.databind.ObjectMapper().readValue(c.getPhotoDataJson(),java.util.List.class);
+       for(Object p:photos) addImageData(d,String.valueOf(p),"Collateral photo",h,420,260);
+      }catch(Exception ignored){}
+    }
+   }
    d.add(new Paragraph("Status: "+l.getStatus()));
    d.add(new Paragraph("Next due date: "+(l.getNextDueDate()==null?"—":l.getNextDueDate())));
    d.add(new Paragraph(" "));
