@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { userAPI } from '@/lib/api';
+import { userAPI, authAPI } from '@/lib/api';
 
 const ROWS: [string, string][] = [
   ['Barua pepe', 'email'], ['Simu', 'phone'], ['Kitambulisho', 'idType'], ['Namba ya kitambulisho', 'idNumber'],
@@ -17,11 +17,31 @@ export default function ProfilePage() {
   const router = useRouter();
   const [me, setMe] = useState<any>(null);
   const [error, setError] = useState('');
+  const [pw, setPw] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwBusy, setPwBusy] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('token')) { router.push('/login'); return; }
     userAPI.me().then((r) => setMe(r.data.data)).catch((e) => setError(e.response?.data?.message || 'Imeshindikana kupakia wasifu'));
   }, [router]);
+
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwMsg('');
+    if (pw.newPassword.length < 8) return setPwMsg('Password mpya iwe na angalau herufi 8.');
+    if (pw.newPassword !== pw.confirmPassword) return setPwMsg('Password mpya hazifanani.');
+    setPwBusy(true);
+    try {
+      await authAPI.changePassword({ currentPassword: pw.currentPassword, newPassword: pw.newPassword });
+      setPw({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPwMsg('Password imebadilishwa kikamilifu.');
+    } catch (e: any) {
+      setPwMsg(e.response?.data?.message || 'Imeshindikana kubadilisha password.');
+    } finally {
+      setPwBusy(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 sm:p-6">
@@ -50,6 +70,19 @@ export default function ProfilePage() {
                 </div>
               ))}
             </dl>
+          </div>
+          <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/30">
+            <h2 className="font-black text-gray-900 dark:text-white">Usalama wa akaunti</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Badilisha password ukiwa ndani ya mfumo.</p>
+            {pwMsg && <div className="mt-3 rounded-xl border border-blue-200 bg-white p-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-gray-900 dark:text-blue-200">{pwMsg}</div>}
+            <form onSubmit={changePassword} className="mt-4 grid gap-3">
+              <input required type="password" autoComplete="current-password" placeholder="Password ya sasa" value={pw.currentPassword} onChange={e=>setPw({...pw,currentPassword:e.target.value})} className="rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-950 dark:text-white"/>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input required type="password" autoComplete="new-password" placeholder="Password mpya" value={pw.newPassword} onChange={e=>setPw({...pw,newPassword:e.target.value})} className="rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-950 dark:text-white"/>
+                <input required type="password" autoComplete="new-password" placeholder="Rudia password mpya" value={pw.confirmPassword} onChange={e=>setPw({...pw,confirmPassword:e.target.value})} className="rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-950 dark:text-white"/>
+              </div>
+              <button disabled={pwBusy} className="rounded-xl bg-blue-600 px-4 py-3 font-bold text-white disabled:opacity-50">{pwBusy?'Inahifadhi...':'Badilisha Password'}</button>
+            </form>
           </div>
         )}
       </div>
