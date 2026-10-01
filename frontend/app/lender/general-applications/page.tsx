@@ -35,3 +35,4 @@ export default function GeneralApplicationsPage(){
   </article>)}</div>
   <button onClick={()=>router.push('/lender')} className="font-bold text-blue-600">← Rudi Lender Dashboard</button>
  </div></main>
+}
