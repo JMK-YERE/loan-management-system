@@ -57,6 +57,7 @@ public class GuarantorService {
                 + ", exposure yako TZS " + request.getGuaranteedAmount()
                 + ". Ingia kwenye mfumo kusoma mkataba na kukubali/kukataa.";
         notifications.sendSms(guarantor.getPhone(), text);
+        notifications.sendWhatsApp(guarantor.getPhone(), text);
         if (guarantor.getEmail() != null && !guarantor.getEmail().isBlank()) {
             notifications.sendEmail(guarantor.getEmail(), "JmkLoanApp - Ombi la Udhamini",
                     "<div style='font-family:Arial,sans-serif'><p>Habari " + guarantor.getFullName()
