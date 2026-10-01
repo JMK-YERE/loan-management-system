@@ -126,7 +126,7 @@ export default function AdminUsersPage() {
                 {sel.role !== 'ADMIN' && (
                   <div className="flex flex-wrap gap-2">
                     <select value={sel.role} onChange={async e=>{try{const r=await adminUserAPI.changeRole(sel.id,e.target.value);setSel(r.data.data);await load();setMsg(en?'Role updated.':'Role imebadilishwa.')}catch(e:any){setMsg(e.response?.data?.message||'Imeshindikana')}}} className="rounded-xl border px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900">
-                      <option value="BORROWER">BORROWER</option><option value="LENDER">LENDER</option><option value="BURSER">BURSER</option>
+                      <option value="BORROWER">BORROWER</option><option value="LENDER">LENDER</option><option value="BURSER">BURSER</option><option value="DIRECTOR">DIRECTOR / CEO</option>
                     </select>
                     <button onClick={async()=>{try{const r=await adminUserAPI.setActive(sel.id,!sel.active);setSel(r.data.data);await load();setMsg(en?'Account status updated.':'Hali ya akaunti imebadilishwa.')}catch(e:any){setMsg(e.response?.data?.message||'Imeshindikana')}}} className={`rounded-xl px-3 py-2 text-sm font-semibold ${sel.active?'bg-red-600 text-white':'bg-emerald-600 text-white'}`}>
                       {sel.active?(en?'Suspend':'Simamisha'):(en?'Activate':'Washa')}
