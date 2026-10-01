@@ -1,6 +1,7 @@
 package com.loanapp.service;
 
 import com.loanapp.dto.GuarantorRequest;
+import com.loanapp.dto.OnsiteGuarantorRequest;
 import com.loanapp.model.Guarantor;
 import com.loanapp.model.Loan;
 import com.loanapp.model.User;
@@ -9,6 +10,7 @@ import com.loanapp.repository.LoanRepository;
 import com.loanapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +44,12 @@ public class GuarantorService {
         if (guarantor.getId().equals(loan.getBorrower().getId())) {
             throw new RuntimeException("Mkopaji hawezi kuwa mdhamini wake mwenyewe");
         }
+        if (guarantor.getRole() != User.Role.GUARANTOR || !Boolean.TRUE.equals(guarantor.getActive()) || guarantor.getStatus() != User.UserStatus.APPROVED) {
+            throw new RuntimeException("Chagua mdhamini mwenye account iliyoidhinishwa na hai");
+        }
+        if (request.getGuaranteedAmount().compareTo(loan.getAmount()) > 0) {
+            throw new RuntimeException("Kiasi cha dhamana hakiwezi kuzidi kiasi cha mkopo");
+        }
 
         Guarantor g = Guarantor.builder()
                 .loan(loan)
@@ -70,6 +78,55 @@ public class GuarantorService {
         return saved;
     }
 
+    @Transactional
+    public Guarantor addOnsiteGuarantor(Long loanId, OnsiteGuarantorRequest request, String lenderEmail) {
+        Loan loan = loanRepository.findById(loanId).orElseThrow(() -> new RuntimeException("Mkopo haujapatikana"));
+        User lender = userRepository.findByEmail(lenderEmail).orElseThrow(() -> new RuntimeException("Mkopeshaji hajapatikana"));
+        if (lender.getRole() != User.Role.ADMIN && !loan.getLender().getId().equals(lender.getId()))
+            throw new RuntimeException("Huna ruhusa ya kuweka mdhamini kwenye mkopo huu");
+        if (loan.getStatus() == Loan.LoanStatus.DISBURSED || loan.getStatus() == Loan.LoanStatus.PAID)
+            throw new RuntimeException("Mkopo huu tayari umeanza/umemalizika; onsite guarantor hawezi kuongezwa");
+        if (request.getGuaranteedAmount().compareTo(loan.getAmount()) > 0)
+            throw new RuntimeException("Kiasi cha dhamana hakiwezi kuzidi kiasi cha mkopo");
+        if (!request.getPhotoData().startsWith("data:image/") || request.getPhotoData().length() > 5000000)
+            throw new RuntimeException("Picha ya mdhamini si sahihi au ni kubwa");
+        if (!request.getSignatureData().startsWith("data:image/") || request.getSignatureData().length() > 1000000)
+            throw new RuntimeException("Sahihi ya mdhamini si sahihi au ni kubwa");
+
+        boolean existing = guarantorRepository.findByLoan(loan).stream()
+                .anyMatch(g -> g.getStatus() == Guarantor.GuarantorStatus.PENDING || g.getStatus() == Guarantor.GuarantorStatus.APPROVED);
+        if (existing) throw new RuntimeException("Mkopo huu tayari una mdhamini aliyewekwa");
+
+        Guarantor g = Guarantor.builder()
+                .loan(loan)
+                .guarantor(null)
+                .guarantorName(request.getName().trim())
+                .guarantorPhone(request.getPhone())
+                .guarantorIdNumber(request.getIdNumber())
+                .guarantorPhotoData(request.getPhotoData())
+                .onsiteSignatureData(request.getSignatureData())
+                .guaranteedAmount(request.getGuaranteedAmount())
+                .relationship(request.getRelationship())
+                .captureMode("ONSITE")
+                .capturedBy(lenderEmail)
+                .capturedAt(LocalDateTime.now())
+                .status(Guarantor.GuarantorStatus.APPROVED)
+                .approvedAt(LocalDateTime.now())
+                .build();
+
+        Guarantor saved = guarantorRepository.save(g);
+        auditService.log(lenderEmail, "ONSITE_GUARANTOR_CAPTURED", "GUARANTOR", saved.getId(),
+                "Onsite guarantor captured with photo and signature for loan #" + loanId);
+        if (request.getPhone() != null && !request.getPhone().isBlank()) {
+            String text = "JmkLoanApp: " + request.getName() + " amerekodiwa kama mdhamini wa "
+                    + loan.getBorrower().getFullName() + ". Kiasi cha mkopo TZS " + loan.getAmount()
+                    + ", liability TZS " + request.getGuaranteedAmount() + ".";
+            notifications.sendSms(request.getPhone(), text);
+            notifications.sendWhatsApp(request.getPhone(), text);
+        }
+        return saved;
+    }
+
     public Guarantor approveGuarantor(Long id, String email) {
         Guarantor g = getForAction(id, email);
         g.setStatus(Guarantor.GuarantorStatus.APPROVED);
@@ -86,6 +143,7 @@ public class GuarantorService {
     private Guarantor getForAction(Long id, String email) {
         Guarantor g = guarantorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mdhamini hajapatikana"));
+        if (g.getGuarantor() == null) throw new RuntimeException("Mdhamini huyu alisainiwa onsite; hakuna account ya ku-approve hapa");
         if (!g.getGuarantor().getEmail().equalsIgnoreCase(email)) {
             User actor = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana"));
@@ -103,7 +161,7 @@ public class GuarantorService {
         boolean participant=actor.getRole()==User.Role.ADMIN
                 || loan.getLender().getId().equals(actor.getId())
                 || loan.getBorrower().getId().equals(actor.getId())
-                || guarantorRepository.findByLoan(loan).stream().anyMatch(g->g.getGuarantor().getId().equals(actor.getId()));
+                || guarantorRepository.findByLoan(loan).stream().anyMatch(g->g.getGuarantor()!=null && g.getGuarantor().getId().equals(actor.getId()));
         if(!participant) throw new RuntimeException("Huna ruhusa kuona taarifa za wadhamini wa mkopo huu");
         return guarantorRepository.findByLoan(loan);
     }

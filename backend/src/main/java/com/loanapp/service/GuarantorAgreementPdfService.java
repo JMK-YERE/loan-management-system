@@ -97,8 +97,15 @@ public class GuarantorAgreementPdfService {
             else {
                 PdfPTable gt=new PdfPTable(4); gt.setWidthPercentage(100); gt.setWidths(new float[]{1.5f,1.1f,1.1f,1});
                 header(gt,"Mdhamini",bold); header(gt,"Kiasi cha dhamana",bold); header(gt,"Uhusiano",bold); header(gt,"Hali",bold);
-                for(Guarantor g:gs){row(gt,safe(g.getGuarantor().getFullName()),money(g.getGuaranteedAmount()),safe(g.getRelationship()),safe(g.getStatus().name()));}
+                for(Guarantor g:gs){
+                    String name=g.getGuarantor()!=null?g.getGuarantor().getFullName():g.getGuarantorName();
+                    row(gt,safe(name),money(g.getGuaranteedAmount()),safe(g.getRelationship()),safe(g.getStatus().name()));
+                }
                 d.add(gt);
+                for(Guarantor g:gs){
+                    addImageData(d,g.getGuarantorPhotoData(),"Picha ya mdhamini",small,220,180);
+                    addImageData(d,g.getOnsiteSignatureData(),"Sahihi ya mdhamini wa onsite",small,320,140);
+                }
                 d.add(new Paragraph("Mdhamini anaona kiasi cha mkopo, kiasi anachowajibika kudhamini na masharti ya wajibu wake kabla ya kukubali na kusaini.",small));
             }
 
@@ -163,6 +170,17 @@ public class GuarantorAgreementPdfService {
             byte[] h=MessageDigest.getInstance("SHA-256").digest(raw.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(h).substring(0,16).toUpperCase();
         }catch(Exception e){return "UNAVAILABLE";}
+    }
+    private static void addImageData(Document d,String data,String title,Font font,float maxW,float maxH){
+        if(data==null || !data.startsWith("data:image/")) return;
+        try{
+            int comma=data.indexOf(',');
+            if(comma<0) return;
+            Image img=Image.getInstance(Base64.getDecoder().decode(data.substring(comma+1)));
+            img.scaleToFit(maxW,maxH);
+            d.add(new Paragraph(title,font));
+            d.add(img);
+        }catch(Exception ignored){}
     }
     private static void section(Document d,String s,Font f){Paragraph p=new Paragraph(s,f);p.setSpacingBefore(8);p.setSpacingAfter(5);d.add(p);}
     private static void header(PdfPTable t,String s,Font f){PdfPCell c=new PdfPCell(new Phrase(s,f));c.setPadding(5);c.setBackgroundColor(java.awt.Color.LIGHT_GRAY);t.addCell(c);}

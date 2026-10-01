@@ -96,9 +96,12 @@ public class LoanService {
   if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.BORROWER).isEmpty()) throw new RuntimeException("Sahihi ya mkopaji inahitajika");
   if(signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.LENDER).isEmpty()) throw new RuntimeException("Sahihi ya mkopeshaji inahitajika");
   var approvedGuarantors=guarantorRepository.findByLoanAndStatus(loan,Guarantor.GuarantorStatus.APPROVED);
-  if(!approvedGuarantors.isEmpty() && approvedGuarantors.stream().anyMatch(g -> signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.GUARANTOR).stream()
-              .noneMatch(s -> s.getUser().getId().equals(g.getGuarantor().getId()))))
-      throw new RuntimeException("Mdhamini aliyeidhinishwa lazima asaini kabla ya disbursement");
+  if(!approvedGuarantors.isEmpty() && approvedGuarantors.stream().anyMatch(g -> {
+      if ("ONSITE".equalsIgnoreCase(g.getCaptureMode())) return g.getOnsiteSignatureData()==null || g.getOnsiteSignatureData().isBlank();
+      return signatureRepository.findByLoanAndSignatureType(loan,Signature.SignatureType.GUARANTOR).stream()
+              .noneMatch(s -> s.getUser()!=null && g.getGuarantor()!=null && s.getUser().getId().equals(g.getGuarantor().getId()));
+  }))
+      throw new RuntimeException("Mdhamini aliyeidhinishwa lazima awe na sahihi kabla ya disbursement");
   loan.setStatus(Loan.LoanStatus.DISBURSED); loan.setDisbursementDate(LocalDate.now());
   Loan saved=loanRepository.save(loan); auditService.log(actorEmail,"LOAN_DISBURSED","LOAN",id,"Approved loan released after required signatures"); return saved;
  }

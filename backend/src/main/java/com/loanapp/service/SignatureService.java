@@ -41,7 +41,7 @@ public class SignatureService {
         if (user.getRole() == User.Role.ADMIN) return Signature.SignatureType.LENDER;
         if (loan.getBorrower().getId().equals(user.getId())) return Signature.SignatureType.BORROWER;
         if (loan.getLender().getId().equals(user.getId())) return Signature.SignatureType.LENDER;
-        boolean approved = guarantorRepository.findByLoan(loan).stream().anyMatch(g -> g.getGuarantor().getId().equals(user.getId()) && g.getStatus() == Guarantor.GuarantorStatus.APPROVED);
+        boolean approved = guarantorRepository.findByLoan(loan).stream().anyMatch(g -> g.getGuarantor()!=null && g.getGuarantor().getId().equals(user.getId()) && g.getStatus() == Guarantor.GuarantorStatus.APPROVED);
         if (approved) return Signature.SignatureType.GUARANTOR;
         throw new RuntimeException("Huna nafasi ya kusaini mkopo huu");
     }
@@ -49,7 +49,7 @@ public class SignatureService {
     private boolean isParticipant(Loan loan, User user) {
         if (user.getRole() == User.Role.ADMIN) return true;
         if (loan.getBorrower().getId().equals(user.getId()) || loan.getLender().getId().equals(user.getId())) return true;
-        return guarantorRepository.findByLoan(loan).stream().anyMatch(g -> g.getGuarantor().getId().equals(user.getId()));
+        return guarantorRepository.findByLoan(loan).stream().anyMatch(g -> g.getGuarantor()!=null && g.getGuarantor().getId().equals(user.getId()));
     }
 
     public List<Signature> getSignaturesByLoan(Long loanId, String email) {

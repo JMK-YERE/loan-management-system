@@ -54,6 +54,6 @@ public class Payment {
     public String getCheckoutUrl(){return checkoutUrl;} public void setCheckoutUrl(String v){checkoutUrl=v;}
     public LocalDateTime getCreatedAt(){return createdAt;} public void setCreatedAt(LocalDateTime v){createdAt=v;}
     @PrePersist protected void onCreate(){if(createdAt==null) createdAt=LocalDateTime.now();}
-    public enum PaymentMethod { MPESA, MIXX_BY_YAS, TIGO_PESA, AIRTEL_MONEY, HALOPESA, CASH, BANK_TRANSFER }
+    public enum PaymentMethod { MPESA, MIXX_BY_YAS, TIGO_PESA, AIRTEL_MONEY, HALOPESA, TANQR, TIPS, TISS, CASH, BANK_TRANSFER }
     public enum PaymentStatus { PENDING, SUCCESS, FAILED, REVERSED }
 }
