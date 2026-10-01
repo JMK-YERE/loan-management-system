@@ -162,9 +162,13 @@ public class GuarantorService {
     public Map<String,Object> getRemoteInvite(String token){
         Guarantor g=findByRemoteToken(token);
         if(g.getStatus()!=Guarantor.GuarantorStatus.PENDING) throw new RuntimeException("Kiungo hiki hakisubiri sahihi");
-        return Map.of("guarantorId",g.getId(),"loanId",g.getLoan().getId(),"borrowerName",g.getLoan().getBorrower().getFullName(),
-          "loanAmount",g.getLoan().getAmount(),"guarantorName",g.getGuarantorName(),"guarantorPhone",g.getGuarantorPhone()==null?"":g.getGuarantorPhone(),
-          "guaranteedAmount",g.getGuaranteedAmount(),"relationship",g.getRelationship()==null?"":g.getRelationship(),"expiresAt",g.getRemoteExpiresAt());
+        Loan l=g.getLoan();
+        return Map.of("guarantorId",g.getId(),"loanId",l.getId(),"borrowerName",l.getBorrower().getFullName(),
+          "loanAmount",l.getAmount(),"guarantorName",g.getGuarantorName(),"guarantorPhone",g.getGuarantorPhone()==null?"":g.getGuarantorPhone(),
+          "guaranteedAmount",g.getGuaranteedAmount(),"relationship",g.getRelationship()==null?"":g.getRelationship(),
+          "purpose",l.getPurpose()==null?"":l.getPurpose(),"interestRate",l.getInterestRate(),"processingFee",l.getProcessingFee(),
+          "totalRepayment",l.getTotalRepayment(),"duration",l.getDurationMonths(),"durationUnit",l.getDurationUnit()==null?"MONTHS":l.getDurationUnit(),
+          "nextDueDate",l.getNextDueDate()==null?"":l.getNextDueDate(),"expiresAt",g.getRemoteExpiresAt());
     }
 
     @Transactional
