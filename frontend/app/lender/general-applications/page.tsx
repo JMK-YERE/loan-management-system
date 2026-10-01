@@ -6,14 +6,14 @@ import {Download,Eye,RefreshCw,ShieldCheck,UserCheck} from 'lucide-react';
 import api,{agreementAPI,loanProductAPI} from '@/lib/api';
 
 const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
-const statusText:any={SUBMITTED:'Jipya — lender aanze review',UNDER_REVIEW:'Review / offer',CONVERTED:'Loan imetengenezwa',REJECTED:'Limekataliwa',CANCELLED:'Limefungwa'};
+const statusText:any={SUBMITTED:'Jipya — lender aanze review',UNDER_REVIEW:'Credit review',OFFER_READY:'Offer iko tayari — borrower akubali',OFFER_ACCEPTED:'Borrower amekubali — final approval',CONVERTED:'Loan imetengenezwa',REJECTED:'Limekataliwa',CANCELLED:'Limefungwa'};
 
 export default function GeneralApplicationsPage(){
  const router=useRouter();const [apps,setApps]=useState<any[]>([]),[products,setProducts]=useState<any[]>([]),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false);
  const load=async()=>{setMsg('');try{const [a,p]=await Promise.all([api.get('/general-loan-applications/pending'),loanProductAPI.active()]);setApps(a.data?.data??[]);setProducts(p.data?.data??[])}catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kupakia maombi')}};useEffect(()=>{load()},[]);
  const act=async(fn:any,ok='Action imekamilika')=>{setBusy(true);setMsg('');try{await fn();setMsg(ok);await load()}catch(e:any){setMsg(e?.response?.data?.message||'Action imeshindikana')}finally{setBusy(false)}};
  const openPdf=async(id:number,download=false)=>{try{const r=await agreementAPI.applicationPreview(id);const url=URL.createObjectURL(r.data);if(download){const a=document.createElement('a');a.href=url;a.download='loan-application-'+id+'-offer.pdf';a.click()}else window.open(url,'_blank','noopener,noreferrer');setTimeout(()=>URL.revokeObjectURL(url),10000)}catch(e:any){setMsg(e?.response?.data?.message||'PDF haipatikani')}};
- const grouped=useMemo(()=>({new:apps.filter(a=>a.status==='SUBMITTED'),review:apps.filter(a=>a.status==='UNDER_REVIEW')}),[apps]);
+ const grouped=useMemo(()=>({new:apps.filter(a=>a.status==='SUBMITTED'),review:apps.filter(a=>['UNDER_REVIEW','OFFER_READY','OFFER_ACCEPTED'].includes(a.status))}),[apps]);
 
  return <main className="min-h-screen bg-slate-50 p-4 dark:bg-slate-950 sm:p-6"><div className="mx-auto max-w-7xl space-y-5">
   <section className="rounded-3xl bg-gradient-to-br from-indigo-700 to-slate-950 p-6 text-white shadow-xl"><div className="flex flex-wrap items-start justify-between gap-3"><div><button onClick={()=>router.push('/lender')} className="mb-4 rounded-xl border border-white/30 px-3 py-2 text-xs font-bold">← Rudi Lender Dashboard</button><h1 className="text-3xl font-black">Loan Application Queue</h1><p className="mt-2 max-w-3xl text-sm text-indigo-100">Hapa lender anaona nani ameomba, kiasi gani, status gani na action gani inayofuata. Hakuna application inayopotea kwenye maelekezo.</p></div><button onClick={load} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold"><RefreshCw className="mr-1 inline h-4 w-4"/>Refresh</button></div></section>
@@ -29,7 +29,7 @@ export default function GeneralApplicationsPage(){
     {a.status==='UNDER_REVIEW'&&<select disabled={busy} defaultValue={a.product?.id||''} onChange={e=>e.target.value&&act(()=>api.put('/general-loan-applications/'+a.id+'/assign-product/'+e.target.value),'Offer imeandaliwa; borrower ataona kwenye Offer page.')} className="rounded-xl border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"><option value="">Chagua product / tengeneza offer</option>{products.map(p=><option key={p.id} value={p.id}>{p.name} · {p.interestRate}% · {p.durationUnit}</option>)}</select>}
     {a.product&&<><button onClick={()=>openPdf(a.id,false)} className="rounded-xl border px-4 py-2 text-sm font-black"><Eye className="mr-1 inline h-4 w-4"/>Soma Offer</button><button onClick={()=>openPdf(a.id,true)} className="rounded-xl border px-4 py-2 text-sm font-black"><Download className="mr-1 inline h-4 w-4"/>Download</button></>}
     {a.product&&a.termsAccepted&&<button disabled={busy} onClick={()=>act(()=>api.put('/general-loan-applications/'+a.id+'/approve'),'Offer imekubaliwa na loan imetengenezwa. Sasa nenda kwenye loan/signature workflow.')} className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white">✓ Approve & Create Loan</button>}
-    {a.product&&!a.termsAccepted&&<span className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700"><ShieldCheck className="mr-1 inline h-4 w-4"/>Subiri borrower akubali offer</span>}
+    {a.status==='OFFER_READY'&&<span className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700"><ShieldCheck className="mr-1 inline h-4 w-4"/>Subiri borrower akubali offer</span>}
     <button onClick={()=>router.push('/admin/credit-assessments?applicationId='+a.id)} className="rounded-xl border px-4 py-2 text-sm font-bold">Credit assessment</button>
    </div>
   </article>)}</div>
