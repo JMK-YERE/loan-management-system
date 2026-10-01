@@ -48,6 +48,9 @@ public class LoanService {
    .durationMonths(request.getDurationMonths()).totalRepayment(total).purpose(request.getPurpose())
    .processingFee(processing).lawyerRequired(Boolean.TRUE.equals(request.getLawyerRequired())).lawyerFee(lawyer)
    .status(Loan.LoanStatus.PENDING).build();
+  loan.setCollateralDescription(request.getCollateralDescription());
+  loan.setCollateralValue(request.getCollateralValue()==null?BigDecimal.ZERO:request.getCollateralValue());
+  loan.setCollateralPhotoData(request.getCollateralPhotoData());
   if(product!=null){loan.setLoanProduct(product);loan.setDurationUnit(product.getDurationUnit());}
   Loan saved=loanRepository.save(loan);
   auditService.log(lenderEmail,"LOAN_CREATED","LOAN",saved.getId(),"Loan created for borrower "+borrower.getId()+(product!=null?" using "+product.getName():""));
