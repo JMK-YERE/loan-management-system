@@ -119,7 +119,7 @@ export default function DashboardPage() {
       }
       if (currentUser.role === 'LENDER') { router.push('/lender'); return; }
       if (currentUser.role === 'BORROWER') { router.push('/borrower'); return; }
-      if (currentUser.role === 'GUARANTOR') { router.push('/guarantor'); return; }
+      if (currentUser.role === 'GUARANTOR') { localStorage.clear(); router.push('/login'); return; }
       if (currentUser.role === 'BURSER') { router.push('/bursar'); return; }
       setUser(currentUser);
       if (currentUser.role === 'LENDER') {
