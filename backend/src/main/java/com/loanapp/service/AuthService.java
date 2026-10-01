@@ -135,6 +135,9 @@ public class AuthService {
     }
 
     public void changePassword(String email, String currentPassword, String newPassword) {
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new RuntimeException("Password ya sasa inahitajika");
+        }
         validatePassword(newPassword);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana"));
