@@ -19,7 +19,7 @@ public class User {
     private String gender; private String maritalStatus; private String nationality; private String address; private String city; private String country;
     private String employmentStatus; private String occupation; private String employer;
     @Column(precision=15,scale=2) private BigDecimal monthlyIncome;
-    private String kinName; private String kinPhone; private String kinRelationship; @Lob private String photoData;
+    private String kinName; private String kinPhone; private String kinRelationship; @Lob @Column(columnDefinition="TEXT") private String photoData;
     private LocalDateTime createdAt; private LocalDateTime updatedAt;
 
     public User(){}
