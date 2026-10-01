@@ -134,6 +134,22 @@ public class AuthService {
         });
     }
 
+    public void changePassword(String email, String currentPassword, String newPassword) {
+        validatePassword(newPassword);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Mtumiaji hajapatikana"));
+        if (user.getPassword() == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Password ya sasa si sahihi");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new RuntimeException("Password mpya lazima iwe tofauti na ya sasa");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordResetToken(null);
+        user.setPasswordResetExpiry(null);
+        userRepository.save(user);
+    }
+
     public void resetPassword(String token, String newPassword) {
         validatePassword(newPassword);
         if (token == null || token.isBlank()) throw new RuntimeException("Link si sahihi au imeisha muda");
