@@ -30,12 +30,10 @@ public class Guarantor {
     private String guarantorIdNumber;
 
     @JsonIgnore
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String guarantorPhotoData;
 
     @JsonIgnore
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String onsiteSignatureData;
 
