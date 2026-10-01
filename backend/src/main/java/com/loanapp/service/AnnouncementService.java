@@ -19,6 +19,9 @@ public class AnnouncementService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notifications;
+
     // Kwa wote (public)
     public List<Announcement> getPublicAnnouncements() {
         return announcementRepository.findByActiveTrueOrderByDisplayOrderAsc();
@@ -70,6 +73,19 @@ public class AnnouncementService {
         if (request.getDisplayOrder() != null) a.setDisplayOrder(request.getDisplayOrder());
 
         return announcementRepository.save(a);
+    }
+
+    public int broadcastToBorrowers(Long id) {
+        Announcement a = getById(id);
+        int sent = 0;
+        for (User borrower : userRepository.findByRole(User.Role.BORROWER)) {
+            if (!Boolean.TRUE.equals(borrower.getActive()) || borrower.getStatus() != User.UserStatus.APPROVED) continue;
+            String body = "JmkLoanApp: " + a.getTitle() + " - " + a.getContent();
+            boolean email = notifications.sendEmail(borrower.getEmail(), "JmkLoanApp - " + a.getTitle(), "<p>Habari " + borrower.getFullName() + ",</p><p>" + a.getContent() + "</p>");
+            boolean sms = notifications.sendSms(borrower.getPhone(), body);
+            if (email || sms) sent++;
+        }
+        return sent;
     }
 
     public void delete(Long id) {
