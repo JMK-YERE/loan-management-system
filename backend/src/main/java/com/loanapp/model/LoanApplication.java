@@ -21,6 +21,7 @@ public class LoanApplication {
  @Column(nullable=true,precision=15,scale=2) private BigDecimal monthlyExpenses=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal existingMonthlyDebt=BigDecimal.ZERO;
  @Column(length=500) private String collateralDescription;
+ @Lob @Column(columnDefinition="TEXT") private String collateralPhotoData;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal collateralValue=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal interestSnapshot=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal processingFeeSnapshot=BigDecimal.ZERO;
@@ -52,6 +53,7 @@ public class LoanApplication {
  public BigDecimal getMonthlyExpenses(){return monthlyExpenses;} public void setMonthlyExpenses(BigDecimal v){monthlyExpenses=v;}
  public BigDecimal getExistingMonthlyDebt(){return existingMonthlyDebt;} public void setExistingMonthlyDebt(BigDecimal v){existingMonthlyDebt=v;}
  public String getCollateralDescription(){return collateralDescription;} public void setCollateralDescription(String v){collateralDescription=v;}
+ public String getCollateralPhotoData(){return collateralPhotoData;} public void setCollateralPhotoData(String v){collateralPhotoData=v;}
  public BigDecimal getCollateralValue(){return collateralValue;} public void setCollateralValue(BigDecimal v){collateralValue=v;}
  public BigDecimal getInterestSnapshot(){return interestSnapshot;} public void setInterestSnapshot(BigDecimal v){interestSnapshot=v;}
  public BigDecimal getProcessingFeeSnapshot(){return processingFeeSnapshot;} public void setProcessingFeeSnapshot(BigDecimal v){processingFeeSnapshot=v;}
