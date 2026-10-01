@@ -60,6 +60,16 @@ public class Loan {
     @Column(length = 500)
     private String purpose;
 
+    @Column(length = 500)
+    private String collateralDescription;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal collateralValue = BigDecimal.ZERO;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String collateralPhotoData;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -168,6 +178,12 @@ public class Loan {
     public void setStatus(LoanStatus v) { status=v; }
     public String getPurpose() { return purpose; }
     public void setPurpose(String v) { purpose=v; }
+    public String getCollateralDescription() { return collateralDescription; }
+    public void setCollateralDescription(String v) { collateralDescription=v; }
+    public BigDecimal getCollateralValue() { return collateralValue; }
+    public void setCollateralValue(BigDecimal v) { collateralValue=v; }
+    public String getCollateralPhotoData() { return collateralPhotoData; }
+    public void setCollateralPhotoData(String v) { collateralPhotoData=v; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime v) { createdAt=v; }
     public LocalDate getDisbursementDate() { return disbursementDate; }
