@@ -21,7 +21,7 @@ public class LoanApplication {
  @Column(nullable=true,precision=15,scale=2) private BigDecimal monthlyExpenses=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal existingMonthlyDebt=BigDecimal.ZERO;
  @Column(length=500) private String collateralDescription;
- @Lob @Column(columnDefinition="TEXT") private String collateralPhotoData;
+ @JsonIgnore @Lob @Column(columnDefinition="TEXT") private String collateralPhotoData;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal collateralValue=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal interestSnapshot=BigDecimal.ZERO;
  @Column(nullable=true,precision=15,scale=2) private BigDecimal processingFeeSnapshot=BigDecimal.ZERO;
