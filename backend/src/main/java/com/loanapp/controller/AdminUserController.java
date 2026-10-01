@@ -33,6 +33,7 @@ public class AdminUserController {
         try{role=User.Role.valueOf(String.valueOf(body.getOrDefault("role","")).toUpperCase(Locale.ROOT));}
         catch(Exception e){throw new RuntimeException("Role si sahihi");}
         if(role==User.Role.ADMIN) throw new RuntimeException("Haiwezekani kumpa mtumiaji ADMIN kupitia endpoint hii");
+        if(role==User.Role.GUARANTOR) throw new RuntimeException("Mdhamini hana account. Tumia onsite guarantor capture kwenye loan.");
         User.Role old=u.getRole(); u.setRole(role); users.save(u);
         audit.log(auth.getName(),"ROLE_CHANGED","USER",u.getId(),old+" -> "+role);
         return ResponseEntity.ok(ApiResponse.success("Role imebadilishwa",safe(u)));
