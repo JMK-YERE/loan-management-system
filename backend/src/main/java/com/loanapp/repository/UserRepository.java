@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPasswordResetToken(String token);
     boolean existsByNidaNumber(String nidaNumber);
     java.util.List<User> findByRole(User.Role role);
+    long countByStatus(User.UserStatus status);
+    long countByActiveTrue();
 }
