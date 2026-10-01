@@ -10,6 +10,10 @@ import java.util.List;
 
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Long> {
+    @org.springframework.data.jpa.repository.Query("select coalesce(sum(l.amount),0) from Loan l")
+    java.math.BigDecimal sumAmount();
+    long countByStatus(Loan.LoanStatus status);
+    long countByStatusIn(java.util.Collection<Loan.LoanStatus> statuses);
 
     @EntityGraph(attributePaths = {"borrower", "lender", "loanProduct"})
     List<Loan> findByBorrower(User borrower);
