@@ -72,7 +72,7 @@ export default function BorrowerPage(){
    </section>
 
    <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-blue-900 dark:bg-slate-900">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-black">Kabla hujaomba</h2><p className="mt-1 text-sm text-slate-500">Soma mkataba/mwongozo kwanza; mkataba wa mwisho utatumia terms halisi za offer yako.</p></div><Link href="/loan-guide" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white"><Download className="mr-1 inline h-4 w-4"/>Soma / Pakua</Link></div>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-black">Mkataba wa Mkopo</h2><p className="mt-1 text-sm text-slate-500">Huu ni mkataba halisi wa mfumo wenye sehemu za taarifa za mkopaji, ajira/biashara, mkopo, dhamana, mdhamini, tamko na sahihi. Nakala ya mwisho itajazwa kwa Loan ID yako.</p></div><Link href="/loan-guide" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white"><Download className="mr-1 inline h-4 w-4"/>Soma / Pakua Mkataba</Link></div>
     <div className="mt-4 grid gap-3 md:grid-cols-4">{[['1','Omba kiasi'],['2','Lender review'],['3','Soma offer'],['4','Kubali / saini']].map(([n,x])=><div key={n} className="rounded-2xl border p-4 dark:border-slate-800"><span className="text-xs font-black text-blue-600">HATUA {n}</span><div className="mt-1 font-bold">{x}</div></div>)}</div>
    </section>
 
