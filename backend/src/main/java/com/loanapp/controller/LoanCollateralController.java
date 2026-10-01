@@ -86,6 +86,22 @@ public class LoanCollateralController {
         catch(Exception e){throw new RuntimeException("Dhamana haijahifadhiwa",e);}
     }
 
+    @GetMapping("/{collateralId}/evidence")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Map<String,Object>>> evidence(@PathVariable Long loanId,@PathVariable Long collateralId,Authentication auth){
+        Loan l=loan(loanId);
+        if(!canView(l,auth.getName())) throw new RuntimeException("Huna ruhusa kuona ushahidi wa dhamana hii");
+        LoanCollateral c=collaterals.findById(collateralId).orElseThrow(()->new RuntimeException("Dhamana haijapatikana"));
+        if(!c.getLoan().getId().equals(l.getId())) throw new RuntimeException("Dhamana si ya mkopo huu");
+        Map<String,Object> out=new LinkedHashMap<>();
+        try{
+            var mapper=new com.fasterxml.jackson.databind.ObjectMapper();
+            out.put("photos",c.getPhotoDataJson()==null?List.of():mapper.readValue(c.getPhotoDataJson(),List.class));
+            out.put("documents",c.getDocumentDataJson()==null?List.of():mapper.readValue(c.getDocumentDataJson(),List.class));
+        }catch(Exception e){throw new RuntimeException("Ushahidi wa dhamana haukusomeka");}
+        return ResponseEntity.ok(ApiResponse.success("Ushahidi wa dhamana",out));
+    }
+
     @PutMapping("/{collateralId}/verify")
     @PreAuthorize("hasAnyRole('LENDER','ADMIN')")
     public ResponseEntity<ApiResponse<LoanCollateral>> verify(@PathVariable Long loanId,@PathVariable Long collateralId,Authentication auth){
