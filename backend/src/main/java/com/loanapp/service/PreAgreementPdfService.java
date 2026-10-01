@@ -5,6 +5,7 @@ import com.loanapp.dto.LoanQuoteResponse;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
@@ -12,6 +13,11 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class PreAgreementPdfService {
     private final LoanQuoteService quotes;
+    @Value("${app.company.name:JmkLoanApp}") private String companyName;
+    @Value("${app.company.address:}") private String companyAddress;
+    @Value("${app.company.phone:}") private String companyPhone;
+    @Value("${app.company.email:}") private String companyEmail;
+    @Value("${app.company.license:}") private String companyLicense;
     public PreAgreementPdfService(LoanQuoteService quotes){this.quotes=quotes;}
 
     public byte[] generate(LoanQuoteRequest request,String borrowerName,String purpose){
@@ -23,7 +29,8 @@ public class PreAgreementPdfService {
             doc.open();
             Font title=FontFactory.getFont(FontFactory.HELVETICA_BOLD,18);
             Font h=FontFactory.getFont(FontFactory.HELVETICA_BOLD,12);
-            doc.add(new Paragraph("[JINA LA TAASISI] — MKATABA WA MKOPO",title));
+            doc.add(new Paragraph(safe(companyName)+" — MKATABA WA MKOPO",title));
+            doc.add(new Paragraph(safe(companyAddress)+" · "+safe(companyPhone)+" · "+safe(companyEmail)+" · Licence: "+safe(companyLicense)));
             doc.add(new Paragraph("Loan Agreement Preview · Mfumo hujaza taarifa za taasisi, borrower na loan halisi kwenye final agreement."));
             doc.add(Chunk.NEWLINE);
             doc.add(new Paragraph("1. TAARIFA BINAFSI ZA MKOPAJI",h));
