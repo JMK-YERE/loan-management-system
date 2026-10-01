@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';\nimport { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Download, Eye, FileSignature, FileText, RefreshCw, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { agreementAPI, loanAPI } from '@/lib/api';
