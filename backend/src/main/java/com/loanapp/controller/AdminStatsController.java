@@ -28,41 +28,30 @@ public class AdminStatsController {
 
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<Map<String, Object>>> stats() {
-        var users = userRepository.findAll();
-        var loans = loanRepository.findAll();
-        var payments = paymentRepository.findAll();
-
-        BigDecimal portfolio = loans.stream()
-                .map(Loan::getAmount)
-                .filter(java.util.Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal repayments = payments.stream()
-                .filter(p -> p.getStatus() == Payment.PaymentStatus.SUCCESS)
-                .map(Payment::getAmount)
-                .filter(java.util.Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        long pendingUsers = users.stream().filter(u -> u.getStatus() == com.loanapp.model.User.UserStatus.PENDING).count();
-        long activeUsers = users.stream().filter(u -> Boolean.TRUE.equals(u.getActive())).count();
-        long pendingLoans = loans.stream().filter(l -> l.getStatus() == Loan.LoanStatus.PENDING).count();
-        long approvedLoans = loans.stream().filter(l -> l.getStatus() == Loan.LoanStatus.APPROVED || l.getStatus() == Loan.LoanStatus.DISBURSED).count();
-        long paidLoans = loans.stream().filter(l -> l.getStatus() == Loan.LoanStatus.PAID).count();
-        long defaultedLoans = loans.stream().filter(l -> l.getStatus() == Loan.LoanStatus.DEFAULTED).count();
+        long totalUsers = userRepository.count();
+        long pendingUsers = userRepository.countByStatus(com.loanapp.model.User.UserStatus.PENDING);
+        long activeUsers = userRepository.countByActiveTrue();
+        long totalLoans = loanRepository.count();
+        long pendingLoans = loanRepository.countByStatus(Loan.LoanStatus.PENDING);
+        long approvedLoans = loanRepository.countByStatusIn(java.util.List.of(Loan.LoanStatus.APPROVED, Loan.LoanStatus.DISBURSED));
+        long paidLoans = loanRepository.countByStatus(Loan.LoanStatus.PAID);
+        long defaultedLoans = loanRepository.countByStatus(Loan.LoanStatus.DEFAULTED);
+        long totalPayments = paymentRepository.count();
+        BigDecimal portfolio = loanRepository.sumAmount();
+        BigDecimal repayments = paymentRepository.sumSuccessfulAmount();
 
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("totalUsers", users.size());
+        data.put("totalUsers", totalUsers);
         data.put("activeUsers", activeUsers);
         data.put("pendingUsers", pendingUsers);
-        data.put("totalLoans", loans.size());
+        data.put("totalLoans", totalLoans);
         data.put("pendingLoans", pendingLoans);
         data.put("approvedLoans", approvedLoans);
         data.put("paidLoans", paidLoans);
         data.put("defaultedLoans", defaultedLoans);
         data.put("portfolioAmount", portfolio);
         data.put("successfulRepayments", repayments);
-        data.put("totalPayments", payments.size());
-
+        data.put("totalPayments", totalPayments);
         return ResponseEntity.ok(ApiResponse.success("Takwimu za mfumo", data));
     }
 }
