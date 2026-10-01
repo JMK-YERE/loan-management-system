@@ -5,6 +5,8 @@ import com.loanapp.model.User;
 import com.loanapp.repository.LoanRepository;
 import com.loanapp.repository.UserRepository;
 import com.loanapp.repository.SignatureRepository;
+import com.loanapp.repository.GuarantorRepository;
+import java.util.Base64;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.stereotype.Service;
@@ -12,12 +14,13 @@ import java.io.ByteArrayOutputStream;
 
 @Service
 public class PdfAgreementService {
- private final LoanRepository loans; private final UserRepository users; private final SignatureRepository signatures;
- public PdfAgreementService(LoanRepository loans,UserRepository users,SignatureRepository signatures){this.loans=loans;this.users=users;this.signatures=signatures;}
+ private final LoanRepository loans; private final UserRepository users; private final SignatureRepository signatures; private final GuarantorRepository guarantors;
+ public PdfAgreementService(LoanRepository loans,UserRepository users,SignatureRepository signatures,GuarantorRepository guarantors){this.loans=loans;this.users=users;this.signatures=signatures;this.guarantors=guarantors;}
  public byte[] generate(Long id,String email){
   Loan l=loans.findById(id).orElseThrow(()->new RuntimeException("Mkopo haujapatikana"));
   User actor=users.findByEmail(email).orElseThrow(()->new RuntimeException("Mtumiaji hajapatikana"));
-  if(actor.getRole()!=User.Role.ADMIN&&!l.getBorrower().getId().equals(actor.getId())&&!l.getLender().getId().equals(actor.getId())) throw new RuntimeException("Huna ruhusa ya mkataba huu");
+  boolean participant=actor.getRole()==User.Role.ADMIN||l.getBorrower().getId().equals(actor.getId())||l.getLender().getId().equals(actor.getId())||guarantors.findByLoan(l).stream().anyMatch(g->g.getGuarantor().getId().equals(actor.getId()));
+  if(!participant) throw new RuntimeException("Huna ruhusa ya mkataba huu");
   try{
    ByteArrayOutputStream out=new ByteArrayOutputStream(); Document d=new Document(); PdfWriter.getInstance(d,out); d.open();
    Font title=FontFactory.getFont(FontFactory.HELVETICA_BOLD,18); Font h=FontFactory.getFont(FontFactory.HELVETICA_BOLD,12);
@@ -26,9 +29,15 @@ public class PdfAgreementService {
    d.add(new Paragraph("Lender: "+l.getLender().getFullName()+" ("+l.getLender().getEmail()+")"));
    d.add(new Paragraph("Principal: TZS "+l.getAmount())); d.add(new Paragraph("Interest rate: "+l.getInterestRate()+"%")); d.add(new Paragraph("Duration: "+l.getDurationMonths()+" "+(l.getDurationUnit()==null?"MONTHS":l.getDurationUnit())));
    d.add(new Paragraph("Processing fee: TZS "+l.getProcessingFee())); d.add(new Paragraph("Lawyer fee: TZS "+l.getLawyerFee())); d.add(new Paragraph("Total repayment: TZS "+l.getTotalRepayment()));
-   d.add(new Paragraph("Purpose: "+(l.getPurpose()==null?"—":l.getPurpose()))); d.add(new Paragraph("Status: "+l.getStatus()));
+   d.add(new Paragraph("Purpose: "+(l.getPurpose()==null?"—":l.getPurpose())));
+   d.add(new Paragraph("Collateral: "+(l.getCollateralDescription()==null?"Hakuna":l.getCollateralDescription())));
+   d.add(new Paragraph("Collateral value: TZS "+(l.getCollateralValue()==null?"0":l.getCollateralValue())));
+   if(l.getCollateralPhotoData()!=null && l.getCollateralPhotoData().startsWith("data:image/")) { try { String b64=l.getCollateralPhotoData().substring(l.getCollateralPhotoData().indexOf(",")+1); Image img=Image.getInstance(Base64.getDecoder().decode(b64)); img.scaleToFit(420,300); d.add(new Paragraph("Collateral evidence photo",h)); d.add(img); } catch(Exception ignored) {} }
+   d.add(new Paragraph("Status: "+l.getStatus()));
    d.add(new Paragraph("Next due date: "+(l.getNextDueDate()==null?"—":l.getNextDueDate())));
    d.add(new Paragraph(" "));
+   d.add(new Paragraph("Guarantor / Dhamana responsibility",h));
+   guarantors.findByLoan(l).forEach(g->d.add(new Paragraph("Guarantor: "+g.getGuarantor().getFullName()+" | Amount covered: TZS "+g.getGuaranteedAmount()+" | Status: "+g.getStatus())));
    d.add(new Paragraph("Digital signatures",h));
    signatures.findByLoan(l).forEach(s->d.add(new Paragraph(s.getSignatureType()+": "+s.getUser().getFullName()+" | signed "+s.getSignedAt())));
    d.add(new Paragraph(" "));
