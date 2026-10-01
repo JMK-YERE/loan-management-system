@@ -30,7 +30,7 @@ export default function GeneralApplicationsPage(){
     {a.product&&<><button onClick={()=>openPdf(a.id,false)} className="rounded-xl border px-4 py-2 text-sm font-black"><Eye className="mr-1 inline h-4 w-4"/>Soma Offer</button><button onClick={()=>openPdf(a.id,true)} className="rounded-xl border px-4 py-2 text-sm font-black"><Download className="mr-1 inline h-4 w-4"/>Download</button></>}
     {a.status==='OFFER_ACCEPTED'&&<button disabled={busy} onClick={()=>act(()=>api.put('/general-loan-applications/'+a.id+'/approve'),'Offer imekubaliwa na loan imetengenezwa. Sasa nenda kwenye loan/signature workflow.')} className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white">✓ Approve & Create Loan</button>}
     {a.status==='OFFER_READY'&&<span className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700"><ShieldCheck className="mr-1 inline h-4 w-4"/>Subiri borrower akubali offer</span>}
-    <button onClick={()=>router.push('/admin/credit-assessments?applicationId='+a.id)} className="rounded-xl border px-4 py-2 text-sm font-bold">Credit assessment</button>
+    <button onClick={()=>router.push('/lender/credit-assessments?applicationId='+a.id)} className="rounded-xl border px-4 py-2 text-sm font-bold">Credit assessment</button>
    </div>
   </article>)}</div>
   <button onClick={()=>router.push('/lender')} className="font-bold text-blue-600">← Rudi Lender Dashboard</button>
