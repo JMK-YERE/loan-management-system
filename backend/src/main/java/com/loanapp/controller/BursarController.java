@@ -60,14 +60,19 @@ public class BursarController {
 
     @GetMapping("/loans")
     public List<Map<String,Object>> loanList() {
+        Map<Long,BigDecimal> paidByLoan=new HashMap<>();
+        for(Payment p:payments.findAll()) if(p.getStatus()==Payment.PaymentStatus.SUCCESS) paidByLoan.merge(p.getLoan().getId(),p.getAmount(),BigDecimal::add);
         return loans.findAll().stream().map(l -> {
             Map<String,Object> m = new LinkedHashMap<>();
+            BigDecimal paid=paidByLoan.getOrDefault(l.getId(),BigDecimal.ZERO);
             m.put("id", l.getId());
             m.put("borrower", l.getBorrower() == null ? null : l.getBorrower().getFullName());
             m.put("borrowerEmail", l.getBorrower() == null ? null : l.getBorrower().getEmail());
             m.put("lender", l.getLender() == null ? null : l.getLender().getFullName());
             m.put("amount", l.getAmount());
             m.put("totalRepayment", l.getTotalRepayment());
+            m.put("paidAmount", paid);
+            m.put("balance", l.getTotalRepayment().subtract(paid).max(BigDecimal.ZERO));
             m.put("status", l.getStatus());
             m.put("interestRate", l.getInterestRate());
             m.put("durationMonths", l.getDurationMonths());
