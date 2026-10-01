@@ -14,9 +14,15 @@ import com.lowagie.text.pdf.PdfWriter;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class PdfAgreementService {
+ @Value("${app.company.name:JmkLoanApp}") private String companyName;
+ @Value("${app.company.address:}") private String companyAddress;
+ @Value("${app.company.phone:}") private String companyPhone;
+ @Value("${app.company.email:}") private String companyEmail;
+ @Value("${app.company.license:}") private String companyLicense;
  private final LoanRepository loans; private final UserRepository users; private final SignatureRepository signatures; private final GuarantorRepository guarantors; private final LoanCollateralRepository collaterals; private final RepaymentScheduleRepository schedules;
  public PdfAgreementService(LoanRepository loans,UserRepository users,SignatureRepository signatures,GuarantorRepository guarantors,LoanCollateralRepository collaterals,RepaymentScheduleRepository schedules){this.loans=loans;this.users=users;this.signatures=signatures;this.guarantors=guarantors;this.collaterals=collaterals;this.schedules=schedules;}
 
@@ -44,7 +50,9 @@ public class PdfAgreementService {
    d.add(new Paragraph("Anwani: "+(l.getBorrower().getAddress()==null?"—":l.getBorrower().getAddress())+" | Mji: "+(l.getBorrower().getCity()==null?"—":l.getBorrower().getCity())));
    d.add(new Paragraph("Next of kin: "+(l.getBorrower().getKinName()==null?"—":l.getBorrower().getKinName())+" | Simu: "+(l.getBorrower().getKinPhone()==null?"—":l.getBorrower().getKinPhone())+" | Uhusiano: "+(l.getBorrower().getKinRelationship()==null?"—":l.getBorrower().getKinRelationship())));
    d.add(new Paragraph(" "));
-   d.add(new Paragraph("PART B — TAARIFA ZA MKOPO",h));   d.add(new Paragraph("Loan #"+l.getId(),h));
+   d.add(new Paragraph("PART B — TAARIFA ZA MKOPO",h));   d.add(new Paragraph(companyName+" — MKATABA WA MKOPO",h));
+   d.add(new Paragraph(companyAddress+" · "+companyPhone+" · "+companyEmail+" · Licence: "+companyLicense));
+   d.add(new Paragraph("Loan #"+l.getId(),h));
    d.add(new Paragraph("Borrower: "+l.getBorrower().getFullName()+" ("+l.getBorrower().getEmail()+")"));
    d.add(new Paragraph("Lender: "+l.getLender().getFullName()+" ("+l.getLender().getEmail()+")"));
    d.add(new Paragraph("Principal: TZS "+l.getAmount()));
