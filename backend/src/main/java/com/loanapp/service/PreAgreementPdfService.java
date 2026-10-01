@@ -23,14 +23,18 @@ public class PreAgreementPdfService {
             doc.open();
             Font title=FontFactory.getFont(FontFactory.HELVETICA_BOLD,18);
             Font h=FontFactory.getFont(FontFactory.HELVETICA_BOLD,12);
-            doc.add(new Paragraph("JmkLoanApp - PRE-APPLICATION LOAN OFFER",title));
-            doc.add(new Paragraph("This is a pricing and terms preview. It is not a final approval or disbursement notice."));
+            doc.add(new Paragraph("[JINA LA TAASISI] — MKATABA WA MKOPO",title));
+            doc.add(new Paragraph("Loan Agreement Preview · Mfumo hujaza taarifa za taasisi, borrower na loan halisi kwenye final agreement."));
             doc.add(Chunk.NEWLINE);
-            doc.add(new Paragraph("Borrower: "+safe(borrowerName),h));
+            doc.add(new Paragraph("1. TAARIFA BINAFSI ZA MKOPAJI",h));
+            doc.add(new Paragraph("Jina kamili: "+safe(borrowerName)));
+            doc.add(new Paragraph("NIDA/ID: ____________________ | Simu: ____________________ | Anwani: ____________________"));
             doc.add(new Paragraph("Loan product: "+safe(q.productName)));
-            doc.add(new Paragraph("Purpose: "+safe(purpose)));
+            doc.add(new Paragraph("Dhumuni la mkopo: "+safe(purpose)));
+            doc.add(new Paragraph("Dhamana: ______________________________ | Thamani: TZS ____________________"));
+            doc.add(new Paragraph("Mdhamini (ikiwa anahitajika): ______________________________ | Liability: TZS ____________________"));
             doc.add(Chunk.NEWLINE);
-            doc.add(new Paragraph("LOAN TERMS",h));
+            doc.add(new Paragraph("2. TAARIFA ZA MKOPO NA MASHARTI",h));
             doc.add(new Paragraph("Principal: TZS "+q.principal));
             doc.add(new Paragraph("Interest: TZS "+q.interest+" ("+q.interestType+")"));
             doc.add(new Paragraph("Processing fee: TZS "+q.processingFee));
@@ -46,7 +50,12 @@ public class PreAgreementPdfService {
             for(int i=0;i<q.dueDates.size();i++) doc.add(new Paragraph((i+1)+". "+q.dueDates.get(i).format(f)+" — TZS "+q.installmentAmount));
             doc.add(Chunk.NEWLINE);
             doc.add(new Paragraph("Terms version: "+safe(q.termsVersion)));
-            doc.add(new Paragraph("The borrower should review the above pricing before submitting the application. Product terms are controlled by the institution and cannot be edited by the borrower."));
+            doc.add(new Paragraph("3. TAMKO LA MKOPAJI",h));
+            doc.add(new Paragraph("Mkopaji anathibitisha kuwa amepata nafasi ya kusoma kiasi, riba, ada, muda, ratiba na masharti ya marejesho. Terms za product zinadhibitiwa na taasisi na borrower hawezi kubadilisha riba, ada au penalty."));
+            doc.add(new Paragraph("4. SAHIHI",h));
+            doc.add(new Paragraph("Mkopaji: ______________________________  Tarehe: ____________________"));
+            doc.add(new Paragraph("Mkopeshaji: ____________________________  Tarehe: ____________________"));
+            doc.add(new Paragraph("Shahidi: _______________________________  Tarehe: ____________________"));
             doc.close();
             return out.toByteArray();
         }catch(Exception e){throw new RuntimeException("Imeshindikana kutengeneza PDF ya masharti",e);}
