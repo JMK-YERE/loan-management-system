@@ -34,3 +34,4 @@ export default function OnsiteGuarantorPage(){
   </form>}
   <Link href="/lender" className="font-bold text-blue-600">← Rudi Lender Dashboard</Link>
  </div></main>
+}
