@@ -64,7 +64,7 @@ public class LoanCollateralController {
         if(photos.size()>10) throw new RuntimeException("Dhamana moja inaweza kuwa na picha 10 kwa sasa");
         LoanCollateral c=new LoanCollateral();
         c.setLoan(l); c.setType(type); c.setDescription(description); c.setValue(value);
-        c.setPhotoDataJson(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(photos));
+        try { c.setPhotoDataJson(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(photos)); } catch (Exception e) { throw new RuntimeException("Picha za dhamana hazikuandaliwa"); }
         c.setCapturedBy(auth.getName()); c.setVerificationStatus("PENDING"); c.setCapturedAt(LocalDateTime.now());
         try { return ResponseEntity.ok(ApiResponse.success("Dhamana imehifadhiwa",collaterals.save(c))); }
         catch(Exception e){throw new RuntimeException("Dhamana haijahifadhiwa",e);}
