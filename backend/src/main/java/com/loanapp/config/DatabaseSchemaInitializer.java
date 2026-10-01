@@ -34,5 +34,9 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
         jdbc.execute("ALTER TABLE loan_applications ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN DEFAULT FALSE");
         jdbc.execute("ALTER TABLE loan_applications ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMP");
         jdbc.execute("ALTER TABLE announcements ADD COLUMN IF NOT EXISTS image_url VARCHAR(500)");
+        jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_token_hash VARCHAR(128)");
+        jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_expires_at TIMESTAMP");
+        jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_signed_at TIMESTAMP");
+        jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_signature_data TEXT");
     }
 }
