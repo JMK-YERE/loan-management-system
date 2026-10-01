@@ -14,13 +14,12 @@ public class DemoUserSeeder {
  CommandLineRunner seedDemoUsers(UserRepository repo, PasswordEncoder encoder,
    @Value("${app.demo.seed-enabled:false}") boolean enabled,
    @Value("${app.demo.lender-password:}") String lenderPassword,
-   @Value("${app.demo.borrower-password:}") String borrowerPassword,
-   @Value("${app.demo.guarantor-password:}") String guarantorPassword) {
+   @Value("${app.demo.borrower-password:}") String borrowerPassword) {
   return args -> {
-   if(!enabled || lenderPassword.isBlank() || borrowerPassword.isBlank() || guarantorPassword.isBlank()) return;
+   if(!enabled || lenderPassword.isBlank() || borrowerPassword.isBlank()) return;
    upsert(repo,encoder,"JMK Demo Lender","lender.demo@jmkloan.co.tz","+255710000001","DEMO-NIDA-LENDER",User.Role.LENDER,lenderPassword);
    upsert(repo,encoder,"JMK Demo Borrower","borrower.demo@jmkloan.co.tz","+255710000002","DEMO-NIDA-BORROWER",User.Role.BORROWER,borrowerPassword);
-   upsert(repo,encoder,"JMK Demo Guarantor","guarantor.demo@jmkloan.co.tz","+255710000003","DEMO-NIDA-GUARANTOR",User.Role.GUARANTOR,guarantorPassword);
+
   };
  }
  private void upsert(UserRepository repo, PasswordEncoder encoder, String name,String email,String phone,String nida,User.Role role,String password){
