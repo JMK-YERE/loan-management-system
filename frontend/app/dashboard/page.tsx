@@ -467,7 +467,7 @@ export default function DashboardPage() {
                   <div className="mt-3 space-y-3">
                     <input required type="number" min="1" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Kiasi cha malipo" className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" />
                     <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950">
-                      {['MPESA','TIGO_PESA','AIRTEL_MONEY','HALOPESA','CASH','BANK_TRANSFER'].map((m) => <option key={m}>{m}</option>)}
+                      {['MPESA','MIXX_BY_YAS','AIRTEL_MONEY','HALOPESA','CASH','BANK_TRANSFER'].map((m) => <option key={m}>{m}</option>)}
                     </select>
                     <button disabled={busy} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white disabled:opacity-50">Tuma Malipo</button>
                   </div>
