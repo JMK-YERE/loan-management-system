@@ -44,6 +44,12 @@ public class GuarantorService {
         if (guarantor.getId().equals(loan.getBorrower().getId())) {
             throw new RuntimeException("Mkopaji hawezi kuwa mdhamini wake mwenyewe");
         }
+        if (guarantor.getRole() != User.Role.GUARANTOR || !Boolean.TRUE.equals(guarantor.getActive()) || guarantor.getStatus() != User.UserStatus.APPROVED) {
+            throw new RuntimeException("Chagua mdhamini mwenye account iliyoidhinishwa na hai");
+        }
+        if (request.getGuaranteedAmount().compareTo(loan.getAmount()) > 0) {
+            throw new RuntimeException("Kiasi cha dhamana hakiwezi kuzidi kiasi cha mkopo");
+        }
 
         Guarantor g = Guarantor.builder()
                 .loan(loan)
