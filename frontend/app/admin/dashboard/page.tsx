@@ -37,7 +37,12 @@ export default function AdminDashboard(){
     </div>
     <div className="mt-6 grid gap-5 lg:grid-cols-3">
       <div className="rounded-3xl bg-gradient-to-br from-blue-700 to-indigo-900 p-7 text-white lg:col-span-2"><h2 className="text-2xl font-black">{en?'Operations overview':'Muhtasari wa shughuli'}</h2><div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">{[[en?'Pending loans':'Zinasubiri',stats?.pendingLoans||0],[en?'Approved/disbursed':'Imeidhinishwa',stats?.approvedLoans||0],[en?'Paid':'Imelipwa',stats?.paidLoans||0],[en?'Payments':'Malipo',stats?.totalPayments||0]].map(([x,v])=><div key={x} className="rounded-2xl bg-white/10 p-4"><div className="text-2xl font-black">{v}</div><div className="text-xs text-blue-100">{x}</div></div>)}</div></div>
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"><h2 className="font-black">{en?'Quick actions':'Vitendo vya haraka'}</h2><div className="mt-4 space-y-2"><Link href="/admin/users" className="flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold dark:bg-slate-950">{en?'Review users':'Kagua watumiaji'}<ArrowRight className="h-4 w-4"/></Link><Link href="/admin/announcements" className="flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold dark:bg-slate-950">{en?'Announcements':'Matangazo'}<ArrowRight className="h-4 w-4"/></Link></div></div>
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"><h2 className="font-black">{en?'Quick actions':'Vitendo vya haraka'}</h2><div className="mt-4 space-y-2">
+<Link href="/admin/users" className="flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold dark:bg-slate-950">{en?'Review users':'Kagua watumiaji'}<ArrowRight className="h-4 w-4"/></Link>
+<Link href="/lender/general-applications" className="flex items-center justify-between rounded-xl bg-blue-50 p-3 font-semibold text-blue-700 dark:bg-blue-950/30">{en?'Loan application queue':'Queue ya maombi ya mikopo'}<ArrowRight className="h-4 w-4"/></Link>
+<Link href="/admin/announcements" className="flex items-center justify-between rounded-xl bg-slate-50 p-3 font-semibold dark:bg-slate-950">{en?'Announcements':'Matangazo'}<ArrowRight className="h-4 w-4"/></Link>
+<Link href="/bursar" className="flex items-center justify-between rounded-xl bg-emerald-50 p-3 font-semibold text-emerald-700 dark:bg-emerald-950/30">{en?'Bursar / reconciliation':'Bursar / reconciliation'}<ArrowRight className="h-4 w-4"/></Link>
+</div></div>
     </div>
   </div>;
 }
