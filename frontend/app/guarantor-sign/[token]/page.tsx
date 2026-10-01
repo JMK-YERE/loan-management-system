@@ -1,0 +1,25 @@
+'use client';
+
+import {useEffect,useRef,useState} from 'react';
+import {useParams} from 'next/navigation';
+import api from '@/lib/api';
+
+const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
+
+export default function RemoteGuarantorSignPage(){
+ const {token}=useParams<{token:string}>();const canvasRef=useRef<HTMLCanvasElement|null>(null);
+ const [data,setData]=useState<any>(null),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false),[drawing,setDrawing]=useState(false),[ack,setAck]=useState(false),[done,setDone]=useState(false);
+ useEffect(()=>{if(!token)return;(async()=>{try{const r=await api.get('/guarantors/remote/'+token);setData(r.data?.data??r.data)}catch(e:any){setMsg(e?.response?.data?.message||'Signing link haijapatikana au ime-expire.')}})()},[token]);
+ const pos=(e:any)=>{const c=canvasRef.current;if(!c)return{x:0,y:0};const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*(c.width/r.width),y:(e.clientY-r.top)*(c.height/r.height)}};
+ const start=(e:any)=>{const c=canvasRef.current;if(!c)return;setDrawing(true);const p=pos(e);const ctx=c.getContext('2d')!;ctx.beginPath();ctx.moveTo(p.x,p.y)};
+ const move=(e:any)=>{const c=canvasRef.current;if(!c||!drawing)return;const p=pos(e);const ctx=c.getContext('2d')!;ctx.lineWidth=3;ctx.lineCap='round';ctx.lineTo(p.x,p.y);ctx.stroke()};
+ const clear=()=>{const c=canvasRef.current;if(c)c.getContext('2d')!.clearRect(0,0,c.width,c.height)};
+ const sign=async()=>{const c=canvasRef.current;if(!c||!ack)return setMsg('Thibitisha kuwa umesoma na umeelewa kwanza.');setBusy(true);setMsg('');try{await api.post('/guarantors/remote/'+token+'/sign',{signatureData:c.toDataURL('image/png'),deviceInfo:navigator.userAgent});setDone(true)}catch(e:any){setMsg(e?.response?.data?.message||'Sahihi haijahifadhiwa')}finally{setBusy(false)}};
+ return <main className="min-h-screen bg-slate-100 p-4 dark:bg-slate-950 sm:p-8"><div className="mx-auto max-w-3xl space-y-5">
+  <section className="rounded-3xl bg-gradient-to-br from-blue-700 to-slate-950 p-6 text-white"><p className="text-sm text-blue-100">JmkLoanApp · Secure Guarantor Signing</p><h1 className="mt-1 text-3xl font-black">Sahihi ya Mdhamini</h1><p className="mt-2 text-sm text-blue-100">Huna haja ya kuwa na account. Link hii imefungwa kwenye loan maalum na ina expiry.</p></section>
+  {msg&&<div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{msg}</div>}
+  {done?<section className="rounded-3xl border border-emerald-200 bg-white p-8 text-center dark:border-emerald-900 dark:bg-slate-900"><div className="text-5xl">✅</div><h2 className="mt-4 text-2xl font-black">Sahihi imehifadhiwa</h2><p className="mt-2 text-sm text-slate-500">Mdhamini amerekodiwa kama APPROVED. Lender ataona taarifa hiyo na itaingia kwenye mkataba/PDF wa Loan #{data?.loanId}.</p></section>:
+  data&&<><section className="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"><h2 className="text-xl font-black">Thibitisha taarifa za udhamini</h2><div className="mt-4 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950"><div className="text-xs text-slate-500">Mkopaji</div><b>{data.borrowerName}</b></div><div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950"><div className="text-xs text-slate-500">Loan</div><b>#{data.loanId} · {money(data.loanAmount)}</b></div><div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950"><div className="text-xs text-slate-500">Mdhamini</div><b>{data.guarantorName}</b></div><div className="rounded-xl bg-amber-50 p-4 dark:bg-amber-950/30"><div className="text-xs text-slate-500">Liability</div><b>{money(data.guaranteedAmount)}</b></div></div></section>
+  <section className="rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p className="text-sm leading-6">Nathibitisha kuwa nimeona mkopaji, Loan ID, kiasi cha mkopo na kiasi ninachodhamini. Nimepewa nafasi ya kusoma mkataba wa mkopo na ninaelewa wajibu wangu wa udhamini.</p><label className="mt-4 flex items-start gap-3 rounded-2xl border p-4 text-sm"><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)} className="mt-1 h-5 w-5"/><span>Nimesoma na kuelewa taarifa za udhamini zilizoonyeshwa.</span></label><h3 className="mt-5 font-black">Chora sahihi yako</h3><canvas ref={canvasRef} width={900} height={340} onPointerDown={start} onPointerMove={move} onPointerUp={()=>setDrawing(false)} onPointerLeave={()=>setDrawing(false)} className="mt-3 h-72 w-full touch-none rounded-2xl border-2 border-dashed bg-white"/><div className="mt-3 flex gap-2"><button onClick={clear} className="rounded-xl border px-4 py-2 text-sm font-bold">Futa</button><button disabled={busy||!ack} onClick={sign} className="flex-1 rounded-xl bg-blue-600 px-4 py-2 font-black text-white disabled:opacity-50">{busy?'Inahifadhi...':'Saini na Kubali Udhamini'}</button></div></section></>}
+ </div></main>;
+}
