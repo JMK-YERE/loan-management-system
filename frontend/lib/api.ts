@@ -115,6 +115,7 @@ export const paymentAPI = {
 
 export const collateralAPI = {
   byLoan: (loanId:number) => api.get(`/loans/${loanId}/collaterals`),
+  evidence: (loanId:number, collateralId:number) => api.get(`/loans/${loanId}/collaterals/${collateralId}/evidence`),
   add: (loanId:number, data:any) => api.post(`/loans/${loanId}/collaterals`, data),
   verify: (loanId:number, collateralId:number) => api.put(`/loans/${loanId}/collaterals/${collateralId}/verify`),
 };
