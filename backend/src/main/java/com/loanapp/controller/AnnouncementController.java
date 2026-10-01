@@ -62,6 +62,13 @@ public class AnnouncementController {
         return ResponseEntity.ok(ApiResponse.success("Tangazo limebadilishwa", a));
     }
 
+    @PostMapping("/{id}/broadcast-borrowers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Integer>> broadcastBorrowers(@PathVariable Long id) {
+        int sent = announcementService.broadcastToBorrowers(id);
+        return ResponseEntity.ok(ApiResponse.success("Ujumbe umetumwa", sent));
+    }
+
     // ADMIN - kufuta
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
