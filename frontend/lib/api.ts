@@ -50,7 +50,9 @@ export const announcementAPI = {
   broadcastBorrowers: (id: number) => api.post(`/announcements/${id}/broadcast-borrowers`),
 };
 
-export const notificationAPI = {\n  remindLoan: (loanId:number) => api.post('/notifications/loan/'+loanId+'/remind'),\n};
+export const notificationAPI = {
+  remindLoan: (loanId:number) => api.post('/notifications/loan/'+loanId+'/remind'),
+};
 
 export const systemAPI = {
   status: () => api.get('/admin/system/status'),
