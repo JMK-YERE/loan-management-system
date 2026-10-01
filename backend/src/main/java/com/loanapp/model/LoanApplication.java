@@ -73,5 +73,5 @@ public class LoanApplication {
  public LocalDateTime getCreatedAt(){return createdAt;} public LocalDateTime getUpdatedAt(){return updatedAt;}
  @PrePersist void create(){createdAt=LocalDateTime.now();updatedAt=LocalDateTime.now();}
  @PreUpdate void update(){updatedAt=LocalDateTime.now();}
- public enum Status { SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, CONVERTED }
+ public enum Status { SUBMITTED, UNDER_REVIEW, OFFER_READY, OFFER_ACCEPTED, APPROVED, REJECTED, CONVERTED }
 }
