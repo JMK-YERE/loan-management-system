@@ -61,11 +61,15 @@ public class ApplicantAdminController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> list(@RequestParam(required = false) String status) {
-        List<Map<String, Object>> out = repo.findAll().stream()
-                .filter(u -> u.getRole() != User.Role.ADMIN)
-                .filter(u -> status == null || status.isBlank() || u.getStatus().name().equalsIgnoreCase(status))
-                .sorted(Comparator.comparing(User::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
-                .map(u -> toMap(u, false))
+        List<Map<String, Object>> out = repo.findApplicantSummaries(User.Role.ADMIN).stream()
+                .map(row -> {
+                    Map<String,Object> m = new LinkedHashMap<>();
+                    m.put("id", row[0]); m.put("fullName", row[1]); m.put("email", row[2]);
+                    m.put("phone", row[3]); m.put("role", row[4]); m.put("status", row[5]);
+                    m.put("active", row[6]); m.put("createdAt", row[7]); m.put("idType", row[8]); m.put("idNumber", row[9]);
+                    return m;
+                })
+                .filter(m -> status == null || status.isBlank() || String.valueOf(m.get("status")).equalsIgnoreCase(status))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success("OK", out));
     }
