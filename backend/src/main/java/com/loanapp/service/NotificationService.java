@@ -22,6 +22,7 @@ public class NotificationService {
     @Value("${app.twilio.account-sid:}") private String twilioSid;
     @Value("${app.twilio.auth-token:}") private String twilioToken;
     @Value("${app.twilio.from:}") private String twilioFrom;
+    @Value("${app.twilio.whatsapp-from:}") private String twilioWhatsappFrom;
 
     public NotificationService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -84,6 +85,24 @@ public class NotificationService {
                     ",</p><p>" + escape(message) + "</p></div>");
         }
         sendSms(user.getPhone(), message);
+        sendWhatsApp(user.getPhone(), message);
+    }
+
+    public boolean sendWhatsApp(String to, String body) {
+        if (twilioSid.isBlank() || twilioToken.isBlank() || twilioWhatsappFrom.isBlank() || to == null || to.isBlank()) return false;
+        try {
+            String recipient = to.startsWith("whatsapp:") ? to : "whatsapp:" + to;
+            String form = "To=" + enc(recipient) + "&From=" + enc(twilioWhatsappFrom) + "&Body=" + enc(body);
+            String auth = Base64.getEncoder().encodeToString((twilioSid + ":" + twilioToken).getBytes(StandardCharsets.UTF_8));
+            HttpRequest req = HttpRequest.newBuilder(
+                    URI.create("https://api.twilio.com/2010-04-01/Accounts/" + twilioSid + "/Messages.json"))
+                    .header("Authorization", "Basic " + auth)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .POST(HttpRequest.BodyPublishers.ofString(form)).build();
+            return HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString()).statusCode() < 300;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean sendSms(String to, String body) {
