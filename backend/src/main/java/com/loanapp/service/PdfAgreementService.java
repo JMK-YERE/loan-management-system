@@ -90,6 +90,8 @@ public class PdfAgreementService {
     if(g.getGuarantorIdNumber()!=null) d.add(new Paragraph("ID: "+g.getGuarantorIdNumber()));
     addImageData(d,g.getGuarantorPhotoData(),"Guarantor photo",h,220,180);
     addImageData(d,g.getOnsiteSignatureData(),"Onsite guarantor signature",h,320,140);
+    addImageData(d,g.getRemoteSignatureData(),"Remote guarantor signature",h,320,140);
+    if(g.getRemoteSignedAt()!=null) d.add(new Paragraph("Remote signed at: "+g.getRemoteSignedAt()));
    }
 
    d.add(new Paragraph("Digital signatures",h));
