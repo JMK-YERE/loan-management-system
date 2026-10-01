@@ -69,7 +69,6 @@ export default function BorrowerPage(){
 
    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {[['Kiasi nilichokopa',money(stats.totalBorrowed),WalletCards],['Nimekwisha lipa',money(stats.paid),CheckCircle2],['Ninachodaiwa',money(stats.balance),WalletCards],['Overdue',money(stats.overdueAmount),Clock3]].map(([label,value,I]:any)=><div key={label} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-2xl font-black">{value}</div><div className="text-sm text-slate-500">{label}</div></div>)}
-   <div className="grid gap-4 sm:col-span-2 lg:col-span-4 sm:grid-cols-3">
    </section>
 
    <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-blue-900 dark:bg-slate-900">
