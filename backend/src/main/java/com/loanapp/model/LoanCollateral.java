@@ -33,6 +33,10 @@ public class LoanCollateral {
 
     @JsonIgnore
     @Column(columnDefinition = "TEXT")
+    private String documentDataJson;
+
+    @JsonIgnore
+    @Column(columnDefinition = "TEXT")
     private String photoDataJson;
 
     @Column(length = 150)
@@ -57,6 +61,8 @@ public class LoanCollateral {
     public void setVerificationStatus(String v){verificationStatus=v;}
     public String getDocumentReference(){return documentReference;}
     public void setDocumentReference(String v){documentReference=v;}
+    public String getDocumentDataJson(){return documentDataJson;}
+    public void setDocumentDataJson(String v){documentDataJson=v;}
     public String getPhotoDataJson(){return photoDataJson;}
     public void setPhotoDataJson(String v){photoDataJson=v;}
     public String getCapturedBy(){return capturedBy;}
