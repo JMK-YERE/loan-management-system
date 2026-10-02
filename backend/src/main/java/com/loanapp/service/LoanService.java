@@ -32,6 +32,7 @@ public class LoanService {
   User lender=userRepository.findByEmail(lenderEmail).orElseThrow(()->new RuntimeException("Mkopeshaji hajapatikana"));
   User borrower=userRepository.findById(borrowerId).orElseThrow(()->new RuntimeException("Mkopaji hajapatikana"));
   if(borrower.getRole()!=User.Role.BORROWER) throw new RuntimeException("Mtumiaji si mkopaji");
+  if(lender.getOrganization()!=null && borrower.getOrganization()!=null && !lender.getOrganization().getId().equals(borrower.getOrganization().getId())) throw new RuntimeException("Mkopaji na lender lazima wawe ndani ya organization moja");
   LoanProduct product=null;
   if(request.getLoanProductId()!=null){
    product=productRepository.findById(request.getLoanProductId()).orElseThrow(()->new RuntimeException("Loan product haijapatikana"));
@@ -46,6 +47,7 @@ public class LoanService {
   Loan loan=Loan.builder().lender(lender).borrower(borrower).amount(request.getAmount()).interestRate(rate).durationMonths(request.getDurationMonths()).totalRepayment(total).purpose(request.getPurpose()).processingFee(processing).lawyerRequired(Boolean.TRUE.equals(request.getLawyerRequired())).lawyerFee(lawyer).status(Loan.LoanStatus.PENDING).build();
   loan.setCollateralDescription(request.getCollateralDescription());loan.setCollateralValue(request.getCollateralValue()==null?BigDecimal.ZERO:request.getCollateralValue());loan.setCollateralPhotoData(request.getCollateralPhotoData());
   if(product!=null){loan.setLoanProduct(product);loan.setDurationUnit(product.getDurationUnit());}
+  loan.setOrganization(lender.getOrganization()); loan.setBranch(lender.getBranch());
   if(product!=null){String snapshot="PRODUCT="+product.getId()+"|VERSION="+product.getTermsVersion()+"|NAME="+product.getName()+"|TYPE="+product.getLoanType()+"|AMOUNT="+request.getAmount()+"|DURATION="+request.getDurationMonths()+" "+product.getDurationUnit()+"|RATE="+product.getInterestRate()+"|INTEREST_TYPE="+product.getInterestType()+"|FEE="+product.getProcessingFee()+"|OTHER="+product.getOtherCharges()+"|LATE="+product.getLateFee()+"|GRACE="+product.getGracePeriodDays()+"|FREQUENCY="+product.getRepaymentFrequency()+"|CURRENCY="+product.getCurrency();loan.setTermsSnapshot(snapshot);loan.setTermsHash(hash(snapshot));}
   Loan saved=loanRepository.save(loan);
   auditService.log(lenderEmail,"LOAN_CREATED","LOAN",saved.getId(),"Loan created for borrower "+borrower.getId()+(product!=null?" using "+product.getName():""));
