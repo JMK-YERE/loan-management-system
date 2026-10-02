@@ -34,8 +34,9 @@ export default function GeneralLoanApplyPage(){
   setBusy(true);
   try{
    await generalLoanApplicationAPI.submit({amount:Number(amount),duration:Number(duration),purpose:purpose.trim(),productId:Number(productId),monthlyExpenses:Number(monthlyExpenses||0),existingMonthlyDebt:Number(existingMonthlyDebt||0),collateralDescription,collateralValue:Number(collateralValue||0),termsAccepted:true});
-   setMsg('Ombi limetumwa. Terms za product zimehifadhiwa kwa quotation ya sasa; lender ataendelea na review.');
+   setMsg('Ombi limetumwa kikamilifu. Application ID itaonekana kwenye dashboard na lender ataiona kwenye queue.');
    setAccepted(false);setPurpose('');setMonthlyExpenses('');setExistingMonthlyDebt('');setCollateralDescription('');setCollateralValue('');
+   setTimeout(()=>router.push('/borrower'),700);
   }catch(err:any){setMsg(err?.response?.data?.message||'Imeshindikana kutuma ombi.')}finally{setBusy(false)}
  };
 
