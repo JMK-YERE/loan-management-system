@@ -19,6 +19,7 @@ public class RepaymentSchedule {
  @Column(nullable=false,precision=15,scale=2) private BigDecimal amountPaid=BigDecimal.ZERO;
  @Enumerated(EnumType.STRING) @Column(nullable=false,length=20) private ScheduleStatus status=ScheduleStatus.PENDING;
  private LocalDateTime paidAt;
+ private LocalDateTime lastReminderAt;
  public RepaymentSchedule(){}
  public Long getId(){return id;} public void setId(Long v){id=v;}
  public Loan getLoan(){return loan;} public void setLoan(Loan v){loan=v;}
@@ -31,5 +32,6 @@ public class RepaymentSchedule {
  public BigDecimal getAmountPaid(){return amountPaid;} public void setAmountPaid(BigDecimal v){amountPaid=v;}
  public ScheduleStatus getStatus(){return status;} public void setStatus(ScheduleStatus v){status=v;}
  public LocalDateTime getPaidAt(){return paidAt;} public void setPaidAt(LocalDateTime v){paidAt=v;}
+ public LocalDateTime getLastReminderAt(){return lastReminderAt;} public void setLastReminderAt(LocalDateTime v){lastReminderAt=v;}
  public enum ScheduleStatus{PENDING,PARTIALLY_PAID,PAID,OVERDUE,WAIVED}
 }

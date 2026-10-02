@@ -10,7 +10,7 @@ const features=[
  ['📧','Password setup/reset','Usalama wa akaunti','/forgot-password'],
  ['📱','SMS notifications','Arifa za SMS kupitia Twilio','/admin/settings'],
  ['⏰','Overdue reminders','Kikumbusho cha malipo yaliyochelewa','/admin/settings'],
- ['💳','Mobile money','M-Pesa, Tigo Pesa, Airtel Money, HaloPesa','/payments'],
+ ['💳','Mobile money','M-Pesa, Tigo Pesa, Airtel Money, HaloPesa','/admin/settings'],
  ['📄','PDF agreements','Mikataba ya mikopo kwa PDF','/agreements'],
  ['✍️','E-signature','Kusaini mikataba kidijitali','/signatures'],
  ['🧾','Audit trail','Rekodi za matukio na mabadiliko','/admin/operations'],

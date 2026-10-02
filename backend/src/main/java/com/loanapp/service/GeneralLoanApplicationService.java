@@ -26,8 +26,21 @@ public class GeneralLoanApplicationService {
   User b=users.findByEmail(email).orElseThrow(()->new RuntimeException("Mkopaji hajapatikana"));
   if(b.getRole()!=User.Role.BORROWER||!Boolean.TRUE.equals(b.getActive())||b.getStatus()!=User.UserStatus.APPROVED)throw new RuntimeException("Akaunti ya mkopaji haijakamilika au haijaidhinishwa");
   if(!apps.findByBorrowerOrderByCreatedAtDesc(b).stream().noneMatch(a->a.getStatus()==LoanApplication.Status.SUBMITTED||a.getStatus()==LoanApplication.Status.UNDER_REVIEW))throw new RuntimeException("Una ombi la mkopo ambalo bado linashughulikiwa");
-  LoanApplication a=new LoanApplication();a.setBorrower(b);a.setAmount(r.getAmount());a.setDuration(r.getDuration());a.setPurpose(r.getPurpose().trim());a.setMonthlyExpenses(r.getMonthlyExpenses());a.setExistingMonthlyDebt(r.getExistingMonthlyDebt());a.setCollateralDescription(r.getCollateralDescription()==null?null:r.getCollateralDescription().trim());a.setCollateralValue(r.getCollateralValue()==null?BigDecimal.ZERO:r.getCollateralValue());a.setDurationUnit(LoanProduct.DurationUnit.DAYS);a.setCollateralPhotoData(r.getCollateralPhotoData());
-  a.setInterestSnapshot(BigDecimal.ZERO);a.setProcessingFeeSnapshot(BigDecimal.ZERO);a.setLateFeeSnapshot(BigDecimal.ZERO);a.setTotalRepaymentSnapshot(r.getAmount());a.setInstallmentAmountSnapshot(r.getAmount());a.setInstallmentCountSnapshot(1);a.setTermsVersion("PENDING_LENDER_OFFER");a.setTermsAccepted(false);
+  LoanApplication a=new LoanApplication();a.setBorrower(b);a.setAmount(r.getAmount());a.setDuration(r.getDuration());a.setPurpose(r.getPurpose().trim());a.setMonthlyExpenses(r.getMonthlyExpenses());a.setExistingMonthlyDebt(r.getExistingMonthlyDebt());a.setCollateralDescription(r.getCollateralDescription()==null?null:r.getCollateralDescription().trim());a.setCollateralValue(r.getCollateralValue()==null?BigDecimal.ZERO:r.getCollateralValue());a.setCollateralPhotoData(r.getCollateralPhotoData());
+  a.setTermsAccepted(Boolean.TRUE.equals(r.getTermsAccepted()));a.setTermsAcceptedAt(Boolean.TRUE.equals(r.getTermsAccepted())?LocalDateTime.now():null);
+  if(r.getProductId()!=null){
+   LoanProduct product=products.findById(r.getProductId()).orElseThrow(()->new RuntimeException("Loan product haijapatikana"));
+   if(!Boolean.TRUE.equals(product.getActive())) throw new RuntimeException("Loan product haifanyi kazi");
+   LoanQuoteRequest qreq=new LoanQuoteRequest();qreq.setProductId(product.getId());qreq.setAmount(r.getAmount());qreq.setDuration(r.getDuration());
+   LoanQuoteResponse q=quotes.quote(qreq);
+   a.setProduct(product);a.setDuration(qreq.getDuration());a.setDurationUnit(product.getDurationUnit());
+   a.setInterestSnapshot(q.interest);a.setProcessingFeeSnapshot(q.processingFee);a.setLateFeeSnapshot(q.lateFee);a.setTotalRepaymentSnapshot(q.totalRepayment);
+   a.setInstallmentAmountSnapshot(q.installmentAmount);a.setInstallmentCountSnapshot(q.installmentCount);a.setGracePeriodDaysSnapshot(q.gracePeriodDays);
+   a.setInterestTypeSnapshot(q.interestType);a.setRepaymentFrequencySnapshot(q.repaymentFrequency);a.setTermsVersion(q.termsVersion);
+  } else {
+   a.setDurationUnit(LoanProduct.DurationUnit.DAYS);a.setInterestSnapshot(BigDecimal.ZERO);a.setProcessingFeeSnapshot(BigDecimal.ZERO);a.setLateFeeSnapshot(BigDecimal.ZERO);
+   a.setTotalRepaymentSnapshot(r.getAmount());a.setInstallmentAmountSnapshot(r.getAmount());a.setInstallmentCountSnapshot(1);a.setTermsVersion("PENDING_LENDER_OFFER");
+  }
   LoanApplication saved=apps.save(a);audit.log(email,"GENERAL_LOAN_REQUEST_SUBMITTED","LOAN_APPLICATION",saved.getId(),"Borrower requested a loan without selecting a visible product");
   notifyLenders("Ombi jipya la mkopo #"+saved.getId(),"Mkopaji "+b.getFullName()+" ameomba mkopo wa TZS "+saved.getAmount()+" kwa siku "+saved.getDuration()+". Fungua General Loan Requests kuanza review.");
   return saved;

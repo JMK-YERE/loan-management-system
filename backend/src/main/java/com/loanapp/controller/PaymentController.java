@@ -21,7 +21,7 @@ public class PaymentController {
     @PostMapping @PreAuthorize("hasRole('BORROWER')")
     public ResponseEntity<ApiResponse<Payment>> createPayment(@Valid @RequestBody PaymentRequest request,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Malipo yameanzishwa",paymentService.createPayment(request,auth.getName())));}
 
-    @PutMapping("/{id}/confirm") @PreAuthorize("hasAnyRole('LENDER','BURSER','ADMIN')")
+    @PutMapping("/{id}/confirm") @PreAuthorize("hasAnyRole('LENDER','BURSER')")
     public ResponseEntity<ApiResponse<Payment>> confirmPayment(@PathVariable Long id,@RequestParam String transactionId,Authentication auth){return ResponseEntity.ok(ApiResponse.success("Malipo yamethibitishwa",paymentService.confirmPayment(id,transactionId,auth.getName())));}
 
     @GetMapping("/loan/{loanId}") @PreAuthorize("isAuthenticated()")

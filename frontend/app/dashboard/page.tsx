@@ -121,6 +121,7 @@ export default function DashboardPage() {
       if (currentUser.role === 'BORROWER') { router.push('/borrower'); return; }
       if (currentUser.role === 'GUARANTOR') { localStorage.clear(); router.push('/login'); return; }
       if (currentUser.role === 'BURSER') { router.push('/bursar'); return; }
+      if (currentUser.role === 'DIRECTOR') { router.push('/management/financial-statement'); return; }
       setUser(currentUser);
       if (currentUser.role === 'LENDER') {
         userAPI.borrowers().then((r) => setBorrowers(unwrap(r))).catch(() => setBorrowers([]));

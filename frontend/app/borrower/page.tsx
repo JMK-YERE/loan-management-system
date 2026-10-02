@@ -37,7 +37,10 @@ export default function BorrowerPage(){
  const days=nextDue?.nextDueDate?Math.ceil((new Date(nextDue.nextDueDate+'T23:59:59').getTime()-Date.now())/86400000):null;
  const pendingApplication=applications.find(a=>['SUBMITTED','UNDER_REVIEW','OFFER_READY','OFFER_ACCEPTED'].includes(a.status));
  const allSchedule=Object.values(schedules).flat(); const totalPaid=allSchedule.reduce((n:any,x:any)=>n+Number(x.amountPaid||0),0); const totalDue=allSchedule.reduce((n:any,x:any)=>n+Number(x.amountDue||0),0); const balance=Math.max(0,totalDue-totalPaid);
- const stats={applications:applications.length,active:active.length,paid:totalPaid,balance};
+ const totalBorrowed=active.reduce((n:any,x:any)=>n+Number(x.amount||0),0);
+ const today=new Date(); today.setHours(23,59,59,999);
+ const overdueAmount=allSchedule.filter((x:any)=>x.dueDate&&new Date(String(x.dueDate)+'T23:59:59')<today).reduce((n:any,x:any)=>n+Math.max(0,Number(x.amountDue||0)-Number(x.amountPaid||0)),0);
+ const stats={applications:applications.length,active:active.length,paid:totalPaid,balance,totalBorrowed,overdueAmount};
  const logout=()=>{localStorage.clear();document.cookie='token=; path=/; max-age=0';router.push('/login')};
  if(!user)return null;
 
@@ -65,11 +68,11 @@ export default function BorrowerPage(){
    {msg&&<div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">{msg}</div>}
 
    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    {[['Maombi',stats.applications,FileText],['Loans active',stats.active,WalletCards],['Imelipwa',stats.paid,CheckCircle2],['Salio la marejesho',stats.balance,WalletCards]].map(([label,value,I]:any)=><div key={label} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-3xl font-black">{value}</div><div className="text-sm text-slate-500">{label}</div></div>)}
+    {[['Kiasi nilichokopa',money(stats.totalBorrowed),WalletCards],['Nimekwisha lipa',money(stats.paid),CheckCircle2],['Ninachodaiwa',money(stats.balance),WalletCards],['Overdue',money(stats.overdueAmount),Clock3]].map(([label,value,I]:any)=><div key={label} className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><I className="h-5 w-5 text-blue-600"/><div className="mt-3 text-2xl font-black">{value}</div><div className="text-sm text-slate-500">{label}</div></div>)}
    </section>
 
    <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-blue-900 dark:bg-slate-900">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-black">Kabla hujaomba</h2><p className="mt-1 text-sm text-slate-500">Soma mkataba/mwongozo kwanza; mkataba wa mwisho utatumia terms halisi za offer yako.</p></div><Link href="/loan-guide" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white"><Download className="mr-1 inline h-4 w-4"/>Soma / Pakua</Link></div>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-black">Mkataba wa Mkopo</h2><p className="mt-1 text-sm text-slate-500">Huu ni mkataba halisi wa mfumo wenye sehemu za taarifa za mkopaji, ajira/biashara, mkopo, dhamana, mdhamini, tamko na sahihi. Nakala ya mwisho itajazwa kwa Loan ID yako.</p></div><Link href="/loan-guide" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black text-white"><Download className="mr-1 inline h-4 w-4"/>Soma / Pakua Mkataba</Link></div>
     <div className="mt-4 grid gap-3 md:grid-cols-4">{[['1','Omba kiasi'],['2','Lender review'],['3','Soma offer'],['4','Kubali / saini']].map(([n,x])=><div key={n} className="rounded-2xl border p-4 dark:border-slate-800"><span className="text-xs font-black text-blue-600">HATUA {n}</span><div className="mt-1 font-bold">{x}</div></div>)}</div>
    </section>
 
@@ -92,6 +95,11 @@ export default function BorrowerPage(){
     <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900 dark:bg-amber-950/30"><div className="text-xs font-black uppercase text-amber-700">Deni linalofuata</div><div className="mt-2 text-2xl font-black">{nextDue?money((schedules[nextDue.id]||[]).filter((x:any)=>x.status!=='PAID').reduce((n:any,x:any)=>n+Math.max(0,Number(x.amountDue||0)-Number(x.amountPaid||0)),0)):'—'}</div><div className="mt-1 text-sm">{nextDue?'Loan #'+nextDue.id+' · '+nextDue.nextDueDate:'Hakuna due date'}</div></div>
     <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/30"><div className="text-xs font-black uppercase text-blue-700">Siku zilizobaki</div><div className="mt-2 text-3xl font-black">{days===null?'—':Math.abs(days)}</div><div className="mt-1 text-sm">{days===null?'Hakuna loan active':days<0?'Siku zimepita tangu due date':'Hadi due date'}</div></div>
     <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-900 dark:bg-emerald-950/30"><div className="text-xs font-black uppercase text-emerald-700">Loan status</div><div className="mt-2 text-xl font-black">{nextDue?.status?statusLabel[nextDue.status]||nextDue.status:'Hakuna loan active'}</div><div className="mt-3 flex flex-wrap gap-2">{nextDue&&<><Link href={'/payments?loanId='+nextDue.id} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white"><CreditCard className="mr-1 inline h-3.5 w-3.5"/>Lipa</Link><Link href={'/agreements?loanId='+nextDue.id} className="rounded-xl border px-3 py-2 text-xs font-black"><FileText className="mr-1 inline h-3.5 w-3.5"/>Agreement</Link></>}</div></div>
+   </section>
+   <section className="grid gap-4 sm:grid-cols-3">
+    <div className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xs font-black uppercase text-blue-700">Due date inayofuata</div><div className="mt-2 text-xl font-black">{nextDue?.nextDueDate||'—'}</div><div className="mt-1 text-sm text-slate-500">{days===null?'Hakuna due date':days<0?Math.abs(days)+' siku zimepita':'Siku '+days+' zimebaki'}</div></div>
+    <div className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xs font-black uppercase text-amber-700">Overdue amount</div><div className="mt-2 text-xl font-black">{money(stats.overdueAmount)}</div><div className="mt-1 text-sm text-slate-500">{stats.overdueAmount>0?'Malipo yanahitaji action':'Hakuna overdue kwa sasa'}</div></div>
+    <div className="rounded-2xl border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xs font-black uppercase text-emerald-700">Mkataba & ushahidi</div><div className="mt-2 font-black">PDF + Dhamana</div><div className="mt-1 text-sm text-slate-500">Unaweza kuona/kupakua agreement na ushahidi wa loan.</div></div>
    </section>
 
    <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">

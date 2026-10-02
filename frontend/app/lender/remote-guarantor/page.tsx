@@ -1,0 +1,26 @@
+'use client';
+
+import {useEffect,useState} from 'react';
+import {useRouter} from 'next/navigation';
+import Link from 'next/link';
+import api,{loanAPI} from '@/lib/api';
+
+const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(Number(v||0));
+
+export default function RemoteGuarantorPage(){
+ const router=useRouter();const [loan,setLoan]=useState<any>(null),[loanId,setLoanId]=useState(''),[name,setName]=useState(''),[phone,setPhone]=useState(''),[idNumber,setIdNumber]=useState(''),[relationship,setRelationship]=useState(''),[amount,setAmount]=useState(''),[link,setLink]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false);
+ useEffect(()=>{const raw=localStorage.getItem('user');const q=new URLSearchParams(window.location.search).get('loanId')||'';setLoanId(q);if(!raw||!['LENDER','ADMIN'].includes(JSON.parse(raw).role)){router.push('/login');return;}if(q)loanAPI.get(Number(q)).then(r=>{const l=r.data?.data??r.data;setLoan(l);setAmount(String(l.amount||''))}).catch(e=>setMsg(e?.response?.data?.message||'Loan haipatikani'))},[router]);
+ const invite=async(e:any)=>{e.preventDefault();setBusy(true);setMsg('');try{const r=await api.post('/guarantors/loan/'+loanId+'/remote-invite',{name,phone,idNumber,relationship,guaranteedAmount:Number(amount)});const d=r.data?.data??r.data;setLink(d.link||'');setMsg('Remote signing link imetengenezwa. Mtumie mdhamini link hiyo kupitia channel salama.');}catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kutengeneza link')}finally{setBusy(false)}};
+ return <main className="min-h-screen bg-slate-50 p-4 dark:bg-slate-950 sm:p-6"><div className="mx-auto max-w-3xl space-y-5">
+  <section className="rounded-3xl bg-gradient-to-br from-indigo-700 to-slate-950 p-6 text-white"><button onClick={()=>router.push('/lender')} className="mb-4 rounded-xl border border-white/30 px-3 py-2 text-xs font-bold">← Rudi Lender</button><h1 className="text-3xl font-black">Mdhamini Remote</h1><p className="mt-2 text-sm text-indigo-100">Mdhamini hana account. Mfumo utatoa secure one-time signing link yenye expiry, iliyofungwa kwenye Loan ID.</p></section>
+  {msg&&<div className="rounded-2xl border bg-white p-4 text-sm font-semibold dark:bg-slate-900">{msg}</div>}
+  {!loan?<div className="rounded-3xl border bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">Inapakia loan...</div>:
+  <form onSubmit={invite} className="space-y-5 rounded-3xl border bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+   <div className="grid gap-3 sm:grid-cols-3"><div className="rounded-xl bg-blue-50 p-4 dark:bg-blue-950/30"><div className="text-xs text-slate-500">Borrower</div><b>{loan.borrower?.fullName||'—'}</b></div><div className="rounded-xl bg-blue-50 p-4 dark:bg-blue-950/30"><div className="text-xs text-slate-500">Loan</div><b>#{loan.id}</b></div><div className="rounded-xl bg-blue-50 p-4 dark:bg-blue-950/30"><div className="text-xs text-slate-500">Amount</div><b>{money(loan.amount)}</b></div></div>
+   <div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-bold">Jina kamili<input required value={name} onChange={e=>setName(e.target.value)} className="mt-1 w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/></label><label className="text-sm font-bold">Simu<input value={phone} onChange={e=>setPhone(e.target.value)} className="mt-1 w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950" placeholder="+255..."/></label><label className="text-sm font-bold">NIDA/ID<input value={idNumber} onChange={e=>setIdNumber(e.target.value)} className="mt-1 w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/></label><label className="text-sm font-bold">Uhusiano<input value={relationship} onChange={e=>setRelationship(e.target.value)} className="mt-1 w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/></label><label className="text-sm font-bold sm:col-span-2">Liability ya mdhamini (TZS)<input required min="0" max={loan.amount} type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="mt-1 w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/></label></div>
+   <button disabled={busy} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-black text-white disabled:opacity-50">{busy?'Inatengeneza...':'Tengeneza Remote Signing Link'}</button>
+   {link&&<div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/30"><div className="text-sm font-black text-emerald-800 dark:text-emerald-200">Link ya mdhamini</div><div className="mt-2 break-all rounded-xl bg-white p-3 text-xs dark:bg-slate-950">{link}</div><button type="button" onClick={()=>navigator.clipboard.writeText(link)} className="mt-3 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white">Copy Link</button><p className="mt-2 text-xs text-slate-500">Expiry ni saa 48. Usiiweke hadharani; mtumie mdhamini moja kwa moja.</p></div>}
+  </form>}
+  <Link href="/lender" className="font-bold text-blue-600">← Rudi Lender Dashboard</Link>
+ </div></main>;
+}
