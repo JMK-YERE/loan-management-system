@@ -30,6 +30,8 @@ public class LoanRequest {
     private String collateralDescription;
     private BigDecimal collateralValue;
     private String collateralPhotoData;
+    private String termsSnapshot;
+    private String termsHash;
 
     public LoanRequest() {}
 
@@ -72,6 +74,8 @@ public class LoanRequest {
     public void setCollateralDescription(String v) { collateralDescription=v; }
     public BigDecimal getCollateralValue() { return collateralValue; }
     public void setCollateralValue(BigDecimal v) { collateralValue=v; }
+    public String getTermsSnapshot(){return termsSnapshot;} public void setTermsSnapshot(String v){termsSnapshot=v;}
+    public String getTermsHash(){return termsHash;} public void setTermsHash(String v){termsHash=v;}
     public String getCollateralPhotoData() { return collateralPhotoData; }
     public void setCollateralPhotoData(String v) { collateralPhotoData=v; }
 
