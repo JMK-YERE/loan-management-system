@@ -20,7 +20,9 @@ public class CreditAssessmentService{
   BigDecimal debt=request.getExistingMonthlyDebt()==null?BigDecimal.ZERO:request.getExistingMonthlyDebt();
   if(income.signum()<0||expenses.signum()<0||debt.signum()<0)throw new RuntimeException("Taarifa za kifedha si sahihi");
   BigDecimal surplus=income.subtract(expenses).subtract(debt).max(BigDecimal.ZERO);
-  BigDecimal installment=app.getInstallmentAmountSnapshot()!=null&&app.getInstallmentAmountSnapshot().signum()>0?app.getInstallmentAmountSnapshot():app.getAmount().divide(BigDecimal.valueOf(Math.max(1,app.getDurationMonths())),2,RoundingMode.HALF_UP);
+  BigDecimal safeAmount=app.getAmount()==null?BigDecimal.ZERO:app.getAmount();
+  int safeDuration=app.getDuration()==null?1:Math.max(1,app.getDuration());
+  BigDecimal installment=app.getInstallmentAmountSnapshot()!=null&&app.getInstallmentAmountSnapshot().signum()>0?app.getInstallmentAmountSnapshot():safeAmount.divide(BigDecimal.valueOf(safeDuration),2,RoundingMode.HALF_UP);
   int score=0;if(app.getBorrower().getNidaNumber()!=null&&!app.getBorrower().getNidaNumber().isBlank())score+=15;if(income.signum()>0)score+=20;if(surplus.signum()>0)score+=20;
   boolean affordable=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.50")))<=0;
   boolean borderline=surplus.signum()>0&&installment.compareTo(surplus.multiply(new BigDecimal("0.75")))<=0;
