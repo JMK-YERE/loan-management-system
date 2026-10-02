@@ -71,7 +71,6 @@ public class Loan {
     private BigDecimal collateralValue = BigDecimal.ZERO;
 
     @JsonIgnore
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String collateralPhotoData;
 
@@ -82,7 +81,7 @@ public class Loan {
     private LocalDate nextDueDate;
     private LocalDateTime lastOverdueReminderAt;
     private LocalDateTime updatedAt;
-    @Lob @Column(columnDefinition="TEXT") private String termsSnapshot;
+    @Column(columnDefinition="TEXT") private String termsSnapshot;
     @Column(length=128) private String termsHash;
 
     public Loan() {}
