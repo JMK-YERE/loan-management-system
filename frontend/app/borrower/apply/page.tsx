@@ -41,13 +41,13 @@ export default function GeneralLoanApplyPage(){
 
  const previewContract=async()=>{
   if(!quote)return setMsg('Weka kiasi na muda kwanza ili preview iwe na figures halisi.');
-  try{const r=await preAgreementAPI.pdf({productId:Number(productId),amount:Number(amount),duration:Number(duration)},purpose||'Loan application');const url=URL.createObjectURL(r.data);setPreviewUrl(url);}
+  try{const r=await preAgreementAPI.pdf({productId:Number(productId),amount:Number(amount),duration:Number(duration),monthlyExpenses:Number(monthlyExpenses||0),existingMonthlyDebt:Number(existingMonthlyDebt||0),collateralDescription,collateralValue:Number(collateralValue||0)},purpose||'Loan application');const url=URL.createObjectURL(r.data);setPreviewUrl(url);}
   catch(e:any){setMsg(e?.response?.data?.message||'Mkataba wa preview haujapatikana.')}
  };
 
  const downloadContract=async()=>{
   if(!quote)return setMsg('Weka kiasi na muda kwanza ili mkataba wa preview uwe na figures halisi.');
-  try{const r=await preAgreementAPI.pdf({productId:Number(productId),amount:Number(amount),duration:Number(duration)},purpose||'Loan application');const url=URL.createObjectURL(r.data);const a=document.createElement('a');a.href=url;a.download='jmk-loan-agreement-preview.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);}catch(e:any){setMsg(e?.response?.data?.message||'Mkataba wa preview haujapatikana.')}
+  try{const r=await preAgreementAPI.pdf({productId:Number(productId),amount:Number(amount),duration:Number(duration),monthlyExpenses:Number(monthlyExpenses||0),existingMonthlyDebt:Number(existingMonthlyDebt||0),collateralDescription,collateralValue:Number(collateralValue||0)},purpose||'Loan application');const url=URL.createObjectURL(r.data);const a=document.createElement('a');a.href=url;a.download='jmk-loan-agreement-preview.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);}catch(e:any){setMsg(e?.response?.data?.message||'Mkataba wa preview haujapatikana.')}
  };
 
  useEffect(()=>()=>{if(previewUrl)URL.revokeObjectURL(previewUrl)},[previewUrl]);
