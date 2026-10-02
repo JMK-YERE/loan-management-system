@@ -44,7 +44,8 @@ public class LoanService {
   BigDecimal rate=product!=null?product.getInterestRate():request.getInterestRate();
   BigDecimal processing=product!=null?product.getProcessingFee():(request.getProcessingFee()!=null?request.getProcessingFee():BigDecimal.ZERO);
   BigDecimal lawyer=Boolean.TRUE.equals(request.getLawyerRequired())&&request.getLawyerFee()!=null?request.getLawyerFee():BigDecimal.ZERO;
-  BigDecimal otherCharges=product!=null&&product.getOtherCharges()!=null?product.getOtherCharges():BigDecimal.ZERO;\n  BigDecimal total=calculateTotalRepayment(request.getAmount(),rate,request.getDurationMonths(),product).add(processing).add(otherCharges).add(lawyer).setScale(2,RoundingMode.HALF_UP);
+  BigDecimal otherCharges=product!=null&&product.getOtherCharges()!=null?product.getOtherCharges():BigDecimal.ZERO;
+  BigDecimal total=calculateTotalRepayment(request.getAmount(),rate,request.getDurationMonths(),product).add(processing).add(otherCharges).add(lawyer).setScale(2,RoundingMode.HALF_UP);
   Loan loan=Loan.builder().lender(lender).borrower(borrower).amount(request.getAmount()).interestRate(rate).durationMonths(request.getDurationMonths()).totalRepayment(total).purpose(request.getPurpose()).processingFee(processing).lawyerRequired(Boolean.TRUE.equals(request.getLawyerRequired())).lawyerFee(lawyer).status(Loan.LoanStatus.PENDING).build();
   loan.setCollateralDescription(request.getCollateralDescription());loan.setCollateralValue(request.getCollateralValue()==null?BigDecimal.ZERO:request.getCollateralValue());loan.setCollateralPhotoData(request.getCollateralPhotoData());
   if(product!=null){loan.setLoanProduct(product);loan.setDurationUnit(product.getDurationUnit());}
@@ -56,7 +57,12 @@ public class LoanService {
  }
  private BigDecimal calculateTotalRepayment(BigDecimal amount,BigDecimal rate,Integer duration,LoanProduct product){
   BigDecimal interest;
-  if(product!=null&&product.getInterestType()==LoanProduct.InterestType.FLAT){\n   BigDecimal durationFactor=product.getDurationUnit()==LoanProduct.DurationUnit.DAYS\n     ?BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(30),10,RoundingMode.HALF_UP)\n     :BigDecimal.valueOf(duration);\n   interest=amount.multiply(rate).divide(BigDecimal.valueOf(100),10,RoundingMode.HALF_UP).multiply(durationFactor).setScale(2,RoundingMode.HALF_UP);\n  }
+  if(product!=null&&product.getInterestType()==LoanProduct.InterestType.FLAT){
+   BigDecimal durationFactor=product.getDurationUnit()==LoanProduct.DurationUnit.DAYS
+     ?BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(30),10,RoundingMode.HALF_UP)
+     :BigDecimal.valueOf(duration);
+   interest=amount.multiply(rate).divide(BigDecimal.valueOf(100),10,RoundingMode.HALF_UP).multiply(durationFactor).setScale(2,RoundingMode.HALF_UP);
+  }
   else{
    BigDecimal periodFraction=product!=null&&product.getDurationUnit()==LoanProduct.DurationUnit.DAYS?BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(365),10,RoundingMode.HALF_UP):BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(12),10,RoundingMode.HALF_UP);
    interest=amount.multiply(rate).divide(BigDecimal.valueOf(100),10,RoundingMode.HALF_UP).multiply(periodFraction).setScale(2,RoundingMode.HALF_UP);
