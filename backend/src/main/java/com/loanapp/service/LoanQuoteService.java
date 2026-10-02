@@ -64,7 +64,7 @@ public class LoanQuoteService {
         LoanQuoteResponse q=new LoanQuoteResponse();
         q.productId=p.getId(); q.productName=p.getName(); q.loanType=p.getLoanType().name();
         q.durationUnit=p.getDurationUnit().name(); q.interestType=p.getInterestType().name();
-        q.principal=principal; q.interest=interest; q.processingFee=fee; q.totalRepayment=total; q.otherCharges=other; q.currency=p.getCurrency();
+        q.principal=principal; q.interest=interest; q.interestRate=p.getInterestRate(); q.processingFee=fee; q.totalRepayment=total; q.otherCharges=other; q.currency=p.getCurrency();
         q.installmentAmount=installment; q.installmentCount=count;
         q.repaymentFrequency=p.getRepaymentFrequency().name();
         q.lateFee=Optional.ofNullable(p.getLateFee()).orElse(BigDecimal.ZERO);
