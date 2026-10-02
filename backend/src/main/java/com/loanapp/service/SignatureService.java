@@ -89,7 +89,7 @@ public class SignatureService {
             "JMK-LOAN-AGREEMENT-V1",String.valueOf(l.getId()),safe(l.getBorrower().getId()),safe(l.getLender().getId()),
             safe(l.getAmount()),safe(l.getInterestRate()),safe(l.getDurationMonths()),safe(l.getDurationUnit()),
             safe(l.getTotalRepayment()),safe(l.getProcessingFee()),safe(l.getLawyerFee()),safe(l.getPurpose()),
-            String.valueOf(l.getStatus()),String.valueOf(l.getNextDueDate()));
+            safe(l.getLoanProduct()==null?null:l.getLoanProduct().getId()),String.valueOf(l.getNextDueDate()));
         return sha256(canonical);
     }
 
