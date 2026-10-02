@@ -12,6 +12,7 @@ public class LoanQuoteResponse {
     public String interestType;
     public BigDecimal principal;
     public BigDecimal interest;
+    public BigDecimal interestRate;
     public BigDecimal processingFee;
     public BigDecimal otherCharges;
     public String currency;
