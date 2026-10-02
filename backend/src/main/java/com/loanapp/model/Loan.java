@@ -79,6 +79,8 @@ public class Loan {
     private LocalDate nextDueDate;
     private LocalDateTime lastOverdueReminderAt;
     private LocalDateTime updatedAt;
+    @Lob @Column(columnDefinition="TEXT") private String termsSnapshot;
+    @Column(length=128) private String termsHash;
 
     public Loan() {}
 
@@ -194,6 +196,8 @@ public class Loan {
     public void setNextDueDate(LocalDate v) { nextDueDate=v; }
     public LocalDateTime getLastOverdueReminderAt() { return lastOverdueReminderAt; }
     public void setLastOverdueReminderAt(LocalDateTime v) { lastOverdueReminderAt=v; }
+    public String getTermsSnapshot(){return termsSnapshot;} public void setTermsSnapshot(String v){termsSnapshot=v;}
+    public String getTermsHash(){return termsHash;} public void setTermsHash(String v){termsHash=v;}
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime v) { updatedAt=v; }
 
