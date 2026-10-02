@@ -21,6 +21,9 @@ public class LoanProduct {
  @Enumerated(EnumType.STRING) @Column(nullable=false,length=20) private InterestType interestType=InterestType.FLAT;
  @Column(nullable=false,precision=15,scale=2) private BigDecimal processingFee=BigDecimal.ZERO;
  @Column(nullable=false,precision=15,scale=2) private BigDecimal lateFee=BigDecimal.ZERO;
+ @Column(nullable=false,precision=15,scale=2) private BigDecimal otherCharges=BigDecimal.ZERO;
+ @Column(nullable=false,length=10) private String currency="TZS";
+ @Column(nullable=false,length=40) private String termsVersion="V1";
  @Column(nullable=false) private Integer gracePeriodDays=0;
  @Enumerated(EnumType.STRING) @Column(nullable=false,length=20) private RepaymentFrequency repaymentFrequency;
  @Column(nullable=false) private Boolean active=true;
@@ -39,6 +42,9 @@ public class LoanProduct {
  public InterestType getInterestType(){return interestType;} public void setInterestType(InterestType v){interestType=v;}
  public BigDecimal getProcessingFee(){return processingFee;} public void setProcessingFee(BigDecimal v){processingFee=v;}
  public BigDecimal getLateFee(){return lateFee;} public void setLateFee(BigDecimal v){lateFee=v;}
+ public BigDecimal getOtherCharges(){return otherCharges;} public void setOtherCharges(BigDecimal v){otherCharges=v;}
+ public String getCurrency(){return currency;} public void setCurrency(String v){currency=v;}
+ public String getTermsVersion(){return termsVersion;} public void setTermsVersion(String v){termsVersion=v;}
  public Integer getGracePeriodDays(){return gracePeriodDays;} public void setGracePeriodDays(Integer v){gracePeriodDays=v;}
  public RepaymentFrequency getRepaymentFrequency(){return repaymentFrequency;} public void setRepaymentFrequency(RepaymentFrequency v){repaymentFrequency=v;}
  public Boolean getActive(){return active;} public void setActive(Boolean v){active=v;}
@@ -46,6 +52,6 @@ public class LoanProduct {
  @PrePersist void create(){if(createdAt==null)createdAt=LocalDateTime.now();}
  public enum LoanType{QUICK,INSTALLMENT}
  public enum DurationUnit{DAYS,MONTHS}
- public enum InterestType{FLAT,ANNUAL_SIMPLE}
+ public enum InterestType{FLAT,ANNUAL_SIMPLE,REDUCING_BALANCE}
  public enum RepaymentFrequency{ONE_TIME,DAILY,WEEKLY,MONTHLY}
 }
