@@ -50,5 +50,11 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
         jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signed_by_email VARCHAR(200)");
         jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS consent_accepted BOOLEAN DEFAULT FALSE");
         jdbc.execute("ALTER TABLE signatures ALTER COLUMN user_id DROP NOT NULL");
+        jdbc.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS organization_id BIGINT");
+        jdbc.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS branch_id BIGINT");
+        jdbc.execute("ALTER TABLE loans ADD COLUMN IF NOT EXISTS organization_id BIGINT");
+        jdbc.execute("ALTER TABLE loans ADD COLUMN IF NOT EXISTS branch_id BIGINT");
+        jdbc.execute("ALTER TABLE repayment_schedules ADD COLUMN IF NOT EXISTS late_penalty NUMERIC(15,2) DEFAULT 0");
+        jdbc.execute("ALTER TABLE repayment_schedules ADD COLUMN IF NOT EXISTS penalty_applied_at TIMESTAMP");
     }
 }
