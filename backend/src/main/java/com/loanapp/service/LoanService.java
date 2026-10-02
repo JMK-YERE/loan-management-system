@@ -26,6 +26,7 @@ public class LoanService {
  @Autowired private GuarantorRepository guarantorRepository;
  @Autowired private SignatureRepository signatureRepository;
  @Autowired private SignatureService signatureService;
+ @Autowired private AccountingService accountingService;
 
  @Transactional
  public Loan createLoan(LoanRequest request,String lenderEmail,Long borrowerId){
@@ -96,7 +97,7 @@ public class LoanService {
    if(!allSigned)throw new RuntimeException("Kila mdhamini aliyewekwa lazima akubali na asaini kabla ya disbursement");
   }
   loan.setStatus(Loan.LoanStatus.DISBURSED);loan.setDisbursementDate(LocalDate.now());
-  Loan saved=loanRepository.save(loan);auditService.log(actorEmail,"LOAN_DISBURSED","LOAN",id,"Approved loan released only after complete e-signature chain");return saved;
+  Loan saved=loanRepository.save(loan); accountingService.postDisbursement(saved); auditService.log(actorEmail,"LOAN_DISBURSED","LOAN",id,"Approved loan released only after complete e-signature chain");return saved;
  }
  public Loan rejectLoan(Long id,String actorEmail){Loan loan=getLoanById(id);authorizeLenderOrAdmin(loan,actorEmail);if(loan.getStatus()!=Loan.LoanStatus.PENDING)throw new RuntimeException("Mkopo huu hauko kwenye hatua ya kusubiri idhini");loan.setStatus(Loan.LoanStatus.REJECTED);Loan saved=loanRepository.save(loan);auditService.log(actorEmail,"LOAN_REJECTED","LOAN",id,"Loan rejected");return saved;}
  private void authorizeLenderOrAdmin(Loan loan,String email){User actor=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Mtumiaji hajapatikana"));if(actor.getRole()!=User.Role.ADMIN&&!loan.getLender().getId().equals(actor.getId()))throw new RuntimeException("Huna ruhusa ya kubadilisha mkopo huu");}
