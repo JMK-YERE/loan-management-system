@@ -20,7 +20,7 @@ public class User {
     private String gender; private String maritalStatus; private String nationality; private String address; private String city; private String country;
     private String employmentStatus; private String occupation; private String employer;
     @Column(precision=15,scale=2) private BigDecimal monthlyIncome;
-    private String kinName; private String kinPhone; private String kinRelationship; @JsonIgnore @Lob @Column(columnDefinition="TEXT") private String photoData;
+    private String kinName; private String kinPhone; private String kinRelationship; @JsonIgnore @Column(columnDefinition="TEXT") private String photoData;
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="organization_id") private Organization organization;
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="branch_id") private Branch branch;
     private LocalDateTime createdAt; private LocalDateTime updatedAt;
