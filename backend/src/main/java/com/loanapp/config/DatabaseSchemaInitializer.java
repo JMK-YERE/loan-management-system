@@ -19,6 +19,10 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        jdbc.execute("ALTER TABLE repayment_schedules ADD COLUMN IF NOT EXISTS last_reminder_at TIMESTAMP");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS password_reset_tokens (id BIGSERIAL PRIMARY KEY, token VARCHAR(100) NOT NULL UNIQUE, user_id BIGINT NOT NULL REFERENCES users(id), expiry_date TIMESTAMP NOT NULL, used BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+        jdbc.execute("CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)");
+        jdbc.execute("CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expiry ON password_reset_tokens(expiry_date)");
         jdbc.execute("ALTER TABLE loan_applications ADD COLUMN IF NOT EXISTS duration INTEGER");
         jdbc.execute("ALTER TABLE loan_applications ADD COLUMN IF NOT EXISTS duration_unit VARCHAR(20)");
         jdbc.execute("ALTER TABLE loan_applications ADD COLUMN IF NOT EXISTS interest_snapshot NUMERIC(15,2) DEFAULT 0");
