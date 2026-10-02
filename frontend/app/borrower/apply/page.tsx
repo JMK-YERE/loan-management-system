@@ -50,6 +50,8 @@ export default function GeneralLoanApplyPage(){
   try{const r=await preAgreementAPI.pdf({productId:Number(productId),amount:Number(amount),duration:Number(duration)},purpose||'Loan application');const url=URL.createObjectURL(r.data);const a=document.createElement('a');a.href=url;a.download='jmk-loan-agreement-preview.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);}catch(e:any){setMsg(e?.response?.data?.message||'Mkataba wa preview haujapatikana.')}
  };
 
+ useEffect(()=>()=>{if(previewUrl)URL.revokeObjectURL(previewUrl)},[previewUrl]);
+
  return <main className="min-h-screen bg-slate-50 p-4 dark:bg-slate-950 sm:p-6"><div className="mx-auto max-w-4xl space-y-5">
   <section className="rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-950 p-6 text-white shadow-xl">
    <button type="button" onClick={()=>router.push('/borrower')} className="mb-4 rounded-xl border border-white/30 px-3 py-2 text-xs font-bold">← Rudi Dashboard</button>
@@ -77,5 +79,6 @@ export default function GeneralLoanApplyPage(){
    <button disabled={busy||!quote||!accepted} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-black text-white disabled:opacity-50">{busy?'Inatuma...':'Tuma ombi la mkopo'}</button>
    <Link href="/borrower" className="block text-center text-sm font-bold text-blue-600">Rudi Dashboard</Link>
   </form>
- </div></main>;
+ </div>
+ {previewUrl&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-6"><div className="flex h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"><div className="flex items-center justify-between border-b p-4"><div><h3 className="font-black">Preview ya Mkataba wa Mkopo</h3><p className="text-xs text-slate-500">Terms zimehesabiwa kutoka Loan Product ya ofisi.</p></div><button type="button" onClick={()=>{URL.revokeObjectURL(previewUrl);setPreviewUrl('')}} className="rounded-xl border px-4 py-2 text-sm font-black">✕ Funga</button></div><iframe title="Preview ya Mkataba wa Mkopo" src={previewUrl} className="min-h-0 flex-1 w-full" /></div></div>}</main>;
 }
