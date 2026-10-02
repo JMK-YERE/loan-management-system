@@ -7,7 +7,7 @@ const money=(v:any)=>new Intl.NumberFormat('sw-TZ',{style:'currency',currency:'T
 
 export default function LoanProductsPage(){
  const [items,setItems]=useState<any[]>([]);const [msg,setMsg]=useState('');const [busy,setBusy]=useState(false);
- const [form,setForm]=useState<any>({name:'',loanType:'QUICK',minAmount:20000,maxAmount:500000,minDuration:7,maxDuration:30,durationUnit:'DAYS',interestRate:5,interestType:'FLAT',processingFee:0,lateFee:0,gracePeriodDays:0,repaymentFrequency:'ONE_TIME'});
+ const [form,setForm]=useState<any>({name:'',loanType:'QUICK',minAmount:20000,maxAmount:500000,minDuration:7,maxDuration:30,durationUnit:'DAYS',interestRate:30,interestType:'FLAT',processingFee:0,lateFee:0,gracePeriodDays:0,repaymentFrequency:'ONE_TIME'});
  const load=async()=>{try{const r=await loanProductAPI.all();setItems(r.data?.data||r.data||[])}catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kupakia products.')}};
  useEffect(()=>{load()},[]);
  const submit=async(e:FormEvent)=>{e.preventDefault();setBusy(true);setMsg('');try{await loanProductAPI.create({...form,minAmount:Number(form.minAmount),maxAmount:Number(form.maxAmount),minDuration:Number(form.minDuration),maxDuration:Number(form.maxDuration),interestRate:Number(form.interestRate),processingFee:Number(form.processingFee),lateFee:Number(form.lateFee),gracePeriodDays:Number(form.gracePeriodDays)});setMsg('Loan product imeundwa.');await load()}catch(e:any){setMsg(e?.response?.data?.message||'Imeshindikana kuunda product.')}finally{setBusy(false)}};
