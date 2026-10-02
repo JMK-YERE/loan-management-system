@@ -86,9 +86,9 @@ export default function Home() {
             <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">{t.hero.title}</h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-xl">{t.hero.text}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/register" className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white shadow-xl hover:bg-blue-500">{t.hero.primary}<ArrowRight className="h-5 w-5" /></Link>
+              <Link href="/register" className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white shadow-xl hover:bg-blue-500">{lang === "sw" ? "Endelea na Usajili" : "Continue Registration"}<ArrowRight className="h-5 w-5" /></Link>
               <Link href="/loan-guide" className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3.5 font-bold text-white backdrop-blur hover:bg-white/20">📄 Soma / Pakua Mkataba</Link>
-              <Link href="/login" className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3.5 font-bold text-white backdrop-blur hover:bg-white/20">{t.hero.secondary}</Link>
+              <Link href="/login?next=/borrower/apply" className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3.5 font-bold text-white backdrop-blur hover:bg-white/20">{lang === "sw" ? "Endelea na Ombi la Mkopo" : "Continue to Loan Application"}</Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-300">
               {t.trust.map((x) => <span key={x} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400" />{x}</span>)}
