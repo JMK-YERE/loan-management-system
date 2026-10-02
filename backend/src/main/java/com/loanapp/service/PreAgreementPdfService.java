@@ -45,6 +45,7 @@ public class PreAgreementPdfService {
             doc.add(new Paragraph("Principal: TZS "+q.principal));
             doc.add(new Paragraph("Interest: TZS "+q.interest+" ("+q.interestType+")"));
             doc.add(new Paragraph("Processing fee: TZS "+q.processingFee));
+            doc.add(new Paragraph("Other charges: TZS "+q.otherCharges));
             doc.add(new Paragraph("Total repayment: TZS "+q.totalRepayment));
             doc.add(new Paragraph("Installments: "+q.installmentCount+" × TZS "+q.installmentAmount));
             doc.add(new Paragraph("Repayment frequency: "+q.repaymentFrequency));
