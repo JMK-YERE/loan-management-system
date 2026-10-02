@@ -105,8 +105,7 @@ public class PreAgreementPdfService {
     }
 
     private String rateText(LoanQuoteResponse q,LoanQuoteRequest r){
-        if(q.interestType==null)return "";
-        return q.interestType+" · product rate used by institution";
+        return (q.interestRate==null?"":q.interestRate.stripTrailingZeros().toPlainString()+"%")+" · "+safe(q.interestType);
     }
     private String safe(String s){return s==null||"null".equals(s)?"—":s;}
     private String money(BigDecimal v){return "TZS "+(v==null?BigDecimal.ZERO:v.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString());}
