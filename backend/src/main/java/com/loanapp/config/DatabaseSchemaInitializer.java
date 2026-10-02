@@ -38,5 +38,13 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
         jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_expires_at TIMESTAMP");
         jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_signed_at TIMESTAMP");
         jdbc.execute("ALTER TABLE guarantors ADD COLUMN IF NOT EXISTS remote_signature_data TEXT");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signature_hash VARCHAR(128)");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS agreement_hash VARCHAR(128)");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS consent_hash VARCHAR(128)");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS consent_version VARCHAR(100)");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signed_by_name VARCHAR(200)");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS signed_by_email VARCHAR(200)");
+        jdbc.execute("ALTER TABLE signatures ADD COLUMN IF NOT EXISTS consent_accepted BOOLEAN DEFAULT FALSE");
+        jdbc.execute("ALTER TABLE signatures ALTER COLUMN user_id DROP NOT NULL");
     }
 }
