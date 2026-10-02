@@ -14,6 +14,8 @@ public class LoanProductRequest{
  @NotNull private InterestType interestType;
  @DecimalMin("0") private BigDecimal processingFee=BigDecimal.ZERO;
  @DecimalMin("0") private BigDecimal lateFee=BigDecimal.ZERO;
+ @DecimalMin("0") private BigDecimal otherCharges=BigDecimal.ZERO;
+ private String currency="TZS";
  @Min(0) private Integer gracePeriodDays=0;
  @NotNull private RepaymentFrequency repaymentFrequency;
  public String getName(){return name;} public void setName(String v){name=v;}
@@ -27,6 +29,8 @@ public class LoanProductRequest{
  public InterestType getInterestType(){return interestType;} public void setInterestType(InterestType v){interestType=v;}
  public BigDecimal getProcessingFee(){return processingFee;} public void setProcessingFee(BigDecimal v){processingFee=v;}
  public BigDecimal getLateFee(){return lateFee;} public void setLateFee(BigDecimal v){lateFee=v;}
+ public BigDecimal getOtherCharges(){return otherCharges;} public void setOtherCharges(BigDecimal v){otherCharges=v;}
+ public String getCurrency(){return currency;} public void setCurrency(String v){currency=v;}
  public Integer getGracePeriodDays(){return gracePeriodDays;} public void setGracePeriodDays(Integer v){gracePeriodDays=v;}
  public RepaymentFrequency getRepaymentFrequency(){return repaymentFrequency;} public void setRepaymentFrequency(RepaymentFrequency v){repaymentFrequency=v;}
 }
