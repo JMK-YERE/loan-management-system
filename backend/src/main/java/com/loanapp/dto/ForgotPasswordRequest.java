@@ -2,9 +2,18 @@ package com.loanapp.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ForgotPasswordRequest {
- @NotBlank @Email private String email;
- public ForgotPasswordRequest(){}
- public String getEmail(){return email;} public void setEmail(String v){email=v;}
+
+    @NotBlank(message = "Barua pepe inahitajika")
+    @Email(message = "Barua pepe si sahihi")
+    private String email;
 }
