@@ -29,6 +29,9 @@ public class Loan {
     @JoinColumn(name = "loan_product_id")
     private LoanProduct loanProduct;
 
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="organization_id") private Organization organization;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="branch_id") private Branch branch;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
     private LoanProduct.DurationUnit durationUnit = LoanProduct.DurationUnit.MONTHS;
@@ -160,6 +163,8 @@ public class Loan {
     public void setBorrower(User v) { borrower=v; }
     public User getLender() { return lender; }
     public void setLender(User v) { lender=v; }
+    public Organization getOrganization(){return organization;} public void setOrganization(Organization v){organization=v;}
+    public Branch getBranch(){return branch;} public void setBranch(Branch v){branch=v;}
     public LoanProduct getLoanProduct() { return loanProduct; }
     public void setLoanProduct(LoanProduct v) { loanProduct=v; }
     public LoanProduct.DurationUnit getDurationUnit() { return durationUnit; }
