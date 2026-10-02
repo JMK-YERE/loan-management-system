@@ -139,6 +139,7 @@ export const guarantorAPI = {
 export const signatureAPI = {
   create: (data: any) => api.post('/signatures', data),
   byLoan: (loanId: number) => api.get(`/signatures/loan/${loanId}`),
+  status: (loanId: number) => api.get(`/signatures/loan/${loanId}/status`),
 };
 
 export default api;
