@@ -1,6 +1,7 @@
 package com.loanapp.service;
 
 import com.loanapp.model.RepaymentSchedule;
+import com.loanapp.model.LoanProduct;
 import com.loanapp.model.User;
 import com.loanapp.repository.RepaymentScheduleRepository;
 import org.springframework.scheduling.annotation.Scheduled;
