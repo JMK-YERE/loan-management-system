@@ -45,6 +45,7 @@ public class LoanService {
   Loan loan=Loan.builder().lender(lender).borrower(borrower).amount(request.getAmount()).interestRate(rate).durationMonths(request.getDurationMonths()).totalRepayment(total).purpose(request.getPurpose()).processingFee(processing).lawyerRequired(Boolean.TRUE.equals(request.getLawyerRequired())).lawyerFee(lawyer).status(Loan.LoanStatus.PENDING).build();
   loan.setCollateralDescription(request.getCollateralDescription());loan.setCollateralValue(request.getCollateralValue()==null?BigDecimal.ZERO:request.getCollateralValue());loan.setCollateralPhotoData(request.getCollateralPhotoData());
   if(product!=null){loan.setLoanProduct(product);loan.setDurationUnit(product.getDurationUnit());}
+  if(product!=null){String snapshot="PRODUCT="+product.getId()+"|VERSION="+product.getTermsVersion()+"|NAME="+product.getName()+"|TYPE="+product.getLoanType()+"|AMOUNT="+request.getAmount()+"|DURATION="+request.getDurationMonths()+" "+product.getDurationUnit()+"|RATE="+product.getInterestRate()+"|INTEREST_TYPE="+product.getInterestType()+"|FEE="+product.getProcessingFee()+"|OTHER="+product.getOtherCharges()+"|LATE="+product.getLateFee()+"|GRACE="+product.getGracePeriodDays()+"|FREQUENCY="+product.getRepaymentFrequency()+"|CURRENCY="+product.getCurrency();loan.setTermsSnapshot(snapshot);loan.setTermsHash(hash(snapshot));}
   Loan saved=loanRepository.save(loan);
   auditService.log(lenderEmail,"LOAN_CREATED","LOAN",saved.getId(),"Loan created for borrower "+borrower.getId()+(product!=null?" using "+product.getName():""));
   return saved;
@@ -96,6 +97,7 @@ public class LoanService {
  }
  public Loan rejectLoan(Long id,String actorEmail){Loan loan=getLoanById(id);authorizeLenderOrAdmin(loan,actorEmail);if(loan.getStatus()!=Loan.LoanStatus.PENDING)throw new RuntimeException("Mkopo huu hauko kwenye hatua ya kusubiri idhini");loan.setStatus(Loan.LoanStatus.REJECTED);Loan saved=loanRepository.save(loan);auditService.log(actorEmail,"LOAN_REJECTED","LOAN",id,"Loan rejected");return saved;}
  private void authorizeLenderOrAdmin(Loan loan,String email){User actor=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Mtumiaji hajapatikana"));if(actor.getRole()!=User.Role.ADMIN&&!loan.getLender().getId().equals(actor.getId()))throw new RuntimeException("Huna ruhusa ya kubadilisha mkopo huu");}
+ private String hash(String s){try{return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(s.getBytes(java.nio.charset.StandardCharsets.UTF_8)));}catch(Exception e){throw new IllegalStateException(e);}}
  public Loan getLoanById(Long id){return loanRepository.findById(id).orElseThrow(()->new RuntimeException("Mkopo haujapatikana"));}
  public boolean canView(Loan loan,String email){User actor=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Mtumiaji hajapatikana"));return actor.getRole()==User.Role.ADMIN||loan.getBorrower().getId().equals(actor.getId())||loan.getLender().getId().equals(actor.getId());}
 }
