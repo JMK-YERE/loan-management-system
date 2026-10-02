@@ -46,6 +46,10 @@ public class PdfAgreementService {
    d.add(new Paragraph("Jina kamili: "+l.getBorrower().getFullName()));
    d.add(new Paragraph("Barua pepe: "+l.getBorrower().getEmail()+" | Simu: "+(l.getBorrower().getPhone()==null?"—":l.getBorrower().getPhone())));
    d.add(new Paragraph("NIDA/ID: "+(l.getBorrower().getNidaNumber()==null?"—":l.getBorrower().getNidaNumber())+" | Ajira: "+(l.getBorrower().getEmploymentStatus()==null?"—":l.getBorrower().getEmploymentStatus())));
+   d.add(new Paragraph("ID type: "+(l.getBorrower().getIdType()==null?"—":l.getBorrower().getIdType())+" | Tarehe ya kuzaliwa: "+(l.getBorrower().getDateOfBirth()==null?"—":l.getBorrower().getDateOfBirth())+" | Jinsia: "+(l.getBorrower().getGender()==null?"—":l.getBorrower().getGender())));
+   d.add(new Paragraph("Hali ya ndoa: "+(l.getBorrower().getMaritalStatus()==null?"—":l.getBorrower().getMaritalStatus())+" | Uraia: "+(l.getBorrower().getNationality()==null?"—":l.getBorrower().getNationality())+" | Nchi: "+(l.getBorrower().getCountry()==null?"—":l.getBorrower().getCountry())));
+   d.add(new Paragraph("Mapato ya mwezi: TZS "+(l.getBorrower().getMonthlyIncome()==null?"0":l.getBorrower().getMonthlyIncome())+" | Account status: "+(l.getBorrower().getStatus()==null?"—":l.getBorrower().getStatus())));
+
    d.add(new Paragraph("Kazi: "+(l.getBorrower().getOccupation()==null?"—":l.getBorrower().getOccupation())+" | Mwajiri: "+(l.getBorrower().getEmployer()==null?"—":l.getBorrower().getEmployer())));
    d.add(new Paragraph("Anwani: "+(l.getBorrower().getAddress()==null?"—":l.getBorrower().getAddress())+" | Mji: "+(l.getBorrower().getCity()==null?"—":l.getBorrower().getCity())));
    d.add(new Paragraph("Next of kin: "+(l.getBorrower().getKinName()==null?"—":l.getBorrower().getKinName())+" | Simu: "+(l.getBorrower().getKinPhone()==null?"—":l.getBorrower().getKinPhone())+" | Uhusiano: "+(l.getBorrower().getKinRelationship()==null?"—":l.getBorrower().getKinRelationship())));
