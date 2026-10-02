@@ -5,23 +5,42 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('token')?.value;
 
-  // Public routes - hazihitaji login
-  const publicRoutes = ['/landing', '/loan-guide', '/login', '/register', '/forgot-password', '/reset-password'];
-  const isPublic = publicRoutes.some((route) => pathname.startsWith(route));
+  // Public routes. Login/register must ALWAYS remain reachable so an existing
+  // session never silently bypasses the credential screen.
+  const publicRoutes = [
+    '/',
+    '/landing',
+    '/loan-guide',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+  ];
+  const isPublic = publicRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
 
-  // Protected routes - zinahitaji login
-  const protectedRoutes = ['/admin', '/dashboard', '/borrower', '/lender', '/bursar', '/management', '/payments', '/profile'];
-  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+  const protectedRoutes = [
+    '/admin',
+    '/dashboard',
+    '/borrower',
+    '/lender',
+    '/bursar',
+    '/management',
+    '/payments',
+    '/profile',
+    '/agreements',
+    '/signatures',
+  ];
+  const isProtected = protectedRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
 
   if (isProtected && !token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('next', pathname);
+    return NextResponse.redirect(url);
   }
 
-  // Kama ameingia, asirudi kwenye login/register
-  if ((pathname === '/login' || pathname === '/register') && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
+  // Do NOT redirect /login or /register merely because a stale/old token exists.
+  // The user must explicitly authenticate again when they choose Login.
   return NextResponse.next();
 }
 
