@@ -24,7 +24,13 @@ public class RepaymentScheduleService{
   };
   BigDecimal principal=loan.getAmount().setScale(2,RoundingMode.HALF_UP);
   BigDecimal fees=Optional.ofNullable(loan.getProcessingFee()).orElse(BigDecimal.ZERO).add(Optional.ofNullable(loan.getLawyerFee()).orElse(BigDecimal.ZERO));
-  BigDecimal rate=product.getInterestRate().divide(BigDecimal.valueOf(100),12,RoundingMode.HALF_UP);\n  if(product.getInterestType()==LoanProduct.InterestType.FLAT){\n   BigDecimal durationFactor=product.getDurationUnit()==LoanProduct.DurationUnit.DAYS\n     ?BigDecimal.valueOf(periods).divide(BigDecimal.valueOf(30),10,RoundingMode.HALF_UP)\n     :BigDecimal.valueOf(periods);\n   BigDecimal flatInterest=principal.multiply(rate).multiply(durationFactor).setScale(2,RoundingMode.HALF_UP);\n  }
+  BigDecimal rate=product.getInterestRate().divide(BigDecimal.valueOf(100),12,RoundingMode.HALF_UP);
+  if(product.getInterestType()==LoanProduct.InterestType.FLAT){
+   BigDecimal durationFactor=product.getDurationUnit()==LoanProduct.DurationUnit.DAYS
+     ?BigDecimal.valueOf(periods).divide(BigDecimal.valueOf(30),10,RoundingMode.HALF_UP)
+     :BigDecimal.valueOf(periods);
+   BigDecimal flatInterest=principal.multiply(rate).multiply(durationFactor).setScale(2,RoundingMode.HALF_UP);
+  }
   BigDecimal periodicRate=switch(product.getRepaymentFrequency()){
    case DAILY -> rate.divide(BigDecimal.valueOf(365),12,RoundingMode.HALF_UP);
    case WEEKLY -> rate.divide(BigDecimal.valueOf(52),12,RoundingMode.HALF_UP);
