@@ -39,7 +39,10 @@ public class LoanQuoteService {
             BigDecimal balance=principal; interest=BigDecimal.ZERO;
             for(int i=0;i<count;i++){BigDecimal in=balance.multiply(periodicRate).setScale(2,RoundingMode.HALF_UP);BigDecimal principalPart=installment.subtract(in).max(BigDecimal.ZERO);if(i==count-1)principalPart=balance;interest=interest.add(in);balance=balance.subtract(principalPart).max(BigDecimal.ZERO);}
         } else if(p.getInterestType()==LoanProduct.InterestType.FLAT){
-            BigDecimal durationFactor=p.getDurationUnit()==LoanProduct.DurationUnit.DAYS\n                    ?BigDecimal.valueOf(r.getDuration()).divide(BigDecimal.valueOf(30),10,RoundingMode.HALF_UP)\n                    :BigDecimal.valueOf(r.getDuration());\n            interest=principal.multiply(p.getInterestRate()).divide(BigDecimal.valueOf(100),10,RoundingMode.HALF_UP).multiply(durationFactor).setScale(2,RoundingMode.HALF_UP);
+            BigDecimal durationFactor=p.getDurationUnit()==LoanProduct.DurationUnit.DAYS
+                    ?BigDecimal.valueOf(r.getDuration()).divide(BigDecimal.valueOf(30),10,RoundingMode.HALF_UP)
+                    :BigDecimal.valueOf(r.getDuration());
+            interest=principal.multiply(p.getInterestRate()).divide(BigDecimal.valueOf(100),10,RoundingMode.HALF_UP).multiply(durationFactor).setScale(2,RoundingMode.HALF_UP);
             installment=principal.add(interest).setScale(2,RoundingMode.HALF_UP).divide(BigDecimal.valueOf(count),2,RoundingMode.HALF_UP);
         } else {
             BigDecimal yearFraction=p.getDurationUnit()==LoanProduct.DurationUnit.DAYS
