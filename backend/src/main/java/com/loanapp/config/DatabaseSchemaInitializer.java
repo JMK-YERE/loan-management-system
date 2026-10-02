@@ -54,6 +54,11 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
         jdbc.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS branch_id BIGINT");
         jdbc.execute("ALTER TABLE loans ADD COLUMN IF NOT EXISTS organization_id BIGINT");
         jdbc.execute("ALTER TABLE loans ADD COLUMN IF NOT EXISTS branch_id BIGINT");
+        jdbc.execute("ALTER TABLE loan_products ADD COLUMN IF NOT EXISTS other_charges NUMERIC(15,2) DEFAULT 0");
+        jdbc.execute("ALTER TABLE loan_products ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'TZS'");
+        jdbc.execute("ALTER TABLE loan_products ADD COLUMN IF NOT EXISTS terms_version VARCHAR(40) DEFAULT 'V1'");
+        jdbc.execute("ALTER TABLE loans ADD COLUMN IF NOT EXISTS terms_snapshot TEXT");
+        jdbc.execute("ALTER TABLE loans ADD COLUMN IF NOT EXISTS terms_hash VARCHAR(128)");
         jdbc.execute("ALTER TABLE repayment_schedules ADD COLUMN IF NOT EXISTS late_penalty NUMERIC(15,2) DEFAULT 0");
         jdbc.execute("ALTER TABLE repayment_schedules ADD COLUMN IF NOT EXISTS penalty_applied_at TIMESTAMP");
     }
