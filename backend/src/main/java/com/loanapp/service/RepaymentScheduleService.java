@@ -56,6 +56,15 @@ public class RepaymentScheduleService{
   }
   return out;
  }
+ private LocalDate scheduleDate(LocalDate start,int i,int duration,LoanProduct.RepaymentFrequency f,LoanProduct.DurationUnit unit){
+  return switch(f){
+   case ONE_TIME -> unit==LoanProduct.DurationUnit.DAYS?start.plusDays(duration):start.plusMonths(duration);
+   case DAILY -> start.plusDays(i);
+   case WEEKLY -> start.plusWeeks(i);
+   case MONTHLY -> start.plusMonths(i);
+  };
+ }
+
  public List<RepaymentSchedule> byLoan(Loan loan){return repo.findByLoanOrderByInstallmentNumberAsc(loan);}
  public void markOverdue(){repo.findByStatusAndDueDateBefore(RepaymentSchedule.ScheduleStatus.PENDING,LocalDate.now()).forEach(s->{s.setStatus(RepaymentSchedule.ScheduleStatus.OVERDUE);repo.save(s);});}
 }
