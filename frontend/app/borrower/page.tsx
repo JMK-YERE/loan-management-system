@@ -77,14 +77,11 @@ export default function BorrowerPage(){
    </section>
 
    {!pendingApplication&&<section className="rounded-3xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-900 dark:bg-slate-900">
-    <div className="flex items-start gap-3"><WalletCards className="mt-1 text-emerald-600"/><div><h2 className="text-xl font-black">Omba kiasi unachohitaji</h2><p className="mt-1 text-sm text-slate-500">Weka kiasi na muda unaouhitaji. Product, riba, ada na ratiba vitawekwa na lender baada ya review.</p></div></div>
-    <form onSubmit={submit} className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_1.5fr_auto]">
-     <input required min="1" type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="Kiasi (TZS)" className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
-     <input required min="1" type="number" value={duration} onChange={e=>setDuration(e.target.value)} placeholder="Muda (siku)" className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
-     <input required maxLength={500} value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="Unahitaji fedha kwa nini?" className="rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-950"/>
-     <button disabled={submitting} className="rounded-xl bg-blue-600 px-5 py-3 font-black text-white disabled:opacity-50">{submitting?'Inatuma...':'Tuma ombi'}</button>
-    </form>
-   </section>}
+    <div className="flex flex-wrap items-center justify-between gap-4">
+     <div className="flex items-start gap-3"><WalletCards className="mt-1 text-emerald-600"/><div><h2 className="text-xl font-black">Anza ombi jipya la mkopo</h2><p className="mt-1 text-sm text-slate-500">Tumia ukurasa rasmi wa maombi: chagua Loan Product, weka kiasi na muda, ona quotation ya taasisi, soma Preview ya Mkataba, kisha tuma ombi.</p></div></div>
+     <Link href="/borrower/apply" className="rounded-xl bg-blue-600 px-5 py-3 font-black text-white">➕ Omba Mkopo</Link>
+    </div>
+   </section> 
 
    <section className="rounded-3xl border bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5 dark:border-slate-800"><div><h2 className="font-black">Application Tracker</h2><p className="text-sm text-slate-500">Hapa ndipo utaona kama lender ameanza review, ameweka offer au loan imetengenezwa.</p></div>{pendingApplication&&<Link href="/loan-offer" className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white">Fungua hatua inayofuata</Link>}</div>
